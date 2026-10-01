@@ -449,7 +449,7 @@ const LEGEND_ORDER = [4, 5, 3, 2, 1, 0];
       world.position.set(0, 1.75, 0);
       world.scale.setScalar(Math.min(0.72, halfW / 2.9));
     }
-    ptsMat.uniforms.scale.value = h * DPR * 0.1 * world.scale.x;
+    ptsMat.uniforms.scale.value = h * DPR * 0.0078 * world.scale.x;
   }
   function applyTheme(){
     const dark = isDark();
