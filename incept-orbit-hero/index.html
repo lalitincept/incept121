@@ -65,8 +65,8 @@
   .toggle svg{width:17px;height:17px}
 
   .content{
-    position:relative;z-index:1;flex:1;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:32px;
-    max-width:1240px;width:100%;margin:0 auto;padding:40px 28px 36px;pointer-events:none;
+    position:relative;z-index:1;flex:1;display:flex;align-items:center;
+    max-width:1240px;width:100%;margin:0 auto;padding:40px 28px 90px;pointer-events:none;
   }
   .copy{max-width:540px;pointer-events:auto}
   h1{font-size:clamp(38px,5vw,66px);font-weight:700;line-height:1.02;letter-spacing:-.035em}
@@ -77,43 +77,21 @@
   .btn.primary{color:#1b1b1b;background:linear-gradient(135deg,var(--amber),var(--amber-deep));box-shadow:0 10px 30px -8px rgba(232,149,26,.55)}
   .btn.primary:hover{filter:brightness(1.05)}
   .btn.secondary{color:var(--ink);background:var(--btn2-bg);border:1px solid var(--btn2-bd);backdrop-filter:blur(6px)}
-  .btn:focus-visible,.toggle:focus-visible,.links a:focus-visible,.speed button:focus-visible{outline:2px solid var(--amber-deep);outline-offset:3px}
+  .btn:focus-visible,.toggle:focus-visible,.links a:focus-visible{outline:2px solid var(--amber-deep);outline-offset:3px}
 
-  /* live panel */
-  .live{
-    pointer-events:auto;align-self:end;width:290px;padding:18px 18px 16px;border-radius:16px;
-    background:var(--panel);border:1px solid var(--rule);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-    font-size:13px;color:var(--muted);
-  }
-  .live-head{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:14px;line-height:1.35}
-  .live-head strong{font-weight:700;font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .live-line{position:absolute;z-index:1;left:0;top:0;margin:0;white-space:nowrap;display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--muted);transform:translateX(-50%);opacity:0;transition:opacity .4s}
+  .live-line.placed{opacity:1}
+  .live-line strong{color:var(--ink);font-weight:600}
+  .live-line a{color:inherit}
   .pulse{width:8px;height:8px;border-radius:50%;background:#4cd27a;flex:none;box-shadow:0 0 0 0 rgba(76,210,122,.6);animation:pulse 2s infinite}
-  .pulse.off{background:var(--muted);animation:none}
   @keyframes pulse{70%{box-shadow:0 0 0 8px rgba(76,210,122,0)}100%{box-shadow:0 0 0 0 rgba(76,210,122,0)}}
-  .clock{margin-top:4px;font-variant-numeric:tabular-nums}
-  .cats{list-style:none;margin-top:14px;display:grid;gap:7px}
-  .cats li{display:flex;align-items:center;gap:9px}
-  .cats i{width:8px;height:8px;border-radius:50%;flex:none}
-  .cats span{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:500}
-  .speed{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--btn2-bd);border-radius:10px;overflow:hidden}
-  .speed button{font:500 12.5px/1 'Poppins',system-ui,sans-serif;padding:9px 4px;border:0;background:transparent;color:var(--muted);cursor:pointer}
-  .speed button+button{border-left:1px solid var(--btn2-bd)}
-  .speed button[aria-pressed="true"]{background:var(--amber);color:#1b1b1b;font-weight:600}
-  .src{margin-top:12px;font-size:11.5px;line-height:1.5}
-
-  /* labels that follow stations */
-  .tag{
-    position:absolute;z-index:1;left:0;top:0;pointer-events:none;white-space:nowrap;
-    font-size:11.5px;font-weight:600;color:var(--ink);padding:4px 8px;border-radius:6px;
-    background:var(--tag-bg);border:1px solid var(--rule);transform:translate(10px,-50%);opacity:0;transition:opacity .3s;
-  }
-  .tag b{color:var(--muted);font-weight:500}
 
   @media (max-width:860px){
     .links a{display:none}
-    .content{grid-template-columns:1fr;align-items:end;padding-top:44vh;padding-bottom:28px;gap:24px}
+    .content{align-items:end;padding-top:46vh;padding-bottom:40px}
     .copy,.lede{max-width:none}
-    .live{width:100%}
+    .live-line{white-space:normal;align-items:flex-start;text-align:left;width:max-content;max-width:calc(100vw - 40px);font-size:12.5px}
+    .live-line .pulse{margin-top:5px}
   }
   @media (prefers-reduced-motion: reduce){ .pulse{animation:none} }
 </style>
@@ -122,8 +100,8 @@
 
 <section class="hero">
   <canvas id="orbit" aria-hidden="true"></canvas>
-  <div class="tag" id="tag-iss">ISS <b id="alt-iss"></b></div>
-  <div class="tag" id="tag-css">Tiangong <b id="alt-css"></b></div>
+  <p class="live-line" id="liveLine"><span class="pulse" aria-hidden="true"></span><span><strong>Live data:</strong> <span id="count">Starlink and OneWeb</span> satellites, <span id="speedNote">sped up 60x</span>. Source: <a href="https://celestrak.org" target="_blank" rel="noopener">CelesTrak</a></span></p>
+
 
   <div class="content">
     <div class="copy">
@@ -135,17 +113,6 @@
       </div>
     </div>
 
-    <aside class="live" aria-label="Live satellite tracking">
-      <div class="live-head"><span class="pulse" id="pulse"></span><div><strong id="count">Loading</strong> objects in orbit</div></div>
-      <div class="clock" id="clock">&nbsp;</div>
-      <ul class="cats" id="cats"></ul>
-      <div class="speed" role="group" aria-label="Playback speed">
-        <button type="button" data-speed="1" aria-pressed="true">Live</button>
-        <button type="button" data-speed="60">1 min/s</button>
-        <button type="button" data-speed="600">10 min/s</button>
-      </div>
-      <p class="src" id="src">Orbits from CelesTrak. Altitudes not to scale.</p>
-    </aside>
   </div>
 </section>
 
@@ -154,21 +121,12 @@
 <script>
 /* ------------------------------------------------------------------
    DATA
-   Satellites load from data/satellites.txt: one object per line,
-   "category|name|TLE line 1|TLE line 2". Refresh it every few hours
-   with scripts/update-satellites.mjs (see README.md).
+   Satellites load from TLE_URL: one object per line,
+   "4|name|TLE line 1|TLE line 2". Refresh it every few hours with
+   scripts/update-satellites.mjs (see README.md). On Webflow, use the
+   full URL of wherever the file is hosted.
 ------------------------------------------------------------------- */
 const TLE_URL = 'data/satellites.txt';
-
-const CATS = [
-  { label: 'Space stations',          dark: '#ffffff', light: '#1b1b1b', size: 7.0 },
-  { label: 'Science and weather',     dark: '#fbf6ea', light: '#3a2e25', size: 4.2 },
-  { label: 'Navigation (GPS etc.)',   dark: '#ffd08a', light: '#b8761c', size: 4.4 },
-  { label: 'Geostationary',           dark: '#d6b088', light: '#7a5c43', size: 3.8 },
-  { label: 'Starlink and OneWeb',     dark: '#f5a623', light: '#e8951a', size: 2.6 },
-  { label: 'Debris',                  dark: '#9b7a5e', light: '#a0836a', size: 2.4 }
-];
-const LEGEND_ORDER = [4, 5, 3, 2, 1, 0];
 
 (() => {
   const canvas = document.getElementById('orbit');
@@ -183,10 +141,17 @@ const LEGEND_ORDER = [4, 5, 3, 2, 1, 0];
   if (!window.THREE) return;
   const SAT = window.satellite;
 
+  // Satellites start at their true positions right now, then play forward faster than
+  // real time so the motion is visible. 1 = real time (barely moves); 60 = one Starlink
+  // orbit in about 95 seconds.
+  const SPEED = reduceMotion ? 1 : 60;
+  const simStart = Date.now(), realStart = performance.now();
+  const simNow = () => simStart + (performance.now() - realStart) * SPEED;
+  document.getElementById('speedNote').textContent = SPEED === 1 ? 'in real time' : `sped up ${SPEED}x`;
+
   // ---------------- scene ----------------
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  const DPR = Math.min(window.devicePixelRatio || 1, 2);
-  renderer.setPixelRatio(DPR);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
   camera.position.set(0, 0.35, 7);
@@ -197,9 +162,13 @@ const LEGEND_ORDER = [4, 5, 3, 2, 1, 0];
   world.add(tilt); tilt.add(orient); scene.add(world);
   // orient's local frame = Earth-centred inertial frame (x: vernal equinox, y: north pole)
 
+  const ambient = new THREE.AmbientLight(0xffffff, 0.45);
+  const sunLight = new THREE.DirectionalLight(0xfff1d6, 1.1);
+  scene.add(ambient, sunLight, sunLight.target);
+
   // ---------------- Earth ----------------
   const loader = new THREE.TextureLoader();
-  const tex = src => { const t = loader.load(src); t.anisotropy = 16; return t; };
+  const tex = src => { const t = loader.load(src); t.anisotropy = 4; return t; };
   const sunUniform = { value: new THREE.Vector3(1, 0, 0) };
   const earthMat = new THREE.ShaderMaterial({
     uniforms: {
@@ -254,66 +223,48 @@ const LEGEND_ORDER = [4, 5, 3, 2, 1, 0];
   });
   orient.add(new THREE.Mesh(new THREE.SphereGeometry(1.1, 64, 64), atmoMat));
 
-  // ---------------- satellites ----------------
-  const RE = 6371;                                   // Earth radius, km
-  const dispR = r => 1 + 0.5 * Math.log(1 + Math.max(r - RE, 0) / 2000);   // log-compressed altitude
-  let N = 0, recs = [], cat, P, Q, W, T, pos, colAttr, sizeAttr, points, geo;
-  let issIdx = -1, cssIdx = -1;
-  const counts = new Array(CATS.length).fill(0);
+  // ---------------- satellites: Starlink and OneWeb only ----------------
+  const RE = 6371;                                  // Earth radius, km
+  const ALT_EXAGGERATION = 2.6;                     // spreads the shells out so they read on screen
+  const dispR = r => 1 + Math.max(r - RE, 0) / RE * ALT_EXAGGERATION;
+  const DARK_COLORS  = [0xf5a623, 0xf5a623, 0xe8951a, 0xffc864];
+  const LIGHT_COLORS = [0xe8951a, 0xf5a623, 0xc98a2a, 0x7a5c43];
 
-  const ptsMat = new THREE.ShaderMaterial({
-    uniforms: { scale: { value: 1 } },
-    vertexShader: `
-      attribute float size; attribute vec3 color; varying vec3 vC; uniform float scale;
-      void main(){
-        vC = color;
-        vec4 mv = modelViewMatrix * vec4(position, 1.0);
-        gl_PointSize = size * scale / -mv.z;
-        gl_Position = projectionMatrix * mv;
-      }`,
-    fragmentShader: `
-      varying vec3 vC;
-      void main(){
-        vec2 c = gl_PointCoord - 0.5; float d = length(c);
-        if (d > 0.5) discard;
-        gl_FragColor = vec4(vC, smoothstep(0.5, 0.2, d));
-      }`,
-    transparent: true, depthWrite: false
-  });
+  let N = 0, recs = [], tone, P, Q, W, T, spin, spinRate, scl, shards = null;
+  const shardGeo = new THREE.BoxGeometry(0.03, 0.0035, 0.012);      // a flat little panel
+  const shardMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
 
   function buildCatalog(text){
-    const lines = text.split('\n').filter(Boolean);
-    recs = []; const cats = [];
-    counts.fill(0);
-    for (const ln of lines){
-      const [c, name, l1, l2] = ln.split('|');
+    recs = []; const tones = [];
+    for (const ln of text.split('\n')){
+      if (!ln) continue;
+      const [c, , l1, l2] = ln.split('|');
+      if (c !== '4') continue;                      // category 4 = Starlink and OneWeb
       let rec; try { rec = SAT.twoline2satrec(l1, l2); } catch(e){ continue; }
       if (!rec || rec.error) continue;
-      if (/ISS \(ZARYA\)/.test(name)) issIdx = recs.length;
-      if (/CSS \(TIANHE\)/.test(name)) cssIdx = recs.length;
-      recs.push(rec); cats.push(+c); counts[+c]++;
+      recs.push(rec);
+      tones.push(/^ONEWEB/.test(ln.split('|')[1] || '') ? 3 : Math.floor(Math.random() * 3));
     }
     N = recs.length;
-    cat = new Uint8Array(cats);
-    P = new Float32Array(N * 3);  // position at last update (km, inertial)
-    Q = new Float32Array(N * 3);  // in-plane perpendicular, same length as P
-    W = new Float32Array(N);      // angular rate, rad/s
-    T = new Float64Array(N);      // sim time of last update (ms)
-    pos = new Float32Array(N * 3);
-    geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3).setUsage(THREE.DynamicDrawUsage));
-    colAttr = new THREE.BufferAttribute(new Float32Array(N * 3), 3);
-    sizeAttr = new THREE.BufferAttribute(new Float32Array(N), 1);
-    for (let i = 0; i < N; i++) sizeAttr.array[i] = CATS[cat[i]].size;
-    geo.setAttribute('color', colAttr); geo.setAttribute('size', sizeAttr);
-    if (points) orient.remove(points);
-    points = new THREE.Points(geo, ptsMat);
-    points.frustumCulled = false;
-    orient.add(points);
-    // first full pass so nothing starts at the origin
+    tone = new Uint8Array(tones);
+    P = new Float32Array(N * 3); Q = new Float32Array(N * 3);
+    W = new Float32Array(N); T = new Float64Array(N);
+    spin = new Float32Array(N * 3); spinRate = new Float32Array(N * 2); scl = new Float32Array(N);
+    for (let i = 0; i < N; i++){
+      spin[i*3] = Math.random() * 6.28; spin[i*3+1] = Math.random() * 6.28; spin[i*3+2] = Math.random() * 6.28;
+      spinRate[i*2] = (Math.random() - 0.5) * 1.2; spinRate[i*2+1] = (Math.random() - 0.5) * 0.8;
+      scl[i] = 0.75 + Math.random() * 0.6;
+    }
+    if (shards) orient.remove(shards);
+    shards = new THREE.InstancedMesh(shardGeo, shardMat, N);
+    shards.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    shards.frustumCulled = false;
+    orient.add(shards);
     const now = simNow();
     for (let i = 0; i < N; i++) propagateOne(i, now);
-    applyColors(); fillLegend();
+    applyColors();
+    document.getElementById('count').textContent = N.toLocaleString('en-US') + ' Starlink and OneWeb';
+    layout();
   }
 
   function propagateOne(i, t){
@@ -324,195 +275,140 @@ const LEGEND_ORDER = [4, 5, 3, 2, 1, 0];
     // inertial (TEME) -> scene axes: x = x, y = z (north), z = -y
     const px = p.x, py = p.z, pz = -p.y, vx = v.x, vy = v.z, vz = -v.y;
     const r = Math.hypot(px, py, pz);
-    // angular momentum axis k = p x v
-    let kx = py*vz - pz*vy, ky = pz*vx - px*vz, kz = px*vy - py*vx;
+    let kx = py*vz - pz*vy, ky = pz*vx - px*vz, kz = px*vy - py*vx;     // orbit normal
     const kl = Math.hypot(kx, ky, kz) || 1; kx /= kl; ky /= kl; kz /= kl;
     P[j] = px; P[j+1] = py; P[j+2] = pz;
-    Q[j] = ky*pz - kz*py; Q[j+1] = kz*px - kx*pz; Q[j+2] = kx*py - ky*px;    // k x p
+    Q[j] = ky*pz - kz*py; Q[j+1] = kz*px - kx*pz; Q[j+2] = kx*py - ky*px;
     W[i] = kl / (r * r);
     T[i] = t;
   }
 
-  let cursor = 0;
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), pv3 = new THREE.Vector3(), sv3 = new THREE.Vector3();
+  let cursor = 0, lastReal = performance.now();
   function updateSats(t){
     if (!N) return;
-    // refresh as many orbits as fit in ~5 ms, round robin
-    const t0 = performance.now();
+    const t0 = performance.now();              // refresh exact orbits for ~4 ms per frame, round robin
     let done = 0;
-    while (done < N && performance.now() - t0 < 5){
-      for (let k = 0; k < 200 && done < N; k++, done++){ propagateOne(cursor, t); cursor = (cursor + 1) % N; }
+    while (done < N && performance.now() - t0 < 4){
+      for (let k = 0; k < 150 && done < N; k++, done++){ propagateOne(cursor, t); cursor = (cursor + 1) % N; }
     }
-    // move everyone along their orbit to "now"
+    const nowReal = performance.now();
+    const dt = reduceMotion ? 0 : Math.min((nowReal - lastReal) / 1000, 0.1); lastReal = nowReal;
     for (let i = 0; i < N; i++){
       const j = i * 3, a = W[i] * (t - T[i]) / 1000, c = Math.cos(a), s = Math.sin(a);
       const x = P[j]*c + Q[j]*s, y = P[j+1]*c + Q[j+1]*s, z = P[j+2]*c + Q[j+2]*s;
       const r = Math.hypot(x, y, z);
-      if (!r){ pos[j] = pos[j+1] = pos[j+2] = 0; continue; }
+      if (!r){ m.makeScale(0, 0, 0); shards.setMatrixAt(i, m); continue; }
       const f = dispR(r) / r;
-      pos[j] = x*f; pos[j+1] = y*f; pos[j+2] = z*f;
+      pv3.set(x*f, y*f, z*f);
+      spin[j] += spinRate[i*2] * dt; spin[j+1] += spinRate[i*2+1] * dt;      // slow tumble so panels catch the light
+      e.set(spin[j], spin[j+1], spin[j+2]); q.setFromEuler(e);
+      sv3.setScalar(scl[i]);
+      m.compose(pv3, q, sv3);
+      shards.setMatrixAt(i, m);
     }
-    geo.attributes.position.needsUpdate = true;
+    shards.instanceMatrix.needsUpdate = true;
   }
 
   function applyColors(){
-    if (!N) return;
-    const dark = isDark(), c = new THREE.Color();
-    for (let i = 0; i < N; i++){
-      c.set(dark ? CATS[cat[i]].dark : CATS[cat[i]].light);
-      colAttr.array[i*3] = c.r; colAttr.array[i*3+1] = c.g; colAttr.array[i*3+2] = c.b;
+    const dark = isDark(), set = dark ? DARK_COLORS : LIGHT_COLORS, c = new THREE.Color();
+    if (shards){
+      for (let i = 0; i < N; i++){ c.setHex(set[tone[i]]); shards.setColorAt(i, c); }
+      shards.instanceColor.needsUpdate = true;
     }
-    colAttr.needsUpdate = true;
-    ptsMat.blending = THREE.NormalBlending;
-    document.querySelectorAll('#cats i').forEach(el => {
-      const k = +el.dataset.c; el.style.background = dark ? CATS[k].dark : CATS[k].light;
-    });
+    atmoMat.uniforms.strength.value = dark ? 0.6 : 0.9;
+    atmoMat.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending;
+    atmoMat.needsUpdate = true;
+    ambient.intensity = dark ? 0.45 : 0.7;
   }
 
-  function fillLegend(){
-    document.getElementById('count').textContent = N.toLocaleString('en-US');
-    document.getElementById('cats').innerHTML = LEGEND_ORDER.filter(k => counts[k]).map(k =>
-      `<li><i data-c="${k}"></i>${CATS[k].label}<span>${counts[k].toLocaleString('en-US')}</span></li>`).join('');
-    applyColorsLegendOnly();
-  }
-  function applyColorsLegendOnly(){
-    const dark = isDark();
-    document.querySelectorAll('#cats i').forEach(el => {
-      const k = +el.dataset.c; el.style.background = dark ? CATS[k].dark : CATS[k].light;
-    });
-  }
-
-  // ---------------- time ----------------
-  let speed = 1, baseSim = Date.now(), baseReal = performance.now();
-  function simNow(){ return baseSim + (performance.now() - baseReal) * speed; }
-  document.querySelectorAll('.speed button').forEach(b => b.addEventListener('click', () => {
-    const s = +b.dataset.speed;
-    baseSim = s === 1 ? Date.now() : simNow();    // "Live" snaps back to the real clock
-    baseReal = performance.now(); speed = s;
-    document.querySelectorAll('.speed button').forEach(x => x.setAttribute('aria-pressed', x === b));
-    document.getElementById('pulse').classList.toggle('off', s !== 1);
-  }));
-
-  // low-precision solar position (good to ~0.01 deg), inertial frame -> scene axes
+  // low-precision solar position, inertial frame -> scene axes
   function sunVector(t){
-    const n = t / 86400000 + 2440587.5 - 2451545.0;
-    const rad = Math.PI / 180;
+    const n = t / 86400000 + 2440587.5 - 2451545.0, rad = Math.PI / 180;
     const L = (280.460 + 0.9856474 * n) * rad, g = (357.528 + 0.9856003 * n) * rad;
     const lam = L + (1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * rad;
     const eps = (23.439 - 0.0000004 * n) * rad;
-    const x = Math.cos(lam), y = Math.cos(eps) * Math.sin(lam), z = Math.sin(eps) * Math.sin(lam);
-    return new THREE.Vector3(x, z, -y);
-  }
-
-  const fmt = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'UTC' });
-  const clockEl = document.getElementById('clock');
-  let lastClock = 0;
-
-  // ---------------- labels ----------------
-  const tags = [
-    { el: document.getElementById('tag-iss'), alt: document.getElementById('alt-iss'), idx: () => issIdx },
-    { el: document.getElementById('tag-css'), alt: document.getElementById('alt-css'), idx: () => cssIdx }
-  ];
-  const v3 = new THREE.Vector3(), ctr = new THREE.Vector3(), camW = new THREE.Vector3();
-  function placeTags(){
-    const rect = canvas.getBoundingClientRect();
-    camera.getWorldPosition(camW);
-    earth.getWorldPosition(ctr);
-    const R = world.scale.x;
-    for (const t of tags){
-      const i = t.idx();
-      if (i < 0 || !N){ t.el.style.opacity = 0; continue; }
-      v3.set(pos[i*3], pos[i*3+1], pos[i*3+2]);
-      const rDisp = v3.length();
-      orient.localToWorld(v3);
-      // hidden if Earth sits between the camera and the station
-      const d = v3.clone().sub(camW), len = d.length(); d.divideScalar(len);
-      const oc = camW.clone().sub(ctr), b = oc.dot(d), c = oc.lengthSq() - R*R, disc = b*b - c;
-      const hidden = disc > 0 && (-b - Math.sqrt(disc)) < len;
-      v3.project(camera);
-      const x = (v3.x * 0.5 + 0.5) * rect.width, y = (-v3.y * 0.5 + 0.5) * rect.height;
-      t.el.style.opacity = hidden ? 0 : 1;
-      t.el.style.transform = `translate(${x + 10}px, ${y}px) translate(0,-50%)`;
-      const j = i * 3, km = Math.hypot(P[j], P[j+1], P[j+2]) - RE;
-      t.alt.textContent = `${Math.round(km)} km up`;
-    }
+    return new THREE.Vector3(Math.cos(lam), Math.sin(eps) * Math.sin(lam), -Math.cos(eps) * Math.sin(lam));
   }
 
   // ---------------- layout, theme, input ----------------
   function layout(){
     const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     const halfW = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z * camera.aspect;
     if (w > 860){
-      world.position.set(Math.min(halfW * 0.42, 2.2), 0.05, 0);
-      world.scale.setScalar(Math.min(0.92, Math.max(0.7, h / 900)));
+      world.position.set(Math.min(halfW * 0.42, 2.3), 0.05, 0);
+      world.scale.setScalar(Math.min(1.0, Math.max(0.75, h / 820)));
     } else {
-      world.position.set(0, 1.75, 0);
-      world.scale.setScalar(Math.min(0.72, halfW / 2.9));
+      world.position.set(0, 1.7, 0);
+      world.scale.setScalar(Math.min(0.75, halfW / 2.5));
     }
-    ptsMat.uniforms.scale.value = h * DPR * 0.0078 * world.scale.x;
+    placeLine(w, h);
   }
-  function applyTheme(){
-    const dark = isDark();
-    atmoMat.uniforms.strength.value = dark ? 0.6 : 0.9;
-    atmoMat.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending;
-    atmoMat.needsUpdate = true;
-    applyColors();
+
+  // keep the live-data line centred just under the outer satellite shell
+  const lineEl = document.getElementById('liveLine');
+  const OUTER_SHELL = 1.5;
+  function placeLine(w, h){
+    world.updateMatrixWorld(true);
+    const c = world.position.clone().project(camera);
+    const b = world.position.clone().add(new THREE.Vector3(0, -OUTER_SHELL * world.scale.x, 0)).project(camera);
+    const x = (c.x * 0.5 + 0.5) * w;
+    const y = (-b.y * 0.5 + 0.5) * h + 14;
+    const top = Math.min(y, h - lineEl.offsetHeight - 16);
+    const half = lineEl.offsetWidth / 2;
+    lineEl.style.left = Math.max(half + 16, Math.min(x, w - half - 16)) + 'px';
+    lineEl.style.top = top + 'px';
+    lineEl.classList.add('placed');
   }
-  var _tt = document.getElementById('themeToggle'); if (_tt) _tt.addEventListener('click', () => {
+  var _tt=document.getElementById('themeToggle'); if(_tt) _tt.addEventListener('click', () => {
     const next = isDark() ? 'light' : 'dark';
     root.setAttribute('data-theme', next);
     try { localStorage.setItem('incept-theme', next); } catch(e){}
-    applyTheme();
+    applyColors();
   });
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyColors);
   const target = { x: 0, y: 0 };
-  window.addEventListener('pointermove', e => {
-    target.y = (e.clientX / window.innerWidth - 0.5) * 0.3;
-    target.x = (e.clientY / window.innerHeight - 0.5) * 0.18;
+  window.addEventListener('pointermove', ev => {
+    target.y = (ev.clientX / window.innerWidth - 0.5) * 0.3;
+    target.x = (ev.clientY / window.innerHeight - 0.5) * 0.18;
   });
   window.addEventListener('resize', layout);
+  if (window.ResizeObserver) new ResizeObserver(layout).observe(canvas);
 
   // ---------------- frame ----------------
   tilt.rotation.z = 0.28;
-  const sunWorld = new THREE.Vector3();
   function frame(){
     const t = simNow();
-    // Earth turns by sidereal time so continents sit under the right satellites
-    earth.rotation.y = SAT.gstime(new Date(t));
-    // keep the sunlit side facing the viewer: rotate the inertial frame about the pole
+    earth.rotation.y = SAT ? SAT.gstime(new Date(t)) : 0;     // Earth turns by real sidereal time
     const sun = sunVector(t);
-    orient.rotation.y = THREE.MathUtils.degToRad(55) - Math.atan2(sun.x, sun.z);
+    orient.rotation.y = THREE.MathUtils.degToRad(55) - Math.atan2(sun.x, sun.z);   // keep the day side facing us
     tilt.rotation.x += (target.x + 0.12 - tilt.rotation.x) * 0.04;
     world.rotation.y += (target.y - world.rotation.y) * 0.04;
     world.updateMatrixWorld(true);
     sunUniform.value.copy(sun).transformDirection(orient.matrixWorld);
+    sunLight.position.copy(sunUniform.value).multiplyScalar(10);
     updateSats(t);
     renderer.render(scene, camera);
-    placeTags();
-    if (t - lastClock > 250 || speed > 1){ clockEl.textContent = fmt.format(new Date(t)).replace(',', '') + ' UTC'; lastClock = t; }
   }
-
-  layout(); applyTheme();
+  layout(); applyColors();
   if (reduceMotion){ frame(); setInterval(frame, 1000); }
   else (function loop(){ frame(); requestAnimationFrame(loop); })();
 
   // ---------------- load data ----------------
   (async () => {
     if (!SAT) return;
-    try {
-      const r = await fetch(TLE_URL, { cache: 'no-cache' });
-      if (!r.ok) throw new Error(r.status);
-      buildCatalog(await r.text());
-      const updated = r.headers.get('last-modified');
-      const when = updated ? new Date(updated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-      document.getElementById('src').textContent = 'Orbits from CelesTrak' + (when ? ', updated ' + when : '') + '. Altitudes not to scale.';
-    } catch(e){
-      document.getElementById('count').textContent = '0';
-      document.getElementById('src').textContent = 'Satellite data could not be loaded.';
-    }
+    try { buildCatalog(await loadData()); } catch(err){ document.getElementById('count').textContent = 'Starlink and OneWeb'; }
   })();
+  async function loadData(){
+    const r = await fetch(TLE_URL, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(r.status);
+    return await r.text();
+  }
 })();
 </script>
+
 </body>
 </html>
