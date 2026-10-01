@@ -175,6 +175,7 @@ const LEGEND_ORDER = [4, 5, 3, 2, 1, 0];
   const root = document.documentElement;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   try { const s = localStorage.getItem('incept-theme'); if (s) root.setAttribute('data-theme', s); } catch(e){}
+  try { var _qp=new URLSearchParams(location.search).get('theme'); if(_qp==='dark'||_qp==='light') root.setAttribute('data-theme',_qp); } catch(e){}
   const isDark = () => {
     const t = root.getAttribute('data-theme');
     return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
