@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -198,7 +198,7 @@ const LEGEND_ORDER = [4, 5, 3, 2, 1, 0];
 
   // ---------------- Earth ----------------
   const loader = new THREE.TextureLoader();
-  const tex = src => { const t = loader.load(src); t.anisotropy = 4; return t; };
+  const tex = src => { const t = loader.load(src); t.anisotropy = 16; return t; };
   const sunUniform = { value: new THREE.Vector3(1, 0, 0) };
   const earthMat = new THREE.ShaderMaterial({
     uniforms: {
