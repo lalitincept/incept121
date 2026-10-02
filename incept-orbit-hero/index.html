@@ -142,7 +142,7 @@ const TLE_URL = 'data/satellites.txt';
   const SAT = window.satellite;
 
   // Satellites start at their true positions right now, then play forward faster than
-  // real time so the motion is visible. 1 = real time (barely moves); 60 = one Starlink
+  // real time so the motion is visible. 1 = real time (barely moves); 60 = one low-orbit
   // orbit in about 95 seconds.
   const SPEED = reduceMotion ? 1 : 60;
   const simStart = Date.now(), realStart = performance.now();
@@ -223,7 +223,7 @@ const TLE_URL = 'data/satellites.txt';
   });
   orient.add(new THREE.Mesh(new THREE.SphereGeometry(1.1, 64, 64), atmoMat));
 
-  // ---------------- satellites: Starlink and OneWeb only ----------------
+  // ---------------- satellites: broadband constellation only ----------------
   const RE = 6371;                                  // Earth radius, km
   const ALT_EXAGGERATION = 2.6;                     // spreads the shells out so they read on screen
   const dispR = r => 1 + Math.max(r - RE, 0) / RE * ALT_EXAGGERATION;
@@ -239,7 +239,7 @@ const TLE_URL = 'data/satellites.txt';
     for (const ln of text.split('\n')){
       if (!ln) continue;
       const [c, , l1, l2] = ln.split('|');
-      if (c !== '4') continue;                      // category 4 = Starlink and OneWeb
+      if (c !== '4') continue;                      // category 4 = broadband constellations
       let rec; try { rec = SAT.twoline2satrec(l1, l2); } catch(e){ continue; }
       if (!rec || rec.error) continue;
       recs.push(rec);
@@ -263,7 +263,7 @@ const TLE_URL = 'data/satellites.txt';
     const now = simNow();
     for (let i = 0; i < N; i++) propagateOne(i, now);
     applyColors();
-    document.getElementById('count').textContent = N.toLocaleString('en-US') + ' Starlink and OneWeb';
+    document.getElementById('count').textContent = N.toLocaleString('en-US') + ' objects';
     layout();
   }
 
@@ -400,7 +400,7 @@ const TLE_URL = 'data/satellites.txt';
   // ---------------- load data ----------------
   (async () => {
     if (!SAT) return;
-    try { buildCatalog(await loadData()); } catch(err){ document.getElementById('count').textContent = 'Starlink and OneWeb'; }
+    try { buildCatalog(await loadData()); } catch(err){ document.getElementById('count').textContent = ''; }
   })();
   async function loadData(){
     const r = await fetch(TLE_URL, { cache: 'no-cache' });
