@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Acquired — Home Depot Reel</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Anton"; src: url("assets/fonts/Anton-Regular.ttf") format("truetype"); }
+      @font-face { font-family: "DM Serif Display"; src: url("assets/fonts/DMSerifDisplay-Regular.ttf") format("truetype"); }
+      @font-face { font-family: "DM Serif Display"; font-style: italic; src: url("assets/fonts/DMSerifDisplay-Italic.ttf") format("truetype"); }
+      @font-face { font-family: "Archivo Black"; src: url("assets/fonts/ArchivoBlack-Regular.ttf") format("truetype"); }
+      @font-face { font-family: "IBM Plex Mono"; font-weight: 500; src: url("assets/fonts/IBMPlexMono-Medium.ttf") format("truetype"); }
+      @font-face { font-family: "IBM Plex Mono"; font-weight: 600; src: url("assets/fonts/IBMPlexMono-SemiBold.ttf") format("truetype"); }
+
+      :root {
+        /* Home Depot palette + editorial neutrals */
+        --orange: #f96302;
+        --orange-deep: #c94d00;
+        --ink: #141414;
+        --char: #1f1f1f;
+        --paper: #efe8dc;
+        --paper-dark: #e2d8c6;
+        --white: #ffffff;
+        --mute: #9e978b;
+        --apple: #bdbdbd;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--ink); }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--ink); }
+      .clip { position: absolute; inset: 0; overflow: hidden; z-index: 1; }
+      .clip.host { z-index: 5; }
+
+      /* type system */
+      .anton { font-family: "Anton", sans-serif; font-weight: 400; line-height: 0.92; letter-spacing: 0.005em; text-transform: uppercase; }
+      .serif { font-family: "DM Serif Display", serif; font-weight: 400; line-height: 1; }
+      .ital { font-family: "DM Serif Display", serif; font-style: italic; font-weight: 400; line-height: 1; }
+      .mono { font-family: "IBM Plex Mono", monospace; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+      .o { color: var(--orange); }
+      .bg-paper .o { color: #e55b02; }
+      .center-col { position: absolute; left: 90px; right: 90px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+
+      /* backgrounds */
+      .bg-ink { background: radial-gradient(120% 80% at 50% 35%, #262321 0%, var(--ink) 70%); }
+      .bg-paper { background: radial-gradient(120% 90% at 50% 40%, #f6f0e6 0%, var(--paper) 55%, var(--paper-dark) 100%); color: var(--ink); }
+      .bg-orange { background: radial-gradient(120% 90% at 50% 30%, #ff7a1f 0%, var(--orange) 50%, var(--orange-deep) 100%); }
+
+      /* editorial masthead (injected per scene) */
+      .masthead { position: absolute; left: 90px; right: 90px; top: 196px; height: 64px; display: flex; justify-content: space-between; align-items: center; border-top: 3px solid currentColor; border-bottom: 1px solid currentColor; font-size: 22px; }
+      .masthead .pg { display: flex; gap: 18px; align-items: center; }
+      .masthead .dot { width: 14px; height: 14px; background: var(--orange); display: block; }
+      .on-ink { color: var(--paper); }
+      .on-paper { color: var(--ink); }
+
+      /* film grain + vignette overlays */
+      #grain { position: absolute; left: -200px; top: -200px; width: 1480px; height: 2320px; opacity: 0.09; mix-blend-mode: overlay; pointer-events: none; z-index: 90; }
+      #vignette { position: absolute; inset: 0; z-index: 89; pointer-events: none; background: radial-gradient(120% 75% at 50% 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.35) 100%); }
+
+      /* captions — bold, centered, inside safe zone */
+      #captions { position: absolute; left: 0; right: 0; top: 1300px; height: 210px; z-index: 80; }
+      .cap { position: absolute; left: 130px; right: 130px; top: 0; text-align: center; font-family: "Archivo Black", sans-serif; font-size: 50px; line-height: 1.32; color: var(--white); opacity: 0; }
+      .cap span.box { background: var(--ink); padding: 2px 16px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+      .cap em { font-style: normal; color: var(--orange); }
+
+      /* host plate (placeholder for Ben's footage) */
+      .host-frame { position: absolute; inset: 0; transform-origin: 50% 42%; }
+      .host-bg { position: absolute; inset: 0; background: radial-gradient(70% 45% at 62% 38%, #4a3526 0%, #231b16 45%, #0e0c0b 100%); }
+      .host-rim { position: absolute; left: 640px; top: 260px; width: 700px; height: 900px; border-radius: 50%; background: radial-gradient(closest-side, rgba(249,99,2,0.55), rgba(249,99,2,0)); }
+      .host-fig { position: absolute; left: 140px; top: 470px; width: 800px; height: 1000px; }
+      .host-tag { position: absolute; left: 90px; top: 1180px; display: flex; gap: 0; align-items: stretch; font-size: 24px; }
+      .host-tag .a { background: var(--orange); color: var(--ink); padding: 12px 18px; }
+      .host-tag .b { background: var(--paper); color: var(--ink); padding: 12px 18px; }
+      .rec { position: absolute; right: 120px; top: 300px; display: flex; gap: 12px; align-items: center; color: var(--paper); font-size: 22px; }
+      .rec i { width: 18px; height: 18px; border-radius: 50%; background: #ff3b30; display: block; }
+
+      /* S1 hook */
+      #s1-text { top: 560px; }
+      #s1-a { font-size: 96px; color: var(--paper); }
+      #s1-b { font-size: 196px; color: var(--white); margin-top: 6px; }
+      #s1-bar { width: 820px; height: 22px; background: var(--orange); margin-top: 18px; transform-origin: 0 50%; }
+
+      /* S2 split */
+      .half { position: absolute; top: 0; bottom: 0; width: 540px; overflow: hidden; }
+      #s2-left { left: 0; background: var(--orange); color: var(--ink); }
+      #s2-right { left: 540px; background: var(--ink); color: var(--paper); }
+      .half .who { position: absolute; left: 0; right: 0; top: 520px; text-align: center; font-size: 34px; }
+      .half .yr { position: absolute; left: 0; right: 0; top: 590px; text-align: center; font-size: 250px; }
+      .half .art { position: absolute; left: 50px; top: 900px; width: 440px; height: 300px; }
+      .half .tag { position: absolute; left: 0; right: 0; top: 860px; text-align: center; font-size: 18px; opacity: 0.7; }
+      #s2-left .yr { color: var(--white); }
+      #s2-right .yr { color: var(--orange); }
+      #s2-vs { position: absolute; left: 0; right: 0; top: 300px; display: flex; justify-content: center; z-index: 5; }
+      #s2-vs .pill { background: var(--paper); color: var(--ink); padding: 18px 34px 22px; font-size: 64px; box-shadow: 0 12px 0 var(--ink); }
+      #s2-vs .pill .ital { color: var(--orange); }
+      #s2-seam { position: absolute; left: 534px; top: 0; width: 12px; height: 1920px; background: var(--paper); z-index: 4; transform-origin: 50% 0; }
+
+      /* S3 comparison */
+      #s3-head { top: 292px; height: 120px; }
+      .s3-h { position: absolute; left: 0; right: 0; top: 0; font-size: 92px; color: var(--paper); text-align: center; }
+      .cards { position: absolute; left: 90px; right: 90px; top: 440px; display: flex; gap: 40px; }
+      .card { position: relative; flex: 1; height: 230px; padding: 24px 28px; background: #1d1b19; border: 3px solid #3a3632; color: var(--paper); }
+      .card .k { font-size: 20px; opacity: 0.75; }
+      .card .n { font-size: 34px; margin-top: 8px; }
+      .card .v { font-size: 104px; margin-top: 12px; }
+      #card-hd { border-color: var(--orange); }
+      #card-hd .n { color: var(--orange); }
+      #card-ap .n { color: var(--apple); }
+      .stamp { position: absolute; right: -14px; top: -26px; padding: 8px 18px; background: var(--orange); color: var(--ink); font-size: 26px; }
+      #s3-chart { position: absolute; left: 90px; top: 710px; width: 900px; height: 520px; }
+      #s3-ticker { position: absolute; left: 0; top: 1236px; height: 46px; width: 4000px; display: flex; gap: 48px; align-items: center; font-size: 22px; color: var(--mute); white-space: nowrap; }
+      #s3-ticker b { color: var(--orange); font-weight: 600; }
+      .src { position: absolute; font-size: 16px; color: var(--mute); letter-spacing: 0.12em; }
+
+      /* S4 compounding */
+      #s4-curve { position: absolute; left: 0; top: 260px; width: 1080px; height: 1040px; }
+      #s4-year { position: absolute; left: 0; right: 0; top: 296px; display: flex; justify-content: center; }
+      #s4-year .box { display: flex; gap: 22px; align-items: baseline; border: 3px solid var(--paper); padding: 6px 26px; color: var(--paper); }
+      #s4-year .lbl { font-size: 22px; opacity: 0.7; }
+      #s4-yearval { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 84px; letter-spacing: 0.04em; min-width: 220px; text-align: center; }
+      #s4-main { top: 470px; }
+      #s4-nearly { font-size: 110px; color: var(--paper); }
+      #s4-25 { font-size: 440px; color: var(--orange); line-height: 0.86; margin-top: 4px; }
+      #s4-ayear { font-size: 118px; color: var(--white); margin-top: 6px; }
+      #s4-45 { position: absolute; left: 0; right: 0; top: 1150px; display: flex; justify-content: center; }
+      #s4-45 .b { background: var(--orange); color: var(--ink); font-size: 96px; padding: 10px 34px 6px; }
+      #s4-kicker { position: absolute; left: 90px; right: 90px; top: 560px; text-align: center; }
+      #s4-kicker .mono { font-size: 26px; color: var(--orange); }
+      #s4-kicker .serif { font-size: 104px; color: var(--paper); margin-top: 18px; }
+      .chip { position: absolute; font-size: 30px; color: var(--orange); border: 2px solid var(--orange); padding: 4px 12px; opacity: 0; }
+      #s4-stores { position: absolute; left: 0; top: 1040px; width: 3200px; height: 220px; }
+
+      /* S5 number one */
+      #s5-head { top: 292px; }
+      #s5-head .serif { font-size: 96px; color: var(--paper); }
+      #s5-head .mono { font-size: 22px; color: var(--orange); margin-top: 14px; }
+      #s5-window { position: absolute; left: 90px; right: 90px; top: 480px; height: 760px; overflow: hidden; border-top: 3px solid var(--paper); border-bottom: 3px solid var(--paper); }
+      #s5-list { position: absolute; left: 0; right: 0; top: 0; }
+      .row { height: 96px; display: flex; align-items: center; gap: 26px; border-bottom: 1px solid #3a3632; color: var(--paper); padding: 0 12px; }
+      .row .r { width: 100px; font-size: 34px; opacity: 0.8; }
+      .row .nm { height: 26px; background: #4a4540; display: block; }
+      .row .bar { margin-left: auto; height: 14px; background: #6b645c; display: block; }
+      #s5-hdrow { position: absolute; left: 90px; right: 90px; top: 480px; height: 96px; background: var(--orange); color: var(--ink); display: flex; align-items: center; gap: 26px; padding: 0 12px; z-index: 3; }
+      #s5-hdrow .r { width: 100px; font-size: 34px; }
+      #s5-hdrow .nm { font-size: 56px; }
+      #s5-hdrow .up { margin-left: auto; font-size: 22px; }
+      #s5b-wrap { position: absolute; inset: 0; }
+      #s5-brand { top: 300px; }
+      #s5-brand .anton { font-size: 120px; color: var(--paper); }
+      #s5-seal { position: absolute; left: 260px; top: 470px; width: 560px; height: 560px; }
+      #s5-one { position: absolute; left: 260px; top: 470px; width: 560px; height: 560px; display: flex; align-items: center; justify-content: center; font-size: 300px; color: var(--ink); }
+      #s5-tr { top: 1062px; }
+      #s5-tr .anton { font-size: 132px; color: var(--white); }
+      #s5-ipo { top: 1196px; }
+      #s5-ipo .mono { font-size: 56px; color: var(--orange); }
+
+      /* S6 payoff */
+      #s6-guil { position: absolute; left: -420px; top: -60px; width: 1920px; height: 1920px; opacity: 0.22; }
+      #s6-border { position: absolute; left: 60px; top: 170px; right: 60px; bottom: 360px; border: 3px solid rgba(249,99,2,0.6); outline: 1px solid rgba(249,99,2,0.35); outline-offset: -16px; }
+      #s6-from { top: 330px; }
+      #s6-from .mono { font-size: 30px; color: var(--paper); }
+      #s6-from .anton { font-size: 120px; color: var(--paper); margin-top: 10px; }
+      #s6-count { position: absolute; left: 0; right: 0; top: 680px; text-align: center; font-family: "Anton", sans-serif; font-size: 178px; color: var(--white); font-variant-numeric: tabular-nums; }
+      #s6-final { top: 560px; }
+      #s6-17 { font-size: 540px; color: var(--orange); line-height: 0.84; }
+      #s6-mil { font-size: 196px; color: var(--white); margin-top: 6px; }
+      #s6-flash { position: absolute; inset: 0; background: var(--orange); opacity: 0; }
+      #s6-dim { position: absolute; inset: 0; background: #000; opacity: 0; }
+
+      /* S7 story tease (paper) */
+      #s7-kick { top: 300px; }
+      #s7-kick .ital { font-size: 76px; color: var(--ink); }
+      .photo { position: absolute; width: 420px; height: 560px; background: #f8f4ec; padding: 18px 18px 70px; box-shadow: 0 18px 40px rgba(0,0,0,0.25); }
+      .photo .img { position: relative; width: 100%; height: 100%; overflow: hidden; background: radial-gradient(80% 60% at 50% 35%, #b9a48a 0%, #7d6a55 60%, #4b3f33 100%); filter: grayscale(0.4) sepia(0.6) contrast(1.05); }
+      .photo .cap2 { position: absolute; left: 0; right: 0; bottom: 18px; text-align: center; font-size: 20px; color: var(--ink); }
+      #ph-1 { left: 96px; top: 430px; }
+      #ph-2 { left: 564px; top: 470px; }
+      #s7-letter { position: absolute; left: 150px; top: 380px; width: 780px; height: 860px; background: #fbf8f2; box-shadow: 0 20px 50px rgba(0,0,0,0.25); padding: 60px 64px; color: var(--ink); }
+      #s7-letter .ln { height: 14px; background: #cfc7b8; margin-top: 22px; display: block; }
+      #s7-fired { top: 640px; }
+      #s7-fired .ital { font-size: 120px; color: var(--ink); }
+      #s7-stamp { margin-top: 18px; border: 12px solid var(--orange); color: var(--orange); font-size: 280px; padding: 18px 40px 6px; background: rgba(239,232,220,0.85); }
+      #s7-paper { position: absolute; left: 70px; top: 300px; width: 940px; height: 960px; background: #f4efe4; color: var(--ink); padding: 40px 48px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+      #s7-paper .mast { text-align: center; font-size: 72px; border-bottom: 4px double var(--ink); padding-bottom: 14px; }
+      #s7-paper .dl { display: flex; justify-content: space-between; font-size: 16px; padding: 10px 0; border-bottom: 1px solid var(--ink); }
+      #s7-paper .hl { font-size: 92px; line-height: 1.02; margin-top: 26px; }
+      #s7-paper .cols { display: flex; gap: 28px; margin-top: 30px; }
+      #s7-paper .col { flex: 1; }
+      #s7-paper .col i { height: 12px; background: #c9c0b0; margin-top: 14px; display: block; }
+      .note { position: absolute; left: 0; right: 0; display: flex; justify-content: center; }
+      .note .b { background: var(--ink); color: var(--paper); font-size: 92px; padding: 14px 36px 8px; }
+      .note .b.or { background: var(--orange); color: var(--ink); }
+      #s7-n1 { top: 760px; }
+      #s7-n2 { top: 930px; }
+
+      /* S8 big idea */
+      #s8-kick { top: 300px; }
+      #s8-kick .ital { font-size: 104px; color: var(--ink); }
+      #s8-cam { position: absolute; left: 40px; top: 470px; width: 1000px; height: 760px; transform-origin: 13% 86%; }
+      #s8-cam svg { width: 100%; height: 100%; }
+      #s8-big { top: 470px; }
+      #s8-5 { font-size: 470px; color: #e55b02; line-height: 0.84; }
+      #s8-bigger { font-size: 236px; color: var(--ink); }
+      #s8-aisle { position: absolute; inset: 0; opacity: 0; }
+
+      /* S9 end card */
+      #s9-slide { position: absolute; inset: 0; }
+      #s9-stripes { position: absolute; left: -400px; top: -400px; width: 2000px; height: 2800px; opacity: 0.16; background: repeating-linear-gradient(-35deg, var(--ink) 0 24px, transparent 24px 96px); }
+      #s9-live { top: 380px; }
+      #s9-live .b { background: var(--ink); color: var(--orange); font-size: 150px; padding: 22px 44px 12px; display: flex; flex-direction: column; align-items: center; }
+      #s9-live .l2 { color: var(--white); font-size: 190px; }
+      #s9-title { top: 780px; }
+      #s9-title .mono { font-size: 30px; color: var(--ink); }
+      #s9-title .serif { font-size: 120px; color: var(--ink); margin-top: 14px; }
+      #s9-title .t2 { color: var(--white); margin-top: 0; }
+      #s9-cta { top: 1060px; }
+      #s9-cta .b { border: 4px solid var(--ink); color: var(--ink); font-size: 34px; padding: 18px 26px; }
+      #s9-logo { position: absolute; left: 0; right: 0; top: 1170px; display: flex; justify-content: center; }
+      #s9-logo .lg { display: flex; align-items: center; gap: 16px; color: var(--paper); background: var(--ink); padding: 14px 24px; font-size: 28px; }
+      #s9-logo .lg i { display: block; width: 34px; height: 34px; border: 4px solid var(--orange); border-radius: 50%; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="67" data-width="1080" data-height="1920">
+
+      <!-- ================= AUDIO (temp score + SFX cue stem) =================
+           Replace with the episode VO, licensed music and final SFX in the edit. -->
+      <audio id="music" src="assets/audio/music_temp.wav" data-start="0" data-duration="67" data-track-index="20" data-volume="1"></audio>
+      <audio id="sfx" src="assets/audio/sfx.wav" data-start="0" data-duration="67" data-track-index="21" data-volume="1"></audio>
+
+      <!-- ================= SHOT 1 · HOOK 00:00–00:04 (host) ================= -->
+      <section id="s1" class="clip host" data-start="0" data-duration="4" data-track-index="1">
+        <div class="host-frame" id="s1-frame"></div>
+        <div class="center-col" id="s1-text">
+          <div class="ital" id="s1-a">This is a</div>
+          <div class="anton" id="s1-b">Crazy stat</div>
+          <div id="s1-bar"></div>
+        </div>
+      </section>
+
+      <!-- ================= SHOT 2 · SETUP 00:04–00:10 ================= -->
+      <section id="s2" class="clip bg-ink" data-start="4" data-duration="6" data-track-index="1">
+        <div class="half" id="s2-left">
+          <div class="who mono">Home Depot · IPO</div>
+          <div class="yr anton">1981</div>
+          <div class="tag mono">Archival · storefront</div>
+          <svg class="art" id="s2-store" viewBox="0 0 440 300" fill="none" stroke="#141414" stroke-width="5" stroke-linejoin="round">
+            <line x1="0" y1="270" x2="440" y2="270" />
+            <rect x="30" y="96" width="330" height="174" />
+            <rect x="30" y="96" width="330" height="46" fill="#141414" />
+            <text x="195" y="130" text-anchor="middle" fill="#f96302" stroke="none" font-family="Anton" font-size="30" letter-spacing="2">HOME DEPOT</text>
+            <rect x="160" y="190" width="70" height="80" /><line x1="195" y1="190" x2="195" y2="270" />
+            <rect x="52" y="166" width="86" height="60" /><rect x="252" y="166" width="86" height="60" />
+            <line x1="400" y1="270" x2="400" y2="40" /><rect x="372" y="22" width="56" height="44" />
+            <rect x="60" y="246" width="40" height="24" fill="#141414" />
+          </svg>
+        </div>
+        <div class="half" id="s2-right">
+          <div class="who mono">Apple · IPO</div>
+          <div class="yr anton">1980</div>
+          <div class="tag mono">Archival · computer</div>
+          <svg class="art" id="s2-comp" viewBox="0 0 440 300" fill="none" stroke="#efe8dc" stroke-width="5" stroke-linejoin="round">
+            <line x1="0" y1="270" x2="440" y2="270" />
+            <rect x="120" y="30" width="200" height="160" rx="10" />
+            <rect x="146" y="54" width="148" height="104" rx="6" />
+            <text x="160" y="90" fill="#f96302" stroke="none" font-family="IBM Plex Mono" font-weight="600" font-size="20">]RUN</text>
+            <rect x="160" y="100" width="14" height="22" fill="#f96302" stroke="none" />
+            <path d="M80 270 L110 210 L330 210 L360 270 Z" />
+            <line x1="120" y1="236" x2="320" y2="236" /><line x1="104" y1="254" x2="336" y2="254" />
+          </svg>
+        </div>
+        <div id="s2-seam"></div>
+        <div id="s2-vs"><div class="pill serif">Home Depot <span class="ital">vs.</span> Apple</div></div>
+      </section>
+
+      <!-- ================= SHOT 3 · COMPARISON 00:10–00:21 ================= -->
+      <section id="s3" class="clip bg-ink" data-start="10" data-duration="11" data-track-index="1">
+        <div class="center-col" id="s3-head">
+          <div class="s3-h anton" id="s3-h1">$1,000 in each <span class="o">IPO</span></div>
+          <div class="s3-h anton" id="s3-h2">Home Depot <span class="o">beat</span> Apple</div>
+        </div>
+        <div class="cards">
+          <div class="card" id="card-hd"><div class="k mono">IPO 1981 · invested</div><div class="n anton">Home Depot</div><div class="v anton">$1,000</div><div class="stamp mono" id="hd-stamp">Winner</div></div>
+          <div class="card" id="card-ap"><div class="k mono">IPO 1980 · invested</div><div class="n anton">Apple</div><div class="v anton">$1,000</div></div>
+        </div>
+        <svg id="s3-chart" viewBox="0 0 900 520">
+          <defs><clipPath id="s3-clip"><rect id="s3-cliprect" x="0" y="0" width="0" height="520" /></clipPath></defs>
+          <g stroke="#3a3632" stroke-width="1">
+            <line x1="0" y1="130" x2="900" y2="130" /><line x1="0" y1="260" x2="900" y2="260" /><line x1="0" y1="390" x2="900" y2="390" />
+          </g>
+          <line x1="0" y1="500" x2="900" y2="500" stroke="#efe8dc" stroke-width="3" />
+          <g clip-path="url(#s3-clip)" fill="none" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+            <path id="s3-ap" stroke="#bdbdbd" />
+            <path id="s3-hd" stroke="#f96302" />
+          </g>
+          <circle id="s3-dot-ap" r="13" fill="#bdbdbd" />
+          <circle id="s3-dot-hd" r="15" fill="#f96302" stroke="#141414" stroke-width="4" />
+          <text x="0" y="490" fill="#9e978b" font-family="IBM Plex Mono" font-weight="600" font-size="18" letter-spacing="2">IPO</text>
+          <text x="900" y="490" text-anchor="end" fill="#9e978b" font-family="IBM Plex Mono" font-weight="600" font-size="18" letter-spacing="2">TODAY</text>
+          <rect id="s3-x" x="0" y="0" width="1" height="1" fill="none" />
+        </svg>
+        <div class="src mono" style="left: 90px; top: 690px">Illustrative · claim as stated in the episode</div>
+        <div id="s3-ticker" class="mono" data-layout-allow-overflow="true"></div>
+      </section>
+
+      <!-- ================= SHOT 4 · COMPOUNDING 00:21–00:31 ================= -->
+      <section id="s4" class="clip bg-ink" data-start="21" data-duration="10" data-track-index="1">
+        <svg id="s4-stores" viewBox="0 0 3200 220" fill="none" stroke="#5e564d" stroke-width="5" stroke-linejoin="round"></svg>
+        <svg id="s4-curve" viewBox="0 0 1080 1040" fill="none">
+          <path id="s4-path" stroke="#f96302" stroke-width="12" stroke-linecap="round" opacity="0.9" />
+          <path id="s4-glow" stroke="#f96302" stroke-width="40" stroke-linecap="round" opacity="0.18" />
+        </svg>
+        <div id="s4-chips"></div>
+        <div id="s4-year"><div class="box"><span class="lbl mono">Year</span><span id="s4-yearval">1981</span></div></div>
+        <div id="s4-kicker"><div class="mono">Every dividend</div><div class="serif">reinvested</div></div>
+        <div class="center-col" id="s4-main">
+          <div class="ital" id="s4-nearly">Nearly</div>
+          <div class="anton" id="s4-25">25%</div>
+          <div class="anton" id="s4-ayear">a year</div>
+        </div>
+        <div id="s4-45"><div class="b anton">For 45 years</div></div>
+      </section>
+
+      <!-- ================= SHOT 5 · NUMBER ONE 00:31–00:42 ================= -->
+      <section id="s5" class="clip bg-ink" data-start="31" data-duration="11" data-track-index="1">
+        <div id="s5a">
+          <div class="center-col" id="s5-head">
+            <div class="serif">The S&amp;P 500</div>
+            <div class="mono">Total return · IPO to today</div>
+          </div>
+          <div id="s5-window"><div id="s5-list"></div></div>
+          <div id="s5-hdrow"><span class="r mono">#?</span><span class="nm anton">Home Depot</span><span class="up mono">▲ Rising</span></div>
+        </div>
+        <div id="s5b-wrap">
+          <div class="center-col" id="s5-brand"><div class="anton">Home Depot</div></div>
+          <svg id="s5-seal" viewBox="0 0 560 560"><path id="s5-sealpath" fill="#f96302" /><circle cx="280" cy="280" r="214" fill="none" stroke="#141414" stroke-width="6" /><circle cx="280" cy="280" r="196" fill="none" stroke="#141414" stroke-width="2" /></svg>
+          <div id="s5-one" class="anton">#1</div>
+          <div class="center-col" id="s5-tr"><div class="anton">Total return</div></div>
+          <div class="center-col" id="s5-ipo"><div class="mono">Since its IPO</div></div>
+        </div>
+      </section>
+
+      <!-- ================= SHOT 6 · PAYOFF 00:42–00:49 ================= -->
+      <section id="s6" class="clip bg-ink" data-start="42" data-duration="7" data-track-index="1">
+        <svg id="s6-guil" viewBox="0 0 1920 1920" fill="none" stroke="#f96302" stroke-width="1.6"></svg>
+        <div id="s6-border"></div>
+        <div class="center-col" id="s6-from">
+          <div class="mono">Invested at the IPO</div>
+          <div class="anton">$1,000 <span class="o">→</span></div>
+        </div>
+        <div id="s6-count">$1,000</div>
+        <div class="center-col" id="s6-final">
+          <div class="anton" id="s6-17">$17</div>
+          <div class="anton" id="s6-mil">Million</div>
+        </div>
+        <div id="s6-dim"></div>
+        <div id="s6-flash"></div>
+      </section>
+
+      <!-- ================= SHOT 7 · STORY TEASE 00:49–00:58 (paper) ================= -->
+      <section id="s7" class="clip bg-paper" data-start="49" data-duration="9" data-track-index="1">
+        <div id="s7a">
+          <div class="center-col" id="s7-kick"><div class="ital">The unlikely story</div></div>
+          <div class="photo" id="ph-1"><div class="img"><svg viewBox="0 0 384 472" style="position:absolute;inset:0;width:100%;height:100%"><circle cx="192" cy="170" r="78" fill="#3b3128" opacity="0.85"/><path d="M40 472 C 50 330 120 270 192 270 C 264 270 334 330 344 472 Z" fill="#3b3128" opacity="0.85"/></svg></div><div class="cap2 mono">Bernie Marcus</div></div>
+          <div class="photo" id="ph-2"><div class="img"><svg viewBox="0 0 384 472" style="position:absolute;inset:0;width:100%;height:100%"><circle cx="192" cy="170" r="78" fill="#3b3128" opacity="0.85"/><path d="M40 472 C 50 330 120 270 192 270 C 264 270 334 330 344 472 Z" fill="#3b3128" opacity="0.85"/></svg></div><div class="cap2 mono">Arthur Blank</div></div>
+        </div>
+        <div id="s7b">
+          <div id="s7-letter">
+            <div class="mono" style="font-size: 22px">Personnel · Notice</div>
+            <div class="serif" style="font-size: 54px; margin-top: 26px">Re: Your employment</div>
+            <i class="ln" style="width: 92%"></i><i class="ln" style="width: 86%"></i><i class="ln" style="width: 95%"></i><i class="ln" style="width: 60%"></i>
+            <i class="ln" style="width: 90%; margin-top: 50px"></i><i class="ln" style="width: 82%"></i><i class="ln" style="width: 70%"></i>
+          </div>
+          <div class="center-col" id="s7-fired">
+            <div class="ital">They were</div>
+            <div class="anton" id="s7-stamp">Fired</div>
+          </div>
+        </div>
+        <div id="s7c">
+          <div id="s7-paper">
+            <div class="mast serif">The Business Page</div>
+            <div class="dl mono"><span>Illustration</span><span>Late 1970s</span></div>
+            <div class="hl serif">Two fired executives bet on a warehouse</div>
+            <div class="cols">
+              <div class="col"><i style="width: 100%"></i><i style="width: 92%"></i><i style="width: 97%"></i><i style="width: 88%"></i><i style="width: 95%"></i><i style="width: 70%"></i></div>
+              <div class="col"><i style="width: 96%"></i><i style="width: 100%"></i><i style="width: 85%"></i><i style="width: 93%"></i><i style="width: 90%"></i><i style="width: 60%"></i></div>
+            </div>
+          </div>
+          <div class="note" id="s7-n1"><div class="b anton">Little savings</div></div>
+          <div class="note" id="s7-n2"><div class="b or anton">No retirement fund</div></div>
+        </div>
+      </section>
+
+      <!-- ================= SHOT 8 · BIG IDEA 00:58–01:04 ================= -->
+      <section id="s8" class="clip bg-paper" data-start="58" data-duration="6" data-track-index="1">
+        <svg id="s8-aisle" viewBox="0 0 1080 1920" fill="none" stroke="#c9bfae" stroke-width="4"></svg>
+        <div class="center-col" id="s8-kick"><div class="ital">Their <span class="o">“crazy”</span> idea</div></div>
+        <div id="s8-cam">
+          <svg viewBox="0 0 1000 760" fill="none" stroke="#141414" stroke-width="5" stroke-linejoin="round">
+            <g id="s8-wh">
+              <path d="M20 700 L20 250 L500 120 L980 250 L980 700" />
+              <line x1="20" y1="250" x2="980" y2="250" />
+              <rect x="20" y="250" width="960" height="70" fill="#f96302" />
+              <text x="500" y="302" text-anchor="middle" fill="#141414" stroke="none" font-family="Anton" font-size="46" letter-spacing="6">HOME IMPROVEMENT WAREHOUSE</text>
+              <g stroke-width="4"><rect x="300" y="560" width="110" height="140" /><rect x="440" y="560" width="110" height="140" /><rect x="580" y="560" width="110" height="140" /><rect x="720" y="560" width="110" height="140" /></g>
+              <g id="s8-cells" stroke="none"></g>
+            </g>
+            <line x1="0" y1="700" x2="1000" y2="700" />
+            <g id="s8-store" stroke-width="2.4">
+              <rect x="70" y="612" width="120" height="88" fill="#efe8dc" />
+              <path d="M62 612 L198 612 L190 630 L70 630 Z" fill="#f96302" />
+              <text x="130" y="660" text-anchor="middle" fill="#141414" stroke="none" font-family="Anton" font-size="18" letter-spacing="1">HARDWARE</text>
+              <rect x="114" y="668" width="32" height="32" />
+            </g>
+            <g font-family="IBM Plex Mono" font-weight="600" font-size="20" stroke="none" fill="#141414" letter-spacing="2">
+              <text id="s8-l1" x="130" y="740" text-anchor="middle">TYPICAL STORE</text>
+            </g>
+          </svg>
+        </div>
+        <div class="center-col" id="s8-big">
+          <div class="anton" id="s8-5">5×</div>
+          <div class="anton" id="s8-bigger">Bigger</div>
+        </div>
+      </section>
+
+      <!-- ================= SHOT 9 · END CARD 01:04–01:07 ================= -->
+      <section id="s9" class="clip" data-start="64" data-duration="3" data-track-index="1">
+        <div id="s9-slide" class="bg-orange">
+          <div id="s9-stripes"></div>
+          <div class="center-col" id="s9-live"><div class="b anton"><span class="l1">Full episode</span><span class="l2">live</span></div></div>
+          <div class="center-col" id="s9-title">
+                        <div class="serif">Acquired:</div><div class="serif ital t2">Home Depot</div>
+          </div>
+          <div class="center-col" id="s9-cta"><div class="b mono">On YouTube &amp; all podcast apps</div></div>
+          <div id="s9-logo"><div class="lg mono"><i></i>Acquired</div></div>
+        </div>
+      </section>
+
+      <!-- ================= HOST CUT-BACKS (reaction beats) ================= -->
+      <section id="h2" class="clip host" data-start="19.3" data-duration="1.0" data-track-index="2">
+        <div class="host-frame" id="h2-frame"></div>
+      </section>
+      <section id="h3" class="clip host" data-start="35.6" data-duration="1.3" data-track-index="2">
+        <div class="host-frame" id="h3-frame"></div>
+      </section>
+
+      <!-- ================= GLOBAL OVERLAYS ================= -->
+      <div id="overlays" class="clip" data-start="0" data-duration="67" data-track-index="9" style="z-index: 85; pointer-events: none">
+        <svg id="grain" viewBox="0 0 1480 2320"><filter id="gf"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" stitchTiles="stitch" /><feColorMatrix type="saturate" values="0" /></filter><rect width="1480" height="2320" filter="url(#gf)" /></svg>
+        <div id="vignette"></div>
+      </div>
+      <div id="captions" class="clip" data-start="0" data-duration="67" data-track-index="10"></div>
+    </div>
+
+    <script>
+      /* ------------------------------------------------------------------
+         TIMING — one source of truth (mirrored in ae/build_home_depot_reel.jsx)
+         ------------------------------------------------------------------ */
+      const CAPTIONS = [
+        [0.15, 1.7, "So here’s a fun stat."],
+        [4.1, 6.4, "Home Depot went public in *1981*,"],
+        [6.4, 9.9, "one year after *Apple* Computer."],
+        [10.1, 12.2, "And astonishingly, if you put"],
+        [12.2, 14.4, "$1,000 into Home Depot and *Apple*"],
+        [14.4, 16.4, "at their IPOs and held them"],
+        [16.4, 17.9, "until today, your investment"],
+        [17.9, 19.4, "in Home Depot would beat"],
+        [19.4, 21.0, "your investment in *Apple*."],
+        [21.1, 23.2, "And if you reinvested the dividends"],
+        [23.2, 25.0, "that it paid out,"],
+        [25.0, 27.6, "it compounded at nearly *25%*"],
+        [27.6, 31.0, "per year for 45 years."],
+        [31.1, 33.0, "That makes it the *number one*"],
+        [33.0, 35.0, "performing stock in the S&P 500"],
+        [35.0, 37.4, "in total investment return"],
+        [37.4, 39.6, "from the day it went public"],
+        [39.6, 42.0, "to today."],
+        [42.1, 43.5, "So that $1,000 invested"],
+        [43.5, 45.6, "in the IPO would be worth"],
+        [46.0, 49.0, "about *$17 million* today."],
+        [49.1, 50.6, "Today, we will tell the story"],
+        [50.6, 51.6, "of how it happened."],
+        [51.6, 52.9, "It is the unlikely story"],
+        [52.9, 54.0, "of two guys who got"],
+        [54.0, 55.6, "unceremoniously *fired* from their old jobs,"],
+        [55.6, 56.8, "with little savings"],
+        [56.8, 58.0, "and no retirement funds…"],
+        [58.1, 59.3, "…who then had a revolutionary idea"],
+        [59.3, 60.6, "to build a home-improvement store"],
+        [60.6, 61.7, "in giant warehouses —"],
+        [61.7, 63.0, "*five times* more square footage"],
+        [63.0, 64.4, "than any other hardware store."],
+      ];
+
+      /* ---------- deterministic DOM builders (run once, before the timeline) ---------- */
+      const HOST_SVG = `
+        <div class="host-bg"></div><div class="host-rim"></div>
+        <svg class="host-fig" viewBox="0 0 800 1000">
+          <path d="M400 360 C 300 360 250 300 250 220 C 250 120 320 60 400 60 C 480 60 550 120 550 220 C 550 300 500 360 400 360 Z" fill="#0b0908"/>
+          <path d="M120 1000 C 140 600 260 470 400 470 C 540 470 660 600 680 1000 Z" fill="#0b0908"/>
+          <rect x="370" y="340" width="60" height="140" fill="#0b0908"/>
+          <path d="M232 230 C 232 90 568 90 568 230" stroke="#2c2420" stroke-width="26" fill="none"/>
+          <rect x="212" y="200" width="44" height="92" rx="18" fill="#2c2420"/><rect x="544" y="200" width="44" height="92" rx="18" fill="#2c2420"/>
+          <path d="M800 140 L 640 330" stroke="#3a2e27" stroke-width="16"/>
+          <rect x="560" y="300" width="90" height="170" rx="40" transform="rotate(-22 605 385)" fill="#f96302"/>
+          <path d="M560 175 C 610 150 650 190 640 240" stroke="#f96302" stroke-width="6" fill="none" opacity="0.7"/>
+        </svg>
+        <div class="rec mono"><i></i>Host cam</div>
+        <div class="host-tag mono"><span class="a">Ben</span><span class="b">Acquired</span></div>`;
+      ["s1-frame", "h2-frame", "h3-frame"].forEach((id) => (document.getElementById(id).innerHTML = HOST_SVG));
+
+      const CHAPTERS = { s2: "02 · The setup", s3: "03 · The comparison", s4: "04 · Compounding", s5: "05 · Number one", s6: "06 · The payoff", s7: "07 · The story", s8: "08 · The big idea" };
+      Object.entries(CHAPTERS).forEach(([id, label]) => {
+        const sec = document.getElementById(id);
+        const m = document.createElement("div");
+        m.className = "masthead mono " + (sec.classList.contains("bg-paper") ? "on-paper" : "on-ink");
+        m.innerHTML = `<span class="pg"><i class="dot"></i>Acquired</span><span>${label}</span><span>Home Depot</span>`;
+        sec.appendChild(m);
+      });
+
+      // captions — one element per line, centered, emphasis words in orange
+      const capRoot = document.getElementById("captions");
+      const capEls = CAPTIONS.map(([s, e, txt], i) => {
+        const d = document.createElement("div");
+        d.className = "cap";
+        d.id = "cap-" + i;
+        const html = txt.replace(/\*(.+?)\*/g, "<em>$1</em>");
+        d.innerHTML = `<span class="box">${html}</span>`;
+        capRoot.appendChild(d);
+        return d;
+      });
+
+      // S3 chart paths (illustrative curves: Home Depot crosses Apple at x = 0.9)
+      const W3 = 900, H3 = 500, TOP3 = 40;
+      const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+      const apY = (x) => 0.944 * Math.pow(x, 0.85) + 0.035 * Math.sin(x * 23) * (1 - smooth(0.55, 0.75, x));
+      const hdY = (x) => Math.pow(x, 1.4) + 0.025 * Math.sin(x * 31 + 1) * (1 - smooth(0.5, 0.72, x));
+      const toPt = (x, y) => [x * W3, H3 - y * (H3 - TOP3)];
+      const pathOf = (fn) => { let d = ""; for (let i = 0; i <= 180; i++) { const x = i / 180; const [px, py] = toPt(x, fn(x)); d += (i ? "L" : "M") + px.toFixed(1) + " " + py.toFixed(1); } return d; };
+      document.getElementById("s3-ap").setAttribute("d", pathOf(apY));
+      document.getElementById("s3-hd").setAttribute("d", pathOf(hdY));
+      document.getElementById("s3-ticker").innerHTML = Array.from({ length: 16 }, (_, i) => (i % 2 ? "<span>AAPL ▲ IPO 1980</span><span>$1,000 invested</span>" : "<span><b>HD ▲</b> IPO 1981</span><span>$1,000 invested</span>")).join("");
+
+      // S4 compound curve, year chips and storefront progression
+      (() => {
+        let d = "";
+        for (let i = 0; i <= 120; i++) { const x = i / 120; const y = (Math.pow(1.25, x * 45) - 1) / (Math.pow(1.25, 45) - 1); d += (i ? "L" : "M") + (40 + x * 1000).toFixed(1) + " " + (1000 - Math.pow(y, 0.32) * 960).toFixed(1); }
+        document.getElementById("s4-path").setAttribute("d", d);
+        document.getElementById("s4-glow").setAttribute("d", d);
+        const chips = document.getElementById("s4-chips");
+        for (let i = 0; i < 18; i++) { const c = document.createElement("div"); c.className = "chip mono"; c.id = "chip-" + i; c.textContent = "+25%"; c.style.left = (110 + ((i * 337) % 820)) + "px"; c.style.top = "1180px"; chips.appendChild(c); }
+        // storefronts get bigger from left (1981) to right (today)
+        let svg = "", x = 40;
+        for (let i = 0; i < 9; i++) { const w = 150 + i * 40, h = 70 + i * 14; svg += `<g><rect x="${x}" y="${210 - h}" width="${w}" height="${h}"/><rect x="${x}" y="${210 - h}" width="${w}" height="${Math.max(16, h * 0.22)}" fill="#5e564d"/><rect x="${x + w / 2 - 18}" y="${210 - 40}" width="36" height="40"/></g>`; x += w + 70; }
+        document.getElementById("s4-stores").innerHTML = `<line x1="0" y1="210" x2="3200" y2="210"/>` + svg;
+      })();
+
+      // S5 ranking rows (anonymised — no invented returns)
+      (() => {
+        const list = document.getElementById("s5-list");
+        let html = "";
+        for (let i = 0; i < 40; i++) { const r = 500 - i * 12; html += `<div class="row"><span class="r mono">#${r}</span><span class="nm" style="width:${180 + ((i * 97) % 220)}px"></span><span class="bar" style="width:${60 + ((i * 53) % 160)}px"></span></div>`; }
+        list.innerHTML = html;
+        // serrated seal
+        let d = ""; const n = 36;
+        for (let i = 0; i < n * 2; i++) { const a = (i / (n * 2)) * Math.PI * 2; const r = i % 2 ? 252 : 278; d += (i ? "L" : "M") + (280 + Math.cos(a) * r).toFixed(1) + " " + (280 + Math.sin(a) * r).toFixed(1); }
+        document.getElementById("s5-sealpath").setAttribute("d", d + "Z");
+      })();
+
+      // S6 guilloche (stock-certificate rosette)
+      (() => {
+        let s = "";
+        for (let k = 0; k < 14; k++) { let d = ""; for (let i = 0; i <= 720; i++) { const a = (i / 720) * Math.PI * 2; const r = 420 + k * 34 + 46 * Math.sin(a * 18 + k * 0.5); d += (i ? "L" : "M") + (960 + Math.cos(a) * r).toFixed(1) + " " + (960 + Math.sin(a) * r).toFixed(1); } s += `<path d="${d}Z"/>`; }
+        document.getElementById("s6-guil").innerHTML = s;
+      })();
+
+      // S8 warehouse floor cells (5 store footprints) + towering aisle backdrop
+      (() => {
+        let c = "";
+        for (let i = 0; i < 5; i++) c += `<rect class="cell" id="cell-${i}" x="${40 + i * 186}" y="340" width="176" height="190" fill="#f96302" opacity="0"/>`;
+        document.getElementById("s8-cells").innerHTML = c;
+        let a = "";
+        for (let i = 0; i < 12; i++) { const y = 300 + i * 110; a += `<line x1="0" y1="${y}" x2="420" y2="${960 + (y - 960) * 0.25}"/><line x1="1080" y1="${y}" x2="660" y2="${960 + (y - 960) * 0.25}"/>`; }
+        for (let i = 0; i < 8; i++) { const x = i * 55; a += `<line x1="${x}" y1="${300 - x * 0.6}" x2="${x}" y2="${1620 + x * 0.6}"/><line x1="${1080 - x}" y1="${300 - x * 0.6}" x2="${1080 - x}" y2="${1620 + x * 0.6}"/>`; }
+        document.getElementById("s8-aisle").innerHTML = a;
+      })();
+
+      /* ------------------------------------------------------------------
+         TIMELINE
+         ------------------------------------------------------------------ */
+      const tl = gsap.timeline({ paused: true });
+      const E = { out: "power3.out", slam: "expo.out", snap: "power4.out", in: "power2.in" };
+
+      // ---------- captions (pop on, hard cut off) ----------
+      CAPTIONS.forEach(([s, e], i) => {
+        const el = capEls[i];
+        tl.fromTo(el, { opacity: 0, y: 14, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.14, ease: E.out }, s);
+        tl.set(el, { opacity: 0 }, e);
+      });
+
+      // ---------- S1 HOOK 0–4 ----------
+      tl.fromTo("#s1-frame", { scale: 1.0 }, { scale: 1.16, duration: 0.28, ease: E.snap }, 0.05); // fast punch-in on first word
+      tl.to("#s1-frame", { scale: 1.22, duration: 3.6, ease: "none" }, 0.33);
+      tl.fromTo("#s1-a", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3, ease: E.out }, 0.7);
+      tl.fromTo("#s1-b", { opacity: 0, scale: 1.45 }, { opacity: 1, scale: 1, duration: 0.22, ease: E.slam }, 1.0); // lands with 00:01 impact
+      tl.fromTo("#s1-bar", { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: E.snap }, 1.08);
+      tl.fromTo("#s1-text", { x: 0 }, { x: -6, duration: 0.05, yoyo: true, repeat: 3, ease: "none" }, 1.0);
+
+      // ---------- S2 SETUP 4–10 (split wipe < 12 frames) ----------
+      tl.fromTo("#s2-left", { xPercent: -100 }, { xPercent: 0, duration: 0.33, ease: E.snap }, 4.0);
+      tl.fromTo("#s2-right", { xPercent: 100 }, { xPercent: 0, duration: 0.33, ease: E.snap }, 4.0);
+      tl.fromTo("#s2-seam", { scaleY: 0 }, { scaleY: 1, duration: 0.3, ease: E.snap }, 4.12);
+      tl.fromTo("#s2-vs", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.3, ease: E.out }, 4.3);
+      tl.fromTo("#s2-left .yr", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.35, ease: E.slam }, 4.9); // "1981"
+      tl.fromTo("#s2-right .yr", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.35, ease: E.slam }, 6.9); // "Apple"
+      tl.fromTo("#s2-store", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: E.out }, 4.5);
+      tl.fromTo("#s2-comp", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: E.out }, 6.6);
+      tl.fromTo(["#s2-store", "#s2-comp"], { scale: 1 }, { scale: 1.08, duration: 5, ease: "none" }, 5.0);
+
+      // ---------- S3 COMPARISON 10–21 ----------
+      tl.fromTo("#s3-h1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3, ease: E.out }, 10.3);
+      tl.fromTo("#card-hd", { opacity: 0, x: -80 }, { opacity: 1, x: 0, duration: 0.4, ease: E.snap }, 10.4);
+      tl.fromTo("#card-ap", { opacity: 0, x: 80 }, { opacity: 1, x: 0, duration: 0.4, ease: E.snap }, 10.55);
+      tl.fromTo("#s3-cliprect", { attr: { width: 0 } }, { attr: { width: 900 }, duration: 8.0, ease: "none" }, 11.0);
+      tl.fromTo("#s3-ticker", { x: 0 }, { x: -1800, duration: 11, ease: "none" }, 10.0);
+      // reveal held until the spoken "Home Depot" (~18.0); crossover impact at 18.2
+      tl.to("#s3-h1", { opacity: 0, y: -24, duration: 0.15 }, 17.9);
+      tl.fromTo("#s3-h2", { opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1, duration: 0.25, ease: E.slam }, 18.0);
+      tl.fromTo("#hd-stamp", { opacity: 0, scale: 2, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.25, ease: E.slam }, 18.2);
+      tl.to("#card-ap", { opacity: 0.45, duration: 0.3 }, 18.3);
+      tl.fromTo("#s3-dot-hd", { attr: { r: 15 } }, { attr: { r: 26 }, duration: 0.12, yoyo: true, repeat: 1 }, 18.2);
+
+      // ---------- S4 COMPOUNDING 21–31 ----------
+      tl.fromTo("#s4-path, #s4-glow", { strokeDasharray: 3000, strokeDashoffset: 3000 }, { strokeDashoffset: 0, duration: 9.4, ease: "power2.in" }, 21.0);
+      tl.fromTo("#s4-stores", { x: 0, opacity: 0 }, { x: -2100, opacity: 1, duration: 9.6, ease: "power1.in" }, 21.0);
+      tl.fromTo("#s4-year", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.3 }, 21.1);
+      tl.fromTo("#s4-kicker", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 21.6);
+      tl.to("#s4-kicker", { opacity: 0, duration: 0.2 }, 25.8);
+      tl.fromTo("#s4-nearly", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3, ease: E.out }, 25.9);
+      tl.fromTo("#s4-25", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, 26.4); // "25%" synced to VO
+      tl.fromTo("#s4-ayear", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3, ease: E.out }, 27.4);
+      tl.fromTo("#s4-45", { opacity: 0, scaleX: 0.2 }, { opacity: 1, scaleX: 1, duration: 0.3, ease: E.snap }, 28.4); // "for 45 years"
+      tl.fromTo("#s4-main", { scale: 1 }, { scale: 1.04, duration: 4.6, ease: "none" }, 26.4);
+      // accelerating "+25%" chips (one per few years) flying up behind the type
+      for (let i = 0; i < 18; i++) {
+        const st = 21.4 + 9.0 * Math.pow(i / 18, 0.6);
+        tl.fromTo("#chip-" + i, { opacity: 0, y: 0 }, { opacity: 0.8, y: -760, duration: 1.6 - i * 0.05, ease: "power1.in" }, st);
+        tl.to("#chip-" + i, { opacity: 0, duration: 0.25 }, st + 1.35 - i * 0.05);
+      }
+
+      // ---------- S5 NUMBER ONE 31–42 ----------
+      tl.fromTo("#s5-head", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3 }, 31.1);
+      tl.fromTo("#s5-list", { y: 0, filter: "blur(0px)" }, { y: -3000, filter: "blur(3px)", duration: 3.8, ease: "power2.in" }, 31.0);
+      tl.fromTo("#s5-hdrow", { y: 760, opacity: 0 }, { y: 664, opacity: 1, duration: 0.3, ease: E.out }, 32.6);
+      tl.to("#s5-hdrow", { y: 0, duration: 1.4, ease: "power3.inOut" }, 33.6); // rises to the top of the list
+      tl.to("#s5-hdrow .r", { opacity: 0, duration: 0.1 }, 34.9);
+      tl.set("#s5b-wrap", { opacity: 0 }, 31.0);
+      // host cut-back 35.6–36.9, then upward move into the badge
+      tl.set("#s5a", { opacity: 0 }, 36.9);
+      tl.set("#s5b-wrap", { opacity: 1 }, 36.9);
+      tl.fromTo("#s5b-wrap", { y: 700 }, { y: 0, duration: 0.42, ease: E.snap }, 36.9);
+      tl.fromTo("#s5-seal", { scale: 0.3, rotation: -90 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(1.4)" }, 37.15);
+      tl.to("#s5-seal", { rotation: 40, duration: 4.5, ease: "none" }, 37.65);
+      tl.fromTo("#s5-one", { opacity: 0, scale: 1.6 }, { opacity: 1, scale: 1, duration: 0.25, ease: E.slam }, 37.3);
+      tl.fromTo("#s5-tr", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.3, ease: E.out }, 37.6);
+      tl.fromTo("#s5-ipo", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: E.out }, 38.0);
+
+      // ---------- S6 PAYOFF 42–49 ----------
+      tl.fromTo("#s6-guil", { rotation: 0, scale: 1 }, { rotation: 12, scale: 1.12, duration: 7, ease: "none" }, 42.0);
+      tl.fromTo("#s6-from", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3 }, 42.1);
+      gsap.set("#s6-count", { opacity: 0, filter: "blur(0px)" });
+      tl.to("#s6-count", { opacity: 1, duration: 0.2 }, 42.4);
+      tl.to("#s6-dim", { opacity: 0.45, duration: 0.3 }, 45.6);          // music drop
+      tl.to("#s6-count", { filter: "blur(6px)", duration: 0.35, ease: E.in }, 45.6);
+      tl.set("#s6-count", { opacity: 0 }, 46.0);
+      tl.set("#s6-dim", { opacity: 0 }, 46.0);
+      tl.set("#s6-flash", { opacity: 0.85 }, 46.0);
+      tl.to("#s6-flash", { opacity: 0, duration: 0.45, ease: "power2.out" }, 46.01); // bass hit
+      tl.fromTo("#s6-final", { opacity: 0, scale: 1.35 }, { opacity: 1, scale: 1, duration: 0.3, ease: E.slam }, 46.0);
+      tl.to("#s6-final", { scale: 1.05, duration: 2.7, ease: "none" }, 46.3);
+      tl.to("#s6-from", { opacity: 0.35, duration: 0.3 }, 46.0);
+
+      // ---------- S7 STORY 49–58 (slower cutting, longest holds) ----------
+      gsap.set("#s7a", { opacity: 0, scale: 1 });
+      tl.to("#s7a", { opacity: 1, duration: 0.6, ease: "power1.out" }, 49.0);
+      tl.fromTo("#s7-kick", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8 }, 49.4);
+      tl.fromTo("#ph-1", { opacity: 0, y: 60, rotation: -6 }, { opacity: 1, y: 0, rotation: -3, duration: 1.0, ease: "power2.out" }, 49.2);
+      tl.fromTo("#ph-2", { opacity: 0, y: 60, rotation: 6 }, { opacity: 1, y: 0, rotation: 3, duration: 1.0, ease: "power2.out" }, 49.7);
+      tl.to("#s7a", { scale: 1.07, duration: 4.9, ease: "none" }, 49.0);
+      tl.set("#s7a", { opacity: 0 }, 53.8);
+      tl.set("#s7b", { opacity: 0 }, 49.0);
+      tl.set("#s7b", { opacity: 1 }, 53.8);
+      tl.fromTo("#s7-letter", { y: 60, rotation: 2 }, { y: 0, rotation: -1.5, duration: 1.8, ease: "power2.out" }, 53.8);
+      tl.fromTo("#s7-fired .ital", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3 }, 54.3);
+      tl.fromTo("#s7-stamp", { opacity: 0, scale: 2.2, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.22, ease: E.slam }, 54.9); // "fired"
+      tl.set("#s7b", { opacity: 0 }, 55.6);
+      tl.set("#s7c", { opacity: 0 }, 49.0);
+      tl.set("#s7c", { opacity: 1 }, 55.6);
+      tl.fromTo("#s7-paper", { scale: 1.1, rotation: 2 }, { scale: 1.0, rotation: -1, duration: 2.4, ease: "power2.out" }, 55.6);
+      tl.fromTo("#s7-n1", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.3, ease: E.out }, 55.7);
+      tl.fromTo("#s7-n2", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.3, ease: E.out }, 56.8);
+
+      // ---------- S8 BIG IDEA 58–64 ----------
+      tl.fromTo("#s8-kick", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3 }, 58.2);
+      tl.fromTo("#s8-cam", { scale: 3.3, x: 370, y: -300 }, { scale: 3.1, x: 370, y: -300, duration: 1.4, ease: "none" }, 58.0); // tight on the small store
+      tl.to("#s8-cam", { scale: 1, x: 0, y: 0, duration: 1.2, ease: "power3.inOut" }, 59.4);
+      tl.fromTo("#s8-wh", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 59.5); // warehouse emerges as we pull out                     // rapid zoom-out to the warehouse
+      for (let i = 0; i < 5; i++) tl.fromTo("#cell-" + i, { attr: { opacity: 0 } }, { attr: { opacity: 0.85 }, duration: 0.12 }, 60.7 + i * 0.12);
+      tl.to("#s8-kick", { opacity: 0, duration: 0.15 }, 61.6);
+      tl.to("#s8-cam", { opacity: 0.12, duration: 0.2 }, 61.6);
+      tl.fromTo("#s8-aisle", { opacity: 0, scale: 1 }, { opacity: 1, scale: 1.25, duration: 2.4, ease: "none" }, 61.6);
+      tl.fromTo("#s8-5", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.5)" }, 61.7); // "five times"
+      tl.fromTo("#s8-bigger", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.25, ease: E.slam }, 61.95);
+      tl.fromTo("#s8-big", { scale: 1 }, { scale: 1.05, duration: 2.0, ease: "none" }, 62.0);
+
+      // ---------- S9 END CARD 64–67 (animate up from bottom; keep moving) ----------
+      tl.fromTo("#s9-slide", { y: 1920 }, { y: 0, duration: 0.4, ease: E.snap }, 64.0);
+      tl.fromTo("#s9-stripes", { x: 0, y: 0 }, { x: -96, y: -137, duration: 3, ease: "none" }, 64.0);
+      tl.fromTo("#s9-live", { scale: 1.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.22, ease: E.slam }, 64.3); // final impact
+      tl.fromTo("#s9-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3 }, 64.45);
+      tl.fromTo("#s9-cta", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3 }, 64.6);
+      tl.fromTo("#s9-logo", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 64.7);
+      tl.fromTo("#s9-live, #s9-title", { scale: 1 }, { scale: 1.03, duration: 2.3, ease: "none" }, 64.7);
+
+      // ---------- host cut-backs: quick reaction punch-ins ----------
+      tl.fromTo("#h2-frame", { scale: 1.12 }, { scale: 1.2, duration: 1.0, ease: "none" }, 19.3);
+      tl.fromTo("#h3-frame", { scale: 1.05 }, { scale: 1.16, duration: 1.3, ease: "power1.out" }, 35.6);
+
+      // ---------- procedural driver: counters, chart heads, grain ----------
+      const yearEl = document.getElementById("s4-yearval");
+      const countEl = document.getElementById("s6-count");
+      const dotHD = document.getElementById("s3-dot-hd");
+      const dotAP = document.getElementById("s3-dot-ap");
+      const grain = document.getElementById("grain");
+      const fmt = (v) => "$" + Math.round(v).toLocaleString("en-US");
+      tl.to({ p: 0 }, {
+        p: 1, duration: 67, ease: "none",
+        onUpdate() {
+          const t = tl.time();
+          // chart heads follow the reveal (11.0 → 19.0)
+          const x = Math.min(1, Math.max(0, (t - 11.0) / 8.0));
+          const [hx, hy] = toPt(x, hdY(x)), [ax, ay] = toPt(x, apY(x));
+          dotHD.setAttribute("cx", hx); dotHD.setAttribute("cy", hy);
+          dotAP.setAttribute("cx", ax); dotAP.setAttribute("cy", ay);
+          // calendar racing 1981 → 2026 (accelerating)
+          const yp = Math.min(1, Math.max(0, (t - 21.2) / 9.3));
+          yearEl.textContent = String(1981 + Math.round(45 * Math.pow(yp, 1.6)));
+          // $1,000 → $17,000,000 lands on the bass hit (46.0)
+          const cp = Math.min(1, Math.max(0, (t - 42.5) / 3.45));
+          countEl.textContent = fmt(1000 * Math.pow(17000, Math.pow(cp, 2.2)));
+          // film grain jitter (12 fps, deterministic)
+          const g = Math.floor(t * 12);
+          grain.style.transform = `translate(${((g * 73) % 160) - 80}px, ${((g * 151) % 160) - 80}px)`;
+        },
+      }, 0);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
