@@ -11,7 +11,7 @@
   :root{
     --bg-1:#fdfbf4; --bg-2:#fbf6ea; --bg-3:#f7ead2;
     --ink:#1b1b1b; --muted:#5f5a52;
-    --amber:#f5a623; --amber-deep:#e8951a; --brown:#7a5c43;
+    --amber:#c9966a; --amber-deep:#b07f55; --brown:#7a5c43;
     --rule:rgba(122,92,67,.18);
     --panel:rgba(255,252,245,.72);
     --btn2-bg:rgba(255,255,255,.6); --btn2-bd:rgba(27,27,27,.16);
@@ -22,21 +22,21 @@
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg-1:#120e0a; --bg-2:#0d0a07; --bg-3:#080604;
+      --bg-1:#15150f; --bg-2:#15150f; --bg-3:#15150f;
       --ink:#fbf6ea; --muted:#b9ad9b;
-      --rule:rgba(245,190,110,.16);
-      --panel:rgba(18,14,10,.62);
+      --rule:rgba(201,150,106,.16);
+      --panel:rgba(21,21,15,.62);
       --btn2-bg:rgba(255,255,255,.04); --btn2-bd:rgba(251,246,234,.2);
-      --tag-bg:rgba(18,14,10,.75);
+      --tag-bg:rgba(21,21,15,.75);
     }
   }
   :root[data-theme="dark"]{
-    --bg-1:#120e0a; --bg-2:#0d0a07; --bg-3:#080604;
+    --bg-1:#15150f; --bg-2:#15150f; --bg-3:#15150f;
     --ink:#fbf6ea; --muted:#b9ad9b;
-    --rule:rgba(245,190,110,.16);
-    --panel:rgba(18,14,10,.62);
+    --rule:rgba(201,150,106,.16);
+    --panel:rgba(21,21,15,.62);
     --btn2-bg:rgba(255,255,255,.04); --btn2-bd:rgba(251,246,234,.2);
-    --tag-bg:rgba(18,14,10,.75);
+    --tag-bg:rgba(21,21,15,.75);
   }
   html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
   *{margin:0;padding:0;box-sizing:border-box}
@@ -74,7 +74,7 @@
   .lede{margin-top:26px;font-size:clamp(16px,1.45vw,18px);line-height:1.65;color:var(--muted);max-width:470px}
   .ctas{margin-top:36px;display:flex;gap:14px;flex-wrap:wrap}
   .btn{display:inline-flex;align-items:center;gap:10px;padding:15px 26px;border-radius:999px;font:600 15px/1 'Poppins',system-ui,sans-serif;text-decoration:none;cursor:pointer;border:0}
-  .btn.primary{color:#1b1b1b;background:linear-gradient(135deg,var(--amber),var(--amber-deep));box-shadow:0 10px 30px -8px rgba(232,149,26,.55)}
+  .btn.primary{color:#1b1b1b;background:linear-gradient(135deg,var(--amber),var(--amber-deep));box-shadow:0 10px 30px -8px rgba(201,150,106,.45)}
   .btn.primary:hover{filter:brightness(1.05)}
   .btn.secondary{color:var(--ink);background:var(--btn2-bg);border:1px solid var(--btn2-bd);backdrop-filter:blur(6px)}
   .btn:focus-visible,.toggle:focus-visible,.links a:focus-visible{outline:2px solid var(--amber-deep);outline-offset:3px}
@@ -227,8 +227,8 @@ const TLE_URL = 'data/satellites.txt';
   const RE = 6371;                                  // Earth radius, km
   const ALT_EXAGGERATION = 2.6;                     // spreads the shells out so they read on screen
   const dispR = r => 1 + Math.max(r - RE, 0) / RE * ALT_EXAGGERATION;
-  const DARK_COLORS  = [0xf5a623, 0xf5a623, 0xe8951a, 0xffc864];
-  const LIGHT_COLORS = [0xe8951a, 0xf5a623, 0xc98a2a, 0x7a5c43];
+  const DARK_COLORS  = [0xc9966a, 0xc9966a, 0xb07f55, 0xdcb48c];
+  const LIGHT_COLORS = [0xb07f55, 0xc9966a, 0xa8784f, 0x7a5c43];
 
   let N = 0, recs = [], tone, P, Q, W, T, spin, spinRate, scl, shards = null;
   const shardGeo = new THREE.BoxGeometry(0.03, 0.0035, 0.012);      // a flat little panel
