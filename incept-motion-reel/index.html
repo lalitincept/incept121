@@ -15,11 +15,11 @@
 <body>
 <canvas id="c" width="1920" height="1080"></canvas>
 <script>
-/* Incept 15-second motion reel.
+/* Incept 30-second brand film.
    Everything is a pure function of time: render(t) draws the frame at t seconds.
    Open the page to watch it loop; scripts/render.mjs calls render(t) frame by frame. */
 
-const W = 1920, H = 1080, DURATION = 15;
+const W = 1920, H = 1080, DURATION = 30;
 const cvs = document.getElementById('c');
 const ctx = cvs.getContext('2d');
 const FONT = "'Inter', 'Inter Display', system-ui, sans-serif";
@@ -27,8 +27,8 @@ const MONO = "'JetBrains Mono', 'DejaVu Sans Mono', monospace";
 
 // Palette taken from inceptds.com
 const C = {
-  ink: '#15150f', ink2: '#201f19', line: '#3b3b33',
-  cream: '#f1efe6', sand: '#d7bca2', blue: '#98b7e1', coral: '#e1a598',
+  ink: '#15150f', ink2: '#201f19', line: '#3b3b33', tile: '#faf8f2',
+  cream: '#f1efe6', sand: '#d7bca2', sandDeep: '#a8835f', blue: '#98b7e1', coral: '#e1a598',
 };
 
 // ---------- math & easing ----------
@@ -37,34 +37,37 @@ const lerp = (a, b, p) => a + (b - a) * p;
 const prog = (t, a, b) => clamp((t - a) / (b - a));
 const E = {
   outCubic: p => 1 - Math.pow(1 - p, 3),
+  outQuint: p => 1 - Math.pow(1 - p, 5),
+  inCubic: p => p * p * p,
   inOutCubic: p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2,
-  outExpo: p => p === 1 ? 1 : 1 - Math.pow(2, -10 * p),
-  inExpo: p => p === 0 ? 0 : Math.pow(2, 10 * p - 10),
-  inOutExpo: p => p === 0 ? 0 : p === 1 ? 1 : p < .5 ? Math.pow(2, 20 * p - 10) / 2 : (2 - Math.pow(2, -20 * p + 10)) / 2,
-  inOutQuart: p => p < .5 ? 8 * p ** 4 : 1 - Math.pow(-2 * p + 2, 4) / 2,
-  outBack: p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); },
-  inBack: p => { const c1 = 1.70158, c3 = c1 + 1; return c3 * p * p * p - c1 * p * p; },
-  outBounce: p => {
-    const n1 = 7.5625, d1 = 2.75;
-    if (p < 1 / d1) return n1 * p * p;
-    if (p < 2 / d1) return n1 * (p -= 1.5 / d1) * p + .75;
-    if (p < 2.5 / d1) return n1 * (p -= 2.25 / d1) * p + .9375;
-    return n1 * (p -= 2.625 / d1) * p + .984375;
-  },
-  spring: p => 1 - Math.exp(-6 * p) * Math.cos(p * 14),
+  inOutSine: p => -(Math.cos(Math.PI * p) - 1) / 2,
+  outBackSoft: p => { const c1 = .9, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); },
 };
 function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
-// ---------- precomputed assets ----------
+// ---------- assets ----------
+const LOGO_FILES = { informatica: 'informatica.png', collibra: 'collibra.png', alation: 'alation.png', bigid: 'bigid.png',
+  dbt: 'dbt.png', aws: 'aws.png', azure: 'azure.png', gcp: 'google-cloud.png', databricks: 'databricks.svg' };
+const LOGOS = {};
+const ready = Promise.all([
+  document.fonts.ready,
+  ...Object.entries(LOGO_FILES).map(([k, f]) => new Promise(res => {
+    const im = new Image(); im.onload = () => { LOGOS[k] = im; res(); }; im.onerror = res; im.src = 'assets/partners/' + f;
+  })),
+]).then(() => {
+  // the Databricks mark ships as a black icon; tint it to brand red
+  const src = LOGOS.databricks; if (!src) return;
+  const c = document.createElement('canvas'); c.width = c.height = 240;
+  const g = c.getContext('2d'); g.drawImage(src, 0, 0, 240, 240);
+  g.globalCompositeOperation = 'source-in'; g.fillStyle = '#ff3621'; g.fillRect(0, 0, 240, 240);
+  LOGOS.databricks = c;
+});
+window.ready = ready;
+
 const rand = rng(121);
-const PARTICLES = Array.from({ length: 280 }, () => ({
-  a: rand() * Math.PI * 2,
-  r: 120 + Math.pow(rand(), .7) * 1150,
-  s: .6 + rand() * 2.4,
-  k: 2 + rand() * 4,
-  spin: (rand() - .5) * .25,
-  col: [C.sand, C.cream, C.blue, C.coral][Math.floor(rand() * 4)],
-  ph: rand() * 10,
+const DUST = Array.from({ length: 160 }, () => ({
+  x: rand() * W, y: rand() * H, s: .6 + rand() * 1.8, vx: (rand() - .5) * 10, vy: -4 - rand() * 8,
+  col: [C.sand, C.cream, C.blue][Math.floor(rand() * 3)], ph: rand() * 10,
 }));
 const GRAIN = Array.from({ length: 6 }, (_, n) => {
   const g = document.createElement('canvas'); g.width = g.height = 256;
@@ -75,392 +78,436 @@ const GRAIN = Array.from({ length: 6 }, (_, n) => {
 
 // ---------- drawing helpers ----------
 function font(size, weight = 600, fam = FONT) { ctx.font = `${weight} ${size}px ${fam}`; }
-
-// Per-letter masked reveal. Letter positions come from prefix widths so kerning survives.
-function kinetic(str, x, y, size, o) {
-  const { weight = 700, color = C.cream, t, t0, stagger = .03, dur = .7, tOut = 99, outStagger = .02, outDur = .45,
-    align = 'center', tracking = 0, ease = E.outExpo, rot = 0, mask = true, stroke = 0 } = o;
-  font(size, weight, o.fam || FONT);
-  ctx.textBaseline = 'alphabetic';
-  const chars = [...str];
-  const xs = chars.map((_, i) => ctx.measureText(chars.slice(0, i).join('')).width + i * tracking);
-  const total = ctx.measureText(str).width + (chars.length - 1) * tracking;
-  const sx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
-  ctx.save();
-  if (mask) { ctx.beginPath(); ctx.rect(sx - size, y - size * 1.02, total + size * 2, size * 1.3); ctx.clip(); }
-  chars.forEach((ch, i) => {
-    const pin = ease(prog(t, t0 + i * stagger, t0 + i * stagger + dur));
-    const pout = E.inExpo(prog(t, tOut + i * outStagger, tOut + i * outStagger + outDur));
-    if (pin <= 0 || pout >= 1) return;
-    const dy = (1 - pin) * size * 1.05 - pout * size * 1.15;
-    ctx.save();
-    ctx.translate(sx + xs[i], y + dy);
-    if (rot) ctx.rotate((1 - pin) * rot);
-    if (stroke) { ctx.lineWidth = stroke; ctx.strokeStyle = color; ctx.strokeText(ch, 0, 0); }
-    else { ctx.fillStyle = typeof color === 'function' ? color(i, ch) : color; ctx.fillText(ch, 0, 0); }
-    ctx.restore();
-  });
-  ctx.restore();
-  return { sx, total, xs };
-}
-
-function wordsReveal(words, x, y, size, o) {
-  // words: [[text, color], ...]; centred line, word-level mask stagger
-  font(size, o.weight || 600);
-  const space = ctx.measureText(' ').width;
-  const widths = words.map(w => ctx.measureText(w[0]).width);
-  const total = widths.reduce((a, b) => a + b, 0) + space * (words.length - 1);
-  let cx = x - total / 2;
-  words.forEach((w, i) => {
-    kinetic(w[0], cx, y, size, { ...o, color: w[1], align: 'left', t0: o.t0 + i * (o.wordStagger || .05), stagger: .012,
-      tOut: o.tOut + i * .025, outStagger: .004 });
-    cx += widths[i] + space;
-  });
-}
-
 function circle(x, y, r, fill) { ctx.beginPath(); ctx.arc(x, y, Math.max(0, r), 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); }
 function ring(x, y, r, col, lw, a0 = 0, a1 = Math.PI * 2) { ctx.beginPath(); ctx.arc(x, y, Math.max(0, r), a0, a1); ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke(); }
 function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
-function alpha(a, fn) { ctx.save(); ctx.globalAlpha *= clamp(a); fn(); ctx.restore(); }
+function alpha(a, fn) { if (a <= 0) return; ctx.save(); ctx.globalAlpha *= clamp(a); fn(); ctx.restore(); }
 
-// ---------- scene timings ----------
-const T = {
-  burst: 1.0,     // line snaps, particles explode
-  typeIn: 1.75,   // WE BUILD TRUST IN DATA
-  wipe: 4.4,      // diagonal band transition
-  stats: 4.75,    // numbers
-  merge: 7.55,    // rings fly to centre
-  agents: 8.05,   // agent network
-  suck: 10.95,    // network collapses into hub
-  iris: 11.45,    // hub floods screen
-  end: 12.0,      // end card
-};
-
-// ---------- background layers ----------
-function drawParticles(t) {
-  if (t < T.burst || t > T.iris + .6) return;
-  const cx = W / 2, cy = H / 2;
-  const suck = E.inExpo(prog(t, T.suck, T.iris + .2));
-  const hubY = 600;
-  for (const p of PARTICLES) {
-    const dt = t - T.burst;
-    const R = p.r * (1 - Math.exp(-p.k * dt));
-    const a = p.a + p.spin * dt + .04 * dt;
-    let x = cx + Math.cos(a) * R + Math.sin(t * .7 + p.ph) * 14;
-    let y = cy + Math.sin(a) * R * .72 + Math.cos(t * .6 + p.ph) * 14;
-    x = lerp(x, cx, suck); y = lerp(y, hubY, suck);
-    const fadeIn = prog(dt, 0, .05);
-    const twinkle = .45 + .55 * Math.abs(Math.sin(t * 1.6 + p.ph));
-    const amb = t > 2.2 ? .35 : lerp(1, .35, prog(t, 1.6, 2.2));
-    alpha(fadeIn * twinkle * amb * (1 - suck * .3), () => {
-      // streak while fast
-      const sp = p.r * p.k * Math.exp(-p.k * dt);
-      if (sp > 60 && suck === 0) {
-        const len = Math.min(140, sp * .06);
-        ctx.strokeStyle = p.col; ctx.lineWidth = p.s; ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - Math.cos(a) * len, y - Math.sin(a) * len * .72); ctx.stroke();
-      }
-      circle(x, y, p.s, p.col);
-    });
-  }
+// In: fade up over `dur`. Out: fade and drift up from tOut.
+function inOut(t, t0, tOut, dur = .9, outDur = .5) {
+  const i = E.outCubic(prog(t, t0, t0 + dur));
+  const o = E.inOutSine(prog(t, tOut, tOut + outDur));
+  return { a: i * (1 - o), dy: (1 - i) * 26 - o * 18 };
 }
 
-function drawGrid(t) {
-  if (t < T.burst || t > T.iris + .6) return;
-  const step = 120;
-  const fade = (t < 2.4 ? lerp(.55, .22, prog(t, 1.6, 2.4)) : .22) * (1 - prog(t, T.iris, T.iris + .4));
-  ctx.save(); ctx.globalAlpha = fade; ctx.strokeStyle = C.line; ctx.lineWidth = 1;
-  for (let i = 1; i < W / step; i++) {
-    const p = E.outExpo(prog(t, T.burst + .1 + Math.abs(i - 8) * .025, T.burst + .9 + Math.abs(i - 8) * .025));
-    const x = i * step; const h = H * p;
-    ctx.beginPath(); ctx.moveTo(x, H / 2 - h / 2); ctx.lineTo(x, H / 2 + h / 2); ctx.stroke();
-  }
-  for (let j = 1; j < H / step; j++) {
-    const p = E.outExpo(prog(t, T.burst + Math.abs(j - 4.5) * .04, T.burst + .8 + Math.abs(j - 4.5) * .04));
-    const y = j * step; const w = W * p;
-    ctx.beginPath(); ctx.moveTo(W / 2 - w / 2, y); ctx.lineTo(W / 2 + w / 2, y); ctx.stroke();
-  }
+// A line of text, optionally split into coloured runs: [[text, colour], ...]. Words rise in one after another.
+function line(runs, x, y, size, o) {
+  const { t, t0, tOut = 99, weight = 600, fam = FONT, stagger = .07, dur = .9, align = 'center', tracking = 0 } = o;
+  if (typeof runs === 'string') runs = [[runs, o.color || C.cream]];
+  font(size, weight, fam); ctx.letterSpacing = tracking + 'px'; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  // words carry whether a space precedes them, so "work" + ", not" stays "work, not"
+  const words = [];
+  let prevSpace = true;
+  runs.forEach(([txt, col]) => {
+    txt.split(' ').forEach((w, k) => w && words.push([w, col, k === 0 && !prevSpace]));
+    prevSpace = txt.endsWith(' ');
+  });
+  const space = ctx.measureText(' ').width;
+  const ws = words.map(w => ctx.measureText(w[0]).width);
+  const gap = i => i > 0 && !words[i][2] ? space : 0;
+  const total = ws.reduce((a, b, i) => a + b + gap(i), 0);
+  let cx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+  words.forEach(([w, col], i) => {
+    cx += gap(i);
+    const s = inOut(t, t0 + i * stagger, tOut + i * stagger * .3, dur);
+    alpha(s.a, () => { ctx.fillStyle = col; ctx.fillText(w, cx, y + s.dy); });
+    cx += ws[i];
+  });
+  ctx.letterSpacing = '0px';
+  return total;
+}
+const kicker = (str, y, t, t0, tOut) => line(str, W / 2, y, 20, { t, t0, tOut, fam: MONO, weight: 500, tracking: 7, color: C.sand, stagger: .02 });
+
+// Masked per-letter reveal, used for the wordmark. Prefix widths keep kerning.
+function letters(str, x, y, size, o) {
+  const { weight = 800, color = C.ink, t, t0, stagger = .05, dur = 1, tracking = 0 } = o;
+  font(size, weight); ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  const chars = [...str];
+  const xs = chars.map((_, i) => ctx.measureText(chars.slice(0, i).join('')).width + i * tracking);
+  const total = ctx.measureText(str).width + (chars.length - 1) * tracking;
+  const sx = x - total / 2;
+  ctx.save(); ctx.beginPath(); ctx.rect(sx - size, y - size * 1.02, total + size * 2, size * 1.3); ctx.clip();
+  chars.forEach((ch, i) => {
+    const p = E.outQuint(prog(t, t0 + i * stagger, t0 + i * stagger + dur));
+    if (p <= 0) return;
+    ctx.fillStyle = color; ctx.fillText(ch, sx + xs[i], y + (1 - p) * size * 1.05);
+  });
+  ctx.restore();
+  return { sx, total };
+}
+
+// Pill label with a coloured dot, used for governance areas and agents
+function pill(x, y, label, col, sc, a, t, i) {
+  font(26, 600); const tw = ctx.measureText(label).width;
+  const pw = tw + 76, ph = 58;
+  ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc); ctx.globalAlpha *= a;
+  roundRect(-pw / 2, -ph / 2, pw, ph, ph / 2); ctx.fillStyle = C.ink2; ctx.fill();
+  ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+  circle(-pw / 2 + 29, 0, 7, col);
+  alpha(.3 + .25 * Math.sin(t * 2.2 + i), () => ring(-pw / 2 + 29, 0, 13, col, 1.5));
+  ctx.fillStyle = C.cream; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(label, -pw / 2 + 47, 2);
   ctx.restore();
 }
 
-// ---------- scene 1: dot → line → burst ----------
+// A stroke that draws itself on: fn builds the path, p is 0..1
+function drawOn(p, len, fn) {
+  if (p <= 0) return;
+  ctx.save(); ctx.setLineDash([len * p, len]); fn(); ctx.stroke(); ctx.restore();
+}
+
+// ---------- scene timings (seconds) ----------
+const S = {
+  open: 0,        // Every decision runs on data. / But can you trust it?
+  promise: 3.4,   // We Build Trust in Data
+  gov: 6.6,       // governance hub
+  fuau: 11.3,     // Find · Understand · Access · Use
+  partner: 14.7,  // Informatica Platinum Delivery Partner
+  eco: 17.6,      // partner logos
+  agents: 20.7,   // AI agents
+  stats: 23.4,    // numbers
+  iris: 26.6,     // flood to cream
+  end: 27.1,      // end card
+};
+
+// ---------- background ----------
+function background(t) {
+  // faint grid that breathes in at the start
+  const ga = .18 * prog(t, .4, 2.4);
+  ctx.save(); ctx.globalAlpha = ga; ctx.strokeStyle = C.line; ctx.lineWidth = 1;
+  for (let x = 120; x < W; x += 120) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 120; y < H; y += 120) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  ctx.restore();
+  // slow rising dust
+  const da = prog(t, .8, 3);
+  for (const d of DUST) {
+    const x = ((d.x + d.vx * t) % W + W) % W, y = ((d.y + d.vy * t) % H + H) % H;
+    alpha(da * (.25 + .3 * Math.abs(Math.sin(t * .8 + d.ph))), () => circle(x, y, d.s, d.col));
+  }
+}
+
+// ---------- 1. opening ----------
 function sceneOpen(t) {
-  if (t > T.typeIn + .6) return;
-  const cx = W / 2, cy = H / 2;
-  // dot pops in, breathes, then stretches into a line
-  const pop = E.outBack(prog(t, .1, .5));
-  const stretch = E.inOutExpo(prog(t, .55, T.burst));
-  const collapse = E.inOutExpo(prog(t, T.burst + .05, T.burst + .7));
-  const r = 16 * pop * (1 + .12 * Math.sin(t * 14) * (1 - prog(t, .3, .55)));
-  const w = lerp(r * 2, 1500, stretch) * (1 - collapse);
-  const h = lerp(r * 2, 3, stretch);
-  if (w > .5) { roundRect(cx - w / 2, cy - h / 2, w, h, h / 2); ctx.fillStyle = C.sand; ctx.fill(); }
-  // shockwaves
-  [0, .12, .24].forEach((d, i) => {
-    const p = E.outExpo(prog(t, T.burst + d, T.burst + d + 1.1));
-    if (p > 0 && p < 1) alpha(1 - p, () => ring(cx, cy, p * (900 - i * 180), i === 1 ? C.blue : C.sand, 3 - i * .7));
-  });
-  // flash
-  const f = 1 - prog(t, T.burst, T.burst + .25);
-  if (t >= T.burst && f > 0) alpha(f * .35, () => { ctx.fillStyle = C.cream; ctx.fillRect(0, 0, W, H); });
-}
-
-// ---------- scene 2: kinetic type ----------
-function sceneType(t) {
-  if (t < T.typeIn || t > T.stats) return;
-  const out = T.wipe - .35;
-  kinetic('WE BUILD', W / 2, 330, 110, { t, t0: T.typeIn, weight: 600, tracking: 18, color: C.cream, tOut: out });
-  // TRUST: outline ghosts punch outward when the word lands
-  const land = T.typeIn + .35;
-  [0, .12].forEach(d => {
-    const g = E.outCubic(prog(t, land + .5 + d, land + 1.3 + d));
-    if (g <= 0 || g >= 1) return;
-    ctx.save(); ctx.translate(W / 2, 560); ctx.scale(1 + g * .22, 1 + g * .22); ctx.translate(-W / 2, -560);
-    alpha((1 - g) * .7, () => kinetic('TRUST', W / 2, 640, 330, { t: 99, t0: 0, weight: 800, tracking: 6, color: C.sand, stroke: 2.5, mask: false }));
-    ctx.restore();
-  });
-  kinetic('TRUST', W / 2, 640, 330, { t, t0: land, weight: 800, tracking: 6, color: C.sand, stagger: .05, dur: .8, rot: .25, ease: E.outBack, tOut: out, outStagger: .03 });
-  kinetic('IN DATA', W / 2, 820, 110, { t, t0: T.typeIn + .75, weight: 600, tracking: 18, color: C.cream, tOut: out + .06 });
-  // underline sweep + tiny caption
-  const ul = E.inOutExpo(prog(t, T.typeIn + 1.1, T.typeIn + 1.8));
-  const ulOut = E.inOutExpo(prog(t, out, out + .4));
-  if (ul > ulOut) { ctx.fillStyle = C.sand; ctx.fillRect(W / 2 - 520 + 1040 * ulOut, 880, 1040 * (ul - ulOut), 4); }
-  kinetic('DATA GOVERNANCE · INFORMATICA IDMC · AI AGENTS', W / 2, 935, 22, { t, t0: T.typeIn + 1.3, fam: MONO, weight: 500, tracking: 4, color: C.cream, stagger: .008, dur: .5, tOut: out + .1, outStagger: .003 });
-}
-
-// ---------- transition: diagonal bands ----------
-function wipeBands(t) {
-  const bands = [[C.sand, 0, 2700], [C.cream, .07, 2380], [C.ink2, .13, 2100]];
-  bands.forEach(([col, d, bw]) => {
-    const p = E.inOutQuart(prog(t, T.wipe + d, T.wipe + d + .75));
-    if (p <= 0 || p >= 1) return;
-    const xc = lerp(-bw, W + bw, p), sk = 260;
-    ctx.beginPath();
-    ctx.moveTo(xc - bw / 2 + sk, 0); ctx.lineTo(xc + bw / 2 + sk, 0);
-    ctx.lineTo(xc + bw / 2 - sk, H); ctx.lineTo(xc - bw / 2 - sk, H); ctx.closePath();
-    ctx.fillStyle = col; ctx.fill();
-  });
-}
-
-// ---------- scene 3: stats ----------
-const STATS = [
-  { v: 195, suf: '', l: ['Informatica', 'certifications'], col: C.sand },
-  { v: 70, suf: '+', l: ['Data governance', 'specialists'], col: C.blue },
-  { v: 1, suf: 'st', l: ['to deploy CDGC & CDMP', 'in North America'], col: C.coral },
-];
-const RING_POS = [[440, 500], [960, 500], [1480, 500]];
-function sceneStats(t) {
-  if (t < T.stats || t > T.agents + .2) return;
-  const t0 = T.stats + .25;
-  kinetic('BY THE NUMBERS', W / 2, 150, 24, { t, t0: t0 - .1, fam: MONO, weight: 500, tracking: 10, color: C.sand, stagger: .015, dur: .5, tOut: T.merge - .2, outStagger: .005 });
-  const kl = E.inOutExpo(prog(t, t0, t0 + .8)) - E.inOutExpo(prog(t, T.merge - .2, T.merge + .2));
-  if (kl > 0) { ctx.fillStyle = C.line; ctx.fillRect(W / 2 - 360 * kl - 250, 141, 360 * kl, 2); ctx.fillRect(W / 2 + 250, 141, 360 * kl, 2); }
-
-  STATS.forEach((s, i) => {
-    const st = t0 + i * .18;
-    const [bx, by] = RING_POS[i];
-    const R = 165;
-    // merge: shrink & fly to hub
-    const m = E.inBack(prog(t, T.merge + i * .06, T.merge + .45 + i * .06));
-    const x = lerp(bx, W / 2, m), y = lerp(by, 600, m);
-    const sc = 1 - m * .9;
-    const pop = E.outBack(prog(t, st, st + .6));
-    if (pop <= 0 || m >= 1) return;
-    ctx.save(); ctx.translate(x, y); ctx.scale(sc * pop, sc * pop);
-    // track + ticks
-    ring(0, 0, R, C.line, 2);
-    const fill = E.inOutCubic(prog(t, st + .15, st + 1.5));
-    const target = i === 2 ? 1 : i === 0 ? .92 : .78;
-    const prg = fill * target;
-    for (let k = 0; k < 72; k++) {
-      const a = -Math.PI / 2 + k / 72 * Math.PI * 2;
-      const on = k / 72 < prg;
-      ctx.strokeStyle = on ? s.col : C.line; ctx.lineWidth = on ? 3 : 1.5;
-      const r1 = R - 26, r2 = R - (k % 6 === 0 ? 44 : 36);
-      ctx.beginPath(); ctx.moveTo(Math.cos(a) * r1, Math.sin(a) * r1); ctx.lineTo(Math.cos(a) * r2, Math.sin(a) * r2); ctx.stroke();
-    }
-    ctx.lineCap = 'round';
-    ring(0, 0, R, s.col, 7, -Math.PI / 2, -Math.PI / 2 + prg * Math.PI * 2);
-    const ha = -Math.PI / 2 + prg * Math.PI * 2;
-    if (fill > 0) { circle(Math.cos(ha) * R, Math.sin(ha) * R, 11, s.col); alpha(.25, () => circle(Math.cos(ha) * R, Math.sin(ha) * R, 22, s.col)); }
-    // rotating dashed orbit
-    ctx.save(); ctx.rotate(t * (i % 2 ? -.5 : .5)); ctx.setLineDash([3, 16]);
-    alpha(.6, () => ring(0, 0, R + 26, s.col, 2)); ctx.restore();
-    // number
-    const n = Math.max(i === 2 ? 1 : 0, Math.round(s.v * E.outExpo(prog(t, st + .15, st + 1.6))));
-    font(118, 800); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const sufW = s.suf ? (font(54, 700), ctx.measureText(s.suf).width) : 0;
-    font(118, 800); const nw = ctx.measureText(String(n)).width;
-    ctx.fillStyle = C.cream; ctx.fillText(String(n), -sufW / 2, 6);
-    if (s.suf) { font(54, 700); ctx.fillStyle = s.col; ctx.textAlign = 'left'; ctx.fillText(s.suf, nw / 2 - sufW / 2 + 4, s.suf === '+' ? -14 : -20); }
-    ctx.restore();
-    // labels (not scaled)
-    ctx.textAlign = 'left';
-    s.l.forEach((ln, j) => kinetic(ln, bx, by + R + 85 + j * 42, 32, { t, t0: st + .45 + j * .08, weight: j ? 500 : 600, color: j ? 'rgba(241,239,230,.62)' : C.cream, stagger: .01, dur: .55, tOut: T.merge - .25, outStagger: .004 }));
-  });
-}
-
-// ---------- scene 4: agent network ----------
-const AGENTS = ['GovernIQ™', 'Onboard360™', 'DataIQ™', 'PulseDQ™', 'DescribeAI™', 'TermForge™', 'LineageIQ™', 'MigrateIQ™', 'ClassifyIQ™'];
-const AG_COL = [C.sand, C.blue, C.coral];
-function sceneAgents(t) {
-  if (t < T.merge + .3 || t > T.end + .2) return;
-  const hx = W / 2, hy = 600;
-  const suck = E.inExpo(prog(t, T.suck, T.iris + .05));
-  // hub
-  const hubPop = E.spring(prog(t, T.merge + .4, T.merge + 1.4));
-  const hubR = 74 * hubPop;
-  // radiating pulses
-  for (let k = 0; k < 3; k++) {
-    const ph = ((t - T.agents) / 1.1 + k / 3) % 1;
-    if (t > T.agents && suck < .5) alpha((1 - ph) * .5, () => ring(hx, hy, hubR + ph * 240, C.sand, 2));
-  }
-  // orbit ellipses
-  const orb = E.inOutExpo(prog(t, T.agents, T.agents + 1.0)) * (1 - suck);
-  if (orb > 0) {
-    ctx.save(); ctx.setLineDash([2, 10]); ctx.globalAlpha = .55;
-    ctx.beginPath(); ctx.ellipse(hx, hy, 660 * orb, 300 * orb, 0, 0, Math.PI * 2); ctx.strokeStyle = C.line; ctx.lineWidth = 2; ctx.stroke();
-    ctx.beginPath(); ctx.ellipse(hx, hy, 400 * orb, 180 * orb, 0, 0, Math.PI * 2); ctx.stroke();
-    ctx.restore();
-  }
-  // nodes
-  const nodes = AGENTS.map((name, i) => {
-    let a = -Math.PI / 2 + i * Math.PI * 2 / 9 + .16 * (t - T.agents);
-    a += suck * 2.4;
-    const k = 1 - suck;
-    const x = hx + Math.cos(a) * 660 * k, y = hy + Math.sin(a) * 300 * k;
-    const depth = (Math.sin(a) + 1) / 2;
-    const ta = T.agents + .25 + i * .11;
-    return { name, i, x, y, depth, ta, col: AG_COL[i % 3] };
-  });
-  // connectors
-  nodes.forEach(n => {
-    const p = E.outExpo(prog(t, n.ta - .15, n.ta + .45));
-    if (p <= 0) return;
-    const mx = (hx + n.x) / 2 + (n.y - hy) * .25, my = (hy + n.y) / 2 - (n.x - hx) * .12;
-    const bez = (u) => [(1 - u) ** 2 * hx + 2 * (1 - u) * u * mx + u * u * n.x, (1 - u) ** 2 * hy + 2 * (1 - u) * u * my + u * u * n.y];
-    ctx.save(); ctx.strokeStyle = n.col; ctx.globalAlpha = .45 + .35 * n.depth; ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.moveTo(hx, hy);
-    for (let u = .02; u <= p + 1e-6; u += .02) { const [bx, by] = bez(u); ctx.lineTo(bx, by); }
-    ctx.stroke(); ctx.restore();
-    // data packets travelling to the hub
-    if (p >= 1 && suck < .2) for (let q = 0; q < 2; q++) {
-      const u = 1 - (((t - n.ta) * .9 + q * .5 + n.i * .13) % 1);
-      const [px, py] = bez(u);
-      alpha(Math.sin(u * Math.PI), () => { circle(px, py, 4.5, n.col); alpha(.3, () => circle(px, py, 10, n.col)); });
-    }
-  });
-  // hub on top of connectors
-  if (hubR > 0) {
-    alpha(.18, () => circle(hx, hy, hubR * 1.45, C.sand));
-    circle(hx, hy, hubR, C.sand);
-    alpha(prog(t, T.merge + .7, T.merge + 1.0) * (1 - prog(t, T.suck, T.suck + .3)), () => {
-      font(20, 800); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = C.ink;
-      ctx.letterSpacing = '3px'; ctx.fillText('AGENTS', hx + 1.5, hy + 1); ctx.letterSpacing = '0px';
+  if (t > S.promise + 3.2) return;
+  const cx = W / 2, cy = 540;
+  // the dot appears, then slowly draws the line, which later becomes the promise frame
+  const dot = E.outCubic(prog(t, .2, .9));
+  const lw = E.inOutCubic(prog(t, .8, 2.4));
+  const toFrame = E.inOutCubic(prog(t, S.promise - .2, S.promise + .9));
+  const frameOut = E.inOutCubic(prog(t, S.gov - .6, S.gov));
+  if (toFrame <= 0) {
+    alpha(dot, () => circle(cx, cy, 9, C.sand));
+    if (lw > 0) { ctx.fillStyle = C.sand; ctx.fillRect(cx - 460 * lw, cy - 1.5, 920 * lw, 3); }
+  } else {
+    // line opens up into a rounded frame around the promise
+    const fw = lerp(920, 1380, toFrame) * (1 - frameOut * .9), fh = lerp(3, 470, toFrame) * (1 - frameOut * .9);
+    alpha(1 - frameOut, () => {
+      roundRect(cx - fw / 2, cy - fh / 2, fw, fh, lerp(1.5, 28, toFrame));
+      ctx.strokeStyle = C.sand; ctx.lineWidth = lerp(3, 2, toFrame); ctx.globalAlpha *= lerp(1, .55, toFrame); ctx.stroke();
     });
+    alpha(1 - toFrame, () => circle(cx, cy, 9, C.sand));
   }
-  // pills, back to front
-  [...nodes].sort((a, b) => a.depth - b.depth).forEach(n => {
-    const p = E.outBack(prog(t, n.ta + .15, n.ta + .6));
-    if (p <= 0) return;
-    const sc = (.82 + .3 * n.depth) * p * (1 - suck * .85);
-    font(26, 600); const tw = ctx.measureText(n.name).width;
-    const pw = tw + 74, ph = 58;
-    ctx.save(); ctx.translate(n.x, n.y); ctx.scale(sc, sc); ctx.globalAlpha = .55 + .45 * n.depth;
-    roundRect(-pw / 2, -ph / 2, pw, ph, ph / 2); ctx.fillStyle = C.ink2; ctx.fill();
-    ctx.strokeStyle = n.col; ctx.lineWidth = 2; ctx.stroke();
-    circle(-pw / 2 + 28, 0, 7, n.col);
-    alpha(.35 + .35 * Math.sin(t * 6 + n.i), () => ring(-pw / 2 + 28, 0, 12, n.col, 1.5));
-    ctx.fillStyle = C.cream; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(n.name, -pw / 2 + 46, 2);
-    ctx.restore();
-  });
-  // headline
-  ctx.textAlign = 'left';
-  kinetic('INCEPT AI AGENTS', W / 2, 105, 22, { t, t0: T.agents - .05, fam: MONO, weight: 500, tracking: 10, color: C.sand, stagger: .015, dur: .5, tOut: T.suck - .1, outStagger: .004 });
-  wordsReveal([['Agents', C.cream], ['that', C.cream], ['take', C.cream], ['the', C.cream], ['data', C.sand], ['work', C.sand], ['off', C.cream], ['your', C.cream], ['team.', C.cream]],
-    W / 2, 185, 56, { t, t0: T.agents + .1, weight: 700, wordStagger: .06, dur: .6, tOut: T.suck - .15 });
-  // iris: hub floods the screen sand, then cream
-  const i1 = E.inOutExpo(prog(t, T.iris, T.iris + .55));
-  const i2 = E.inOutExpo(prog(t, T.iris + .1, T.iris + .65));
-  if (i1 > 0) circle(hx, hy, lerp(hubR, 2300, i1), C.sand);
-  if (i2 > 0) circle(hx, hy, lerp(0, 2300, i2), C.cream);
+  if (t < S.promise) {
+    line('Every decision runs on data.', cx, cy - 70, 64, { t, t0: .6, tOut: S.promise - .55, weight: 600 });
+    line([['But can you ', C.cream], ['trust', C.sand], [' it?', C.cream]], cx, cy + 115, 64, { t, t0: 1.9, tOut: S.promise - .45, weight: 600 });
+  }
 }
 
-// ---------- scene 5: end card ----------
+// ---------- 2. promise ----------
+function scenePromise(t) {
+  if (t < S.promise || t > S.gov + .2) return;
+  const out = S.gov - .65;
+  line([['We Build ', C.cream], ['Trust', C.sand], [' in Data', C.cream]], W / 2, 545, 112, { t, t0: S.promise + .35, tOut: out, weight: 700, stagger: .12, dur: 1.1 });
+  line('Data governance consulting & implementation', W / 2, 640, 36, { t, t0: S.promise + 1.2, tOut: out, weight: 500, color: 'rgba(241,239,230,.7)', stagger: .04 });
+}
+
+// ---------- 3. governance hub ----------
+const GOV = ['Data Governance', 'Data Quality', 'Master Data Management', 'Metadata & Catalog', 'Data Lineage', 'Data Privacy & Compliance', 'AI Governance'];
+const GOV_COL = [C.sand, C.blue, C.coral];
+const HUB = [W / 2, 615];
+function orbit(i, n, t, t0, rx, ry, speed) {
+  const a = -Math.PI / 2 + i * Math.PI * 2 / n + speed * (t - t0);
+  return { x: HUB[0] + Math.cos(a) * rx, y: HUB[1] + Math.sin(a) * ry, depth: (Math.sin(a) + 1) / 2 };
+}
+function curve(n) {
+  const [hx, hy] = HUB;
+  const mx = (hx + n.x) / 2 + (n.y - hy) * .2, my = (hy + n.y) / 2 - (n.x - hx) * .1;
+  return u => [(1 - u) ** 2 * hx + 2 * (1 - u) * u * mx + u * u * n.x, (1 - u) ** 2 * hy + 2 * (1 - u) * u * my + u * u * n.y];
+}
+function strokeCurve(bez, p, col, a) {
+  if (p <= 0) return;
+  ctx.save(); ctx.strokeStyle = col; ctx.globalAlpha *= a; ctx.lineWidth = 1.6; ctx.beginPath();
+  const [x0, y0] = bez(0); ctx.moveTo(x0, y0);
+  for (let u = .02; u <= p + 1e-6; u += .02) { const [x, y] = bez(Math.min(u, p)); ctx.lineTo(x, y); }
+  ctx.stroke(); ctx.restore();
+}
+function hub(t, t0, tOut, labelLines, dim = 1) {
+  const p = E.outBackSoft(prog(t, t0, t0 + 1));
+  const o = E.inOutCubic(prog(t, tOut, tOut + .6));
+  const r = 78 * p * (1 - o);
+  if (r <= 0) return;
+  const [hx, hy] = HUB;
+  alpha(dim, () => {
+    for (let k = 0; k < 2; k++) {
+      const ph = ((t - t0) / 2.6 + k / 2) % 1;
+      alpha((1 - ph) * .35 * (1 - o), () => ring(hx, hy, r + ph * 200, C.sand, 1.5));
+    }
+    alpha(.16, () => circle(hx, hy, r * 1.4, C.sand));
+    circle(hx, hy, r, C.sand);
+    alpha(prog(t, t0 + .5, t0 + .9) * (1 - o), () => {
+      font(17, 800); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = C.ink; ctx.letterSpacing = '2px';
+      labelLines.forEach((l, i) => ctx.fillText(l, hx + 1, hy + (i - (labelLines.length - 1) / 2) * 22 + 1));
+      ctx.letterSpacing = '0px';
+    });
+  });
+}
+function sceneGov(t) {
+  if (t < S.gov - .3 || t > S.fuau + 1) return;
+  const t0 = S.gov, out = S.fuau - .3;
+  // after the governance beat, the hub stays faintly behind Find · Understand · Access · Use
+  const dim = 1 - E.inOutCubic(prog(t, out, out + .8));
+  kicker('WHAT WE DO', 112, t, t0 + .1, out);
+  line([['Make data governance ', C.cream], ['work', C.sand], [', not just exist.', C.cream]], W / 2, 190, 56, { t, t0: t0 + .25, tOut: out, weight: 700 });
+  alpha(dim, () => {
+    const nodes = GOV.map((g, i) => ({ g, i, ta: t0 + .9 + i * .45, col: GOV_COL[i % 3], ...orbit(i, GOV.length, t, t0, 610, 265, .035) }));
+    // orbit guide
+    const og = E.inOutCubic(prog(t, t0 + .3, t0 + 1.4));
+    if (og > 0) { ctx.save(); ctx.setLineDash([2, 10]); ctx.globalAlpha *= .5; ctx.beginPath(); ctx.ellipse(HUB[0], HUB[1], 610 * og, 265 * og, 0, 0, Math.PI * 2); ctx.strokeStyle = C.line; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); }
+    nodes.forEach(n => {
+      const bez = curve(n), p = E.inOutCubic(prog(t, n.ta - .2, n.ta + .45));
+      strokeCurve(bez, p, n.col, .35 + .35 * n.depth);
+      if (p >= 1) { const u = 1 - (((t - n.ta) * .45 + n.i * .17) % 1); const [px, py] = bez(u); alpha(Math.sin(u * Math.PI), () => circle(px, py, 4, n.col)); }
+    });
+    hub(t, t0 + .2, 99, ['TRUSTED', 'DATA']);
+    [...nodes].sort((a, b) => a.depth - b.depth).forEach(n => {
+      const p = E.outBackSoft(prog(t, n.ta + .1, n.ta + .8));
+      if (p > 0) pill(n.x, n.y, n.g, n.col, (.86 + .2 * n.depth) * p, clamp(p) * (.65 + .35 * n.depth), t, n.i);
+    });
+  });
+}
+
+// ---------- 4. Find · Understand · Access · Use ----------
+const ICONS = [
+  ['Find', () => { ctx.beginPath(); ctx.arc(-8, -8, 30, 0, Math.PI * 2); ctx.moveTo(14, 14); ctx.lineTo(40, 40); }],
+  ['Understand', () => { ctx.beginPath(); ctx.moveTo(-46, 0); ctx.quadraticCurveTo(0, -46, 46, 0); ctx.quadraticCurveTo(0, 46, -46, 0); ctx.moveTo(14, 0); ctx.arc(0, 0, 14, 0, Math.PI * 2); }],
+  ['Access', () => { ctx.beginPath(); ctx.roundRect(-32, -4, 64, 48, 8); ctx.moveTo(-19, -4); ctx.lineTo(-19, -30); ctx.arc(0, -30, 19, Math.PI, 0); ctx.lineTo(19, -20); }],
+  ['Use', () => { ctx.beginPath(); ctx.arc(0, 0, 40, -Math.PI / 2, Math.PI * 1.5); ctx.moveTo(-17, 1); ctx.lineTo(-5, 14); ctx.lineTo(19, -12); }],
+];
+function sceneFUAU(t) {
+  if (t < S.fuau || t > S.partner + .2) return;
+  const t0 = S.fuau + .3, out = S.partner - .6;
+  line('Trusted data you can', W / 2, 360, 46, { t, t0, tOut: out, weight: 500, color: 'rgba(241,239,230,.75)' });
+  ICONS.forEach(([word, path], i) => {
+    const x = W / 2 + (i - 1.5) * 420, ti = t0 + .45 + i * .3;
+    const s = inOut(t, ti, out + i * .05, 1);
+    alpha(s.a, () => {
+      ctx.save(); ctx.translate(x, 560 + s.dy); ctx.strokeStyle = C.sand; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      drawOn(E.inOutCubic(prog(t, ti, ti + 1.1)), 420, path); ctx.restore();
+    });
+    line(word, x, 720, 68, { t, t0: ti + .15, tOut: out + i * .05, weight: 700 });
+  });
+}
+
+// ---------- 5. featured partner ----------
+function drawLogo(key, cx, cy, maxW, maxH) {
+  const im = LOGOS[key]; if (!im) return;
+  const w = im.width, h = im.height, s = Math.min(maxW / w, maxH / h);
+  ctx.drawImage(im, cx - w * s / 2, cy - h * s / 2, w * s, h * s);
+}
+function scenePartner(t) {
+  if (t < S.partner || t > S.eco + .2) return;
+  const t0 = S.partner + .1, out = S.eco - .6;
+  kicker('FEATURED PARTNER', 300, t, t0, out);
+  const s = inOut(t, t0 + .1, out, 1.1);
+  const cw = 1060, ch = 430, cx = W / 2, cy = 590 + s.dy;
+  alpha(s.a, () => {
+    const sc = lerp(.97, 1, E.outCubic(prog(t, t0 + .1, t0 + 1.2)));
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc);
+    ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 60; ctx.shadowOffsetY = 20;
+    roundRect(-cw / 2, -ch / 2, cw, ch, 28); ctx.fillStyle = C.tile; ctx.fill();
+    ctx.shadowColor = 'transparent';
+    // sand border draws itself around the card
+    ctx.lineWidth = 3; ctx.strokeStyle = C.sand;
+    drawOn(E.inOutCubic(prog(t, t0 + .5, t0 + 1.9)), 2 * (cw + ch) + 10, () => roundRect(-cw / 2 + 12, -ch / 2 + 12, cw - 24, ch - 24, 20));
+    ctx.restore();
+  });
+  // card contents, in reading order
+  const c1 = inOut(t, t0 + .5, out, 1);
+  alpha(c1.a, () => drawLogo('informatica', cx, cy - 120 + c1.dy * .5, 360, 88));
+  line('Platinum Delivery Partner', cx, cy + 20, 64, { t, t0: t0 + .75, tOut: out, weight: 700, color: C.ink });
+  const rl = E.inOutCubic(prog(t, t0 + 1.2, t0 + 1.9)) * (1 - prog(t, out, out + .4));
+  ctx.fillStyle = C.sand; ctx.fillRect(cx - 80 * rl, cy + 62, 160 * rl, 3);
+  line([['Trusted by ', '#5a574c'], ['Fortune 500', C.sandDeep], [' enterprises', '#5a574c']], cx, cy + 135, 38, { t, t0: t0 + 1.35, tOut: out, weight: 600 });
+}
+
+// ---------- 6. partner ecosystem ----------
+const ROWS = [
+  { label: 'PLATFORMS', y: 505, dir: -1, items: ['informatica', 'collibra', 'alation', 'bigid', 'dbt', 'databricks'] },
+  { label: 'CLOUD', y: 750, dir: 1, items: ['aws', 'azure', 'gcp', 'aws', 'azure', 'gcp'] },
+];
+function tile(key, x, y) {
+  const tw = 330, th = 150;
+  roundRect(x - tw / 2, y - th / 2, tw, th, 22); ctx.fillStyle = C.tile; ctx.fill();
+  if (key === 'databricks' || key === 'azure') {
+    const label = key === 'databricks' ? 'databricks' : 'Microsoft Azure';
+    font(key === 'databricks' ? 38 : 29, key === 'databricks' ? 700 : 600);
+    const tw2 = ctx.measureText(label).width, iw = 56, gap = 14, total = iw + gap + tw2;
+    drawLogo(key, x - total / 2 + iw / 2, y, iw, iw);
+    ctx.fillStyle = key === 'databricks' ? '#1b3139' : '#3a3a3a'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, x - total / 2 + iw + gap, y + 2);
+  } else drawLogo(key, x, y, 236, key === 'aws' ? 70 : 64);
+}
+function sceneEco(t) {
+  if (t < S.eco || t > S.agents + .2) return;
+  const t0 = S.eco + .1, out = S.agents - .6;
+  kicker('TECHNOLOGY PARTNERS', 205, t, t0, out);
+  line('Partners across your data ecosystem', W / 2, 290, 58, { t, t0: t0 + .15, tOut: out, weight: 700 });
+  const step = 366;
+  ROWS.forEach((r, ri) => {
+    kicker(r.label, r.y - 105, t, t0 + .4 + ri * .2, out);
+    const span = step * r.items.length;
+    const drift = r.dir * 38 * (t - t0);
+    for (let k = -1; k <= r.items.length; k++) {
+      const idx = ((k % r.items.length) + r.items.length) % r.items.length;
+      let x = W / 2 - span / 2 + step / 2 + k * step + drift;
+      x = ((x + step) % span + span) % span - step + (W - span) / 2 + step / 2;
+      const order = clamp((x + 200) / (W + 400));
+      const s = inOut(t, t0 + .5 + ri * .25 + order * .5, out + order * .15, .9);
+      alpha(s.a, () => tile(r.items[idx], x, r.y + s.dy));
+    }
+  });
+  // soft edges so tiles glide in and out of view
+  [[0, 1], [W, -1]].forEach(([x0, d]) => {
+    const g = ctx.createLinearGradient(x0, 0, x0 + d * 260, 0);
+    g.addColorStop(0, C.ink); g.addColorStop(1, 'rgba(21,21,15,0)');
+    ctx.fillStyle = g; ctx.fillRect(Math.min(x0, x0 + d * 260), 380, 260, 480);
+  });
+}
+
+// ---------- 7. AI agents ----------
+const AGENTS = ['GovernIQ™', 'Onboard360™', 'DataIQ™', 'PulseDQ™', 'DescribeAI™', 'TermForge™', 'LineageIQ™', 'MigrateIQ™', 'ClassifyIQ™'];
+function sceneAgents(t) {
+  if (t < S.agents - .2 || t > S.stats + .2) return;
+  const t0 = S.agents, out = S.stats - .6;
+  kicker('INCEPT AI AGENTS', 112, t, t0 + .05, out);
+  line([['Agents that take the ', C.cream], ['data work', C.sand], [' off your team.', C.cream]], W / 2, 190, 56, { t, t0: t0 + .2, tOut: out, weight: 700 });
+  alpha(1 - prog(t, out, out + .55), () => {
+    const nodes = AGENTS.map((g, i) => ({ g, i, ta: t0 + .35 + i * .08, col: GOV_COL[i % 3], ...orbit(i, 9, t, t0, 650, 270, .06) }));
+    nodes.forEach(n => {
+      const bez = curve(n);
+      strokeCurve(bez, E.inOutCubic(prog(t, n.ta - .1, n.ta + .5)), n.col, .35 + .35 * n.depth);
+      if (t > n.ta + .5) for (let q = 0; q < 2; q++) {
+        const u = 1 - (((t - n.ta) * .5 + q * .5 + n.i * .13) % 1); const [px, py] = bez(u);
+        alpha(Math.sin(u * Math.PI), () => { circle(px, py, 4, n.col); alpha(.3, () => circle(px, py, 9, n.col)); });
+      }
+    });
+    hub(t, t0 + .1, 99, ['AGENTS']);
+    [...nodes].sort((a, b) => a.depth - b.depth).forEach(n => {
+      const p = E.outBackSoft(prog(t, n.ta + .15, n.ta + .8));
+      if (p > 0) pill(n.x, n.y, n.g, n.col, (.84 + .22 * n.depth) * p, clamp(p) * (.6 + .4 * n.depth), t, n.i);
+    });
+  });
+}
+
+// ---------- 8. stats ----------
+const STATS = [
+  { v: 195, suf: '', l: ['Informatica', 'certifications'], col: C.sand, fill: .92 },
+  { v: 70, suf: '+', l: ['Data governance', 'specialists'], col: C.blue, fill: .78 },
+  { v: 10, suf: '+', l: ['Years delivering', 'data governance'], col: C.coral, fill: .85 },
+];
+function sceneStats(t) {
+  if (t < S.stats || t > S.iris + .8) return;
+  const t0 = S.stats + .15, out = S.iris - .5;
+  kicker('BY THE NUMBERS', 175, t, t0, out);
+  STATS.forEach((s, i) => {
+    const bx = W / 2 + (i - 1) * 520, by = 500, R = 160, st = t0 + .2 + i * .15;
+    const io = inOut(t, st, out, 1);
+    alpha(io.a, () => {
+      ctx.save(); ctx.translate(bx, by + io.dy);
+      ring(0, 0, R, C.line, 2);
+      const prg = E.inOutCubic(prog(t, st + .2, st + 1.7)) * s.fill;
+      for (let k = 0; k < 72; k++) {
+        const a = -Math.PI / 2 + k / 72 * Math.PI * 2, on = k / 72 < prg;
+        ctx.strokeStyle = on ? s.col : C.line; ctx.lineWidth = on ? 2.5 : 1.2;
+        const r1 = R - 24, r2 = R - (k % 6 === 0 ? 40 : 33);
+        ctx.beginPath(); ctx.moveTo(Math.cos(a) * r1, Math.sin(a) * r1); ctx.lineTo(Math.cos(a) * r2, Math.sin(a) * r2); ctx.stroke();
+      }
+      ctx.lineCap = 'round'; ring(0, 0, R, s.col, 6, -Math.PI / 2, -Math.PI / 2 + prg * Math.PI * 2);
+      const ha = -Math.PI / 2 + prg * Math.PI * 2;
+      if (prg > 0) { circle(Math.cos(ha) * R, Math.sin(ha) * R, 9, s.col); alpha(.25, () => circle(Math.cos(ha) * R, Math.sin(ha) * R, 18, s.col)); }
+      const n = Math.round(s.v * E.inOutCubic(prog(t, st + .2, st + 1.7)));
+      font(50, 700); const sufW = s.suf ? ctx.measureText(s.suf).width : 0;
+      font(112, 800); const nw = ctx.measureText(String(n)).width;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = C.cream; ctx.fillText(String(n), -sufW / 2, 6);
+      if (s.suf) { font(50, 700); ctx.fillStyle = s.col; ctx.textAlign = 'left'; ctx.fillText(s.suf, nw / 2 - sufW / 2 + 4, -16); }
+      ctx.restore();
+    });
+    s.l.forEach((ln, j) => line(ln, bx, by + R + 80 + j * 42, 32, { t, t0: st + .5 + j * .1, tOut: out, weight: j ? 500 : 600, color: j ? 'rgba(241,239,230,.62)' : C.cream, stagger: .05 }));
+  });
+}
+
+// ---------- 9. end card ----------
 function sceneEnd(t) {
-  if (t < T.end) return;
+  const i1 = E.inOutCubic(prog(t, S.iris, S.iris + .8));
+  const i2 = E.inOutCubic(prog(t, S.iris + .15, S.iris + .95));
+  if (i1 > 0 && i2 < 1) circle(W / 2, 540, 2300 * i1, C.sand);
+  if (i2 <= 0) return;
+  if (i2 < 1) { circle(W / 2, 540, 2300 * i2, C.cream); return; }
   ctx.fillStyle = C.cream; ctx.fillRect(0, 0, W, H);
-  const zoom = 1 + .03 * E.outCubic(prog(t, T.end, DURATION));
+  const zoom = 1 + .025 * E.inOutSine(prog(t, S.end, DURATION));
   ctx.save(); ctx.translate(W / 2, H / 2); ctx.scale(zoom, zoom); ctx.translate(-W / 2, -H / 2);
-  // frame corners
-  const fp = E.inOutExpo(prog(t, T.end + .1, T.end + .9));
-  ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.globalAlpha = .25;
+  const fp = E.inOutCubic(prog(t, S.end, S.end + 1.2));
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.globalAlpha = .22;
   [[80, 80, 1, 1], [W - 80, 80, -1, 1], [80, H - 80, 1, -1], [W - 80, H - 80, -1, -1]].forEach(([x, y, sx, sy]) => {
     ctx.beginPath(); ctx.moveTo(x + sx * 60 * fp, y); ctx.lineTo(x, y); ctx.lineTo(x, y + sy * 60 * fp); ctx.stroke();
   });
   ctx.globalAlpha = 1;
-  // wordmark with a dotless i; the dot is dropped in separately
-  const y = 560, size = 250;
-  const wm = kinetic('ıncept', W / 2, y, size, { t, t0: T.end + .1, weight: 800, tracking: -6, color: C.ink, stagger: .05, dur: .8 });
+  // wordmark with a dotless i; the dot settles in separately
+  const y = 520, size = 240;
+  const wm = letters('ıncept', W / 2, y, size, { t, t0: S.end + .1, tracking: -6, stagger: .06, dur: 1.1 });
   font(size, 800); const iw = ctx.measureText('ı').width;
   const dx = wm.sx + iw / 2 + size * .032, dyFinal = y - size * .74, dr = size * .085;
-  const drop = prog(t, T.end + .55, T.end + 1.25);
+  const drop = prog(t, S.end + .7, S.end + 1.6);
   if (drop > 0) {
-    const dy = lerp(-80, dyFinal, E.outBounce(drop));
-    circle(dx, dy, dr, C.sand);
-    const rp = E.outExpo(prog(t, T.end + .95, T.end + 1.9));
-    if (rp > 0 && rp < 1) alpha(1 - rp, () => ring(dx, dyFinal, dr + rp * 120, C.sand, 3));
+    circle(dx, lerp(dyFinal - 110, dyFinal, E.outBackSoft(drop)), dr, C.sand);
+    const rp = E.outCubic(prog(t, S.end + 1.4, S.end + 2.6));
+    if (rp > 0 && rp < 1) alpha((1 - rp) * .7, () => ring(dx, dyFinal, dr + rp * 90, C.sand, 2));
   }
-  // tagline, rule, url
-  const rl = E.inOutExpo(prog(t, T.end + .7, T.end + 1.4));
-  ctx.fillStyle = C.ink; ctx.globalAlpha = .18; ctx.fillRect(W / 2 - 420 * rl, 640, 840 * rl, 2); ctx.globalAlpha = 1;
-  kinetic('We Build Trust in Data', W / 2, 720, 50, { t, t0: T.end + .85, weight: 600, color: (i) => i >= 9 && i <= 13 ? '#a8835f' : C.ink, stagger: .018, dur: .6 });
-  const up = E.outExpo(prog(t, T.end + 1.35, T.end + 2.0));
+  const rl = E.inOutCubic(prog(t, S.end + .9, S.end + 1.8));
+  ctx.fillStyle = C.ink; ctx.globalAlpha = .18; ctx.fillRect(W / 2 - 420 * rl, 600, 840 * rl, 2); ctx.globalAlpha = 1;
+  line([['We Build ', C.ink], ['Trust', C.sandDeep], [' in Data', C.ink]], W / 2, 680, 50, { t, t0: S.end + 1.1, weight: 600 });
+  const up = E.outCubic(prog(t, S.end + 1.6, S.end + 2.4));
   if (up > 0) {
     font(32, 600); const uw = ctx.measureText('www.inceptds.com').width + 120;
-    const ux = W / 2 - uw / 2, uy = 790;
+    const ux = W / 2 - uw / 2, uy = 745;
     roundRect(ux + uw / 2 * (1 - up), uy, uw * up, 70, 35); ctx.fillStyle = C.ink; ctx.fill();
-    ctx.save(); ctx.beginPath(); ctx.rect(ux, uy, uw, 70); ctx.clip();
-    kinetic('www.inceptds.com', W / 2 - 18, uy + 46, 32, { t, t0: T.end + 1.5, weight: 600, color: C.cream, stagger: .012, dur: .5, mask: false });
-    // arrow nudges
-    const ar = E.outBack(prog(t, T.end + 1.9, T.end + 2.3));
-    const ax = ux + uw - 52 + Math.sin(Math.max(0, t - T.end - 2.3) * 5) * 4 * (ar >= 1 ? 1 : 0);
-    alpha(ar, () => { ctx.strokeStyle = C.sand; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      ctx.beginPath(); ctx.moveTo(ax - 14, uy + 35); ctx.lineTo(ax + 10, uy + 35); ctx.moveTo(ax + 1, uy + 26); ctx.lineTo(ax + 10, uy + 35); ctx.lineTo(ax + 1, uy + 44); ctx.stroke(); });
-    ctx.restore();
+    alpha(prog(t, S.end + 1.9, S.end + 2.5), () => {
+      font(32, 600); ctx.fillStyle = C.cream; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText('www.inceptds.com', W / 2 - 18, uy + 46);
+      const ax = ux + uw - 52;
+      ctx.strokeStyle = C.sand; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(ax - 14, uy + 35); ctx.lineTo(ax + 10, uy + 35); ctx.moveTo(ax + 1, uy + 26); ctx.lineTo(ax + 10, uy + 35); ctx.lineTo(ax + 1, uy + 44); ctx.stroke();
+    });
   }
+  line('Book a consultation', W / 2, 875, 26, { t, t0: S.end + 2.1, weight: 500, color: 'rgba(21,21,15,.6)', stagger: .05 });
   ctx.restore();
 }
 
-// ---------- HUD: the little details ----------
+// ---------- HUD ----------
 function hud(t) {
-  const dark = t < T.end;
-  const col = dark ? C.cream : C.ink;
-  const a = prog(t, .6, 1.2) * (dark ? .45 : .45 * prog(t, T.end + .5, T.end + 1));
+  const dark = t < S.iris + .9;
+  const a = prog(t, 1, 2) * (dark ? .4 : .4 * prog(t, S.end + .8, S.end + 1.5));
   if (a <= 0) return;
-  ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = col; font(16, 500, MONO); ctx.textBaseline = 'alphabetic';
+  ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = dark ? C.cream : C.ink; font(16, 500, MONO); ctx.textBaseline = 'alphabetic';
   ctx.letterSpacing = '3px';
-  ctx.textAlign = 'left'; ctx.fillText('INCEPT DATA SOLUTIONS', 80, 62);
+  ctx.textAlign = 'left'; ctx.fillText('INCEPT DATA SOLUTIONS', 80, 62); ctx.fillText('INCEPTDS.COM', 80, H - 46);
   ctx.textAlign = 'right';
-  const scene = t < T.wipe + .35 ? 1 : t < T.merge + .4 ? 2 : t < T.end ? 3 : 4;
-  ctx.fillText(`0${scene} / 04`, W - 80, 62);
-  const tc = t.toFixed(2).padStart(5, '0');
-  ctx.fillText(`00:${tc.replace('.', ':')}`, W - 80, H - 46);
-  ctx.textAlign = 'left'; ctx.fillText('INCEPTDS.COM', 80, H - 46);
-  // progress bar
+  const ss = Object.values(S).filter(v => v > 0); const scene = Math.min(8, 1 + ss.filter(v => t >= v).length);
+  ctx.fillText(`0${scene} / 08`, W - 80, 62);
+  const sec = Math.floor(t), fr = Math.floor((t % 1) * 100);
+  ctx.fillText(`00:${String(sec).padStart(2, '0')}:${String(fr).padStart(2, '0')}`, W - 80, H - 46);
   ctx.globalAlpha = a * .5; ctx.fillRect(80, H - 34, (W - 160) * (t / DURATION), 2);
   ctx.letterSpacing = '0px';
   ctx.restore();
-}
-
-function shake(t) {
-  let x = 0, y = 0;
-  for (const [ti, amp] of [[T.burst, 14], [T.typeIn + .55, 9], [T.stats, 6], [T.iris + .5, 5]]) {
-    if (t < ti) continue;
-    const d = t - ti, e = amp * Math.exp(-d * 9);
-    x += e * Math.sin(d * 71); y += e * Math.cos(d * 53);
-  }
-  return [x, y];
 }
 
 // ---------- frame ----------
@@ -468,28 +515,30 @@ function render(t) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1; ctx.textAlign = 'left';
   ctx.fillStyle = C.ink; ctx.fillRect(0, 0, W, H);
-  const [sx, sy] = shake(t);
-  ctx.save(); ctx.translate(sx, sy);
-  // gentle push-in on the dark section
-  if (t < T.end) { const z = 1 + .04 * (t / T.end); ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-W / 2, -H / 2); }
-  drawGrid(t);
-  drawParticles(t);
+  ctx.save();
+  const z = 1 + .03 * E.inOutSine(prog(t, 0, S.iris));
+  ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-W / 2, -H / 2);
+  background(t);
   sceneOpen(t);
-  if (t < T.wipe + .38) sceneType(t); else sceneStats(t);
+  scenePromise(t);
+  sceneGov(t);
+  sceneFUAU(t);
+  scenePartner(t);
+  sceneEco(t);
   sceneAgents(t);
+  sceneStats(t);
   ctx.restore();
-  wipeBands(t);
   sceneEnd(t);
   hud(t);
   // vignette + grain
+  const cream = t > S.iris + .9;
   const v = ctx.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * 1.05);
-  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, t < T.end ? 'rgba(0,0,0,.55)' : 'rgba(60,45,20,.12)');
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, cream ? 'rgba(60,45,20,.1)' : 'rgba(0,0,0,.5)');
   ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
-  ctx.save(); ctx.globalAlpha = .045; ctx.globalCompositeOperation = 'overlay';
+  ctx.save(); ctx.globalAlpha = .04; ctx.globalCompositeOperation = 'overlay';
   ctx.fillStyle = ctx.createPattern(GRAIN[Math.floor(t * 24) % GRAIN.length], 'repeat'); ctx.fillRect(0, 0, W, H);
   ctx.restore();
-  // fade out from black at the very start
-  const fi = 1 - prog(t, 0, .15);
+  const fi = 1 - prog(t, 0, .4);
   if (fi > 0) { ctx.fillStyle = `rgba(0,0,0,${fi})`; ctx.fillRect(0, 0, W, H); }
 }
 window.render = render;
@@ -497,9 +546,9 @@ window.DURATION = DURATION;
 
 // live playback unless driven by the renderer
 if (!location.search.includes('render')) {
-  document.fonts.ready.then(() => {
+  ready.then(() => {
     const start = performance.now();
-    const loop = now => { render(((now - start) / 1000) % (DURATION + 1.5) > DURATION ? DURATION : ((now - start) / 1000) % (DURATION + 1.5)); requestAnimationFrame(loop); };
+    const loop = now => { const s = ((now - start) / 1000) % (DURATION + 2); render(Math.min(s, DURATION)); requestAnimationFrame(loop); };
     requestAnimationFrame(loop);
   });
 }
