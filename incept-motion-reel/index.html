@@ -51,7 +51,7 @@ const LOGO_FILES = { informatica: 'informatica.png', collibra: 'collibra.png', a
 const LOGOS = {};
 const ready = Promise.all([
   document.fonts.ready,
-  ...Object.entries(LOGO_FILES).map(([k, f]) => new Promise(res => {
+  ...Object.entries({ ...LOGO_FILES, incept: '../incept-logo.png' }).map(([k, f]) => new Promise(res => {
     const im = new Image(); im.onload = () => { LOGOS[k] = im; res(); }; im.onerror = res; im.src = 'assets/partners/' + f;
   })),
 ]).then(() => {
@@ -260,27 +260,33 @@ function hub(t, t0, tOut, labelLines, dim = 1) {
     });
   });
 }
+const GOV_LINES = [['Data', 'Governance'], ['Data', 'Quality'], ['Master Data', 'Management'], ['Metadata', '& Catalog'],
+  ['Data', 'Lineage'], ['Data Privacy', '& Compliance'], ['AI', 'Governance']];
 function sceneGov(t) {
   if (t < S.gov - .3 || t > S.fuau + 1) return;
   const t0 = S.gov, out = S.fuau - .3;
-  // after the governance beat, the hub stays faintly behind Find · Understand · Access · Use
-  const dim = 1 - E.inOutCubic(prog(t, out, out + .8));
-  kicker('WHAT WE DO', 112, t, t0 + .1, out);
-  line([['Make data governance ', C.cream], ['work', C.sand], [', not just exist.', C.cream]], W / 2, 190, 56, { t, t0: t0 + .25, tOut: out, weight: 700 });
-  alpha(dim, () => {
-    const nodes = GOV.map((g, i) => ({ g, i, ta: t0 + .9 + i * .45, col: GOV_COL[i % 3], ...orbit(i, GOV.length, t, t0, 610, 265, .035) }));
-    // orbit guide
-    const og = E.inOutCubic(prog(t, t0 + .3, t0 + 1.4));
-    if (og > 0) { ctx.save(); ctx.setLineDash([2, 10]); ctx.globalAlpha *= .5; ctx.beginPath(); ctx.ellipse(HUB[0], HUB[1], 610 * og, 265 * og, 0, 0, Math.PI * 2); ctx.strokeStyle = C.line; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); }
-    nodes.forEach(n => {
-      const bez = curve(n), p = E.inOutCubic(prog(t, n.ta - .2, n.ta + .45));
-      strokeCurve(bez, p, n.col, .35 + .35 * n.depth);
-      if (p >= 1) { const u = 1 - (((t - n.ta) * .45 + n.i * .17) % 1); const [px, py] = bez(u); alpha(Math.sin(u * Math.PI), () => circle(px, py, 4, n.col)); }
-    });
-    hub(t, t0 + .2, 99, ['TRUSTED', 'DATA']);
-    [...nodes].sort((a, b) => a.depth - b.depth).forEach(n => {
-      const p = E.outBackSoft(prog(t, n.ta + .1, n.ta + .8));
-      if (p > 0) pill(n.x, n.y, n.g, n.col, (.86 + .2 * n.depth) * p, clamp(p) * (.65 + .35 * n.depth), t, n.i);
+  kicker('WHAT WE DO', 200, t, t0 + .1, out);
+  line([['Make data governance ', C.cream], ['work', C.sand], [', not just exist.', C.cream]], W / 2, 285, 60, { t, t0: t0 + .25, tOut: out, weight: 700 });
+  const cw = 228, gap = 16, ch = 290, top = 420;
+  const x0 = W / 2 - (GOV_LINES.length * cw + (GOV_LINES.length - 1) * gap) / 2;
+  // a thin rail under the cards draws across as each area arrives
+  const rail = E.inOutCubic(prog(t, t0 + .9, t0 + .9 + GOV_LINES.length * .45)) * (1 - E.inOutSine(prog(t, out, out + .5)));
+  const span = GOV_LINES.length * cw + (GOV_LINES.length - 1) * gap;
+  ctx.fillStyle = C.line; ctx.fillRect(x0, top + ch + 46, span * rail, 2);
+  GOV_LINES.forEach((ln, i) => {
+    const ta = t0 + .9 + i * .45, x = x0 + i * (cw + gap), col = GOV_COL[i % 3];
+    const s = inOut(t, ta, out + i * .04, 1);
+    alpha(s.a, () => {
+      ctx.save(); ctx.translate(x, top + s.dy);
+      roundRect(0, 0, cw, ch, 18); ctx.fillStyle = C.ink2; ctx.fill(); ctx.strokeStyle = C.line; ctx.lineWidth = 1.5; ctx.stroke();
+      const bar = E.inOutCubic(prog(t, ta + .2, ta + .9));
+      ctx.fillStyle = col; ctx.fillRect(24, 24, (cw - 48) * bar, 3);
+      font(20, 500, MONO); ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText(String(i + 1).padStart(2, '0'), 24, 68);
+      font(27, 600); ctx.fillStyle = C.cream;
+      ln.forEach((l, j) => ctx.fillText(l, 24, ch - 62 + j * 36));
+      ctx.restore();
+      circle(x + cw / 2, top + ch + 47, 5, col);
     });
   });
 }
@@ -461,16 +467,17 @@ function sceneEnd(t) {
     ctx.beginPath(); ctx.moveTo(x + sx * 60 * fp, y); ctx.lineTo(x, y); ctx.lineTo(x, y + sy * 60 * fp); ctx.stroke();
   });
   ctx.globalAlpha = 1;
-  // wordmark with a dotless i; the dot settles in separately
-  const y = 520, size = 240;
-  const wm = letters('ıncept', W / 2, y, size, { t, t0: S.end + .1, tracking: -6, stagger: .06, dur: 1.1 });
-  font(size, 800); const iw = ctx.measureText('ı').width;
-  const dx = wm.sx + iw / 2 + size * .032, dyFinal = y - size * .74, dr = size * .085;
-  const drop = prog(t, S.end + .7, S.end + 1.6);
-  if (drop > 0) {
-    circle(dx, lerp(dyFinal - 110, dyFinal, E.outBackSoft(drop)), dr, C.sand);
-    const rp = E.outCubic(prog(t, S.end + 1.4, S.end + 2.6));
-    if (rp > 0 && rp < 1) alpha((1 - rp) * .7, () => ring(dx, dyFinal, dr + rp * 90, C.sand, 2));
+  const logo = LOGOS.incept;
+  if (logo) {
+    const lw = 760, lh = lw * logo.height / logo.width, lx = W / 2 - lw / 2, ly = 285;
+    const wp = E.inOutCubic(prog(t, S.end + .1, S.end + 1.5));
+    const rise = (1 - E.outCubic(prog(t, S.end + .1, S.end + 1.3))) * 20;
+    ctx.save(); ctx.beginPath(); ctx.rect(lx - 20, ly - 40, (lw + 40) * wp, lh + 80); ctx.clip();
+    ctx.globalAlpha = E.outCubic(prog(t, S.end + .1, S.end + .9));
+    ctx.drawImage(logo, lx, ly + rise, lw, lh);
+    ctx.restore();
+    // a sand glint rides the leading edge of the wipe
+    if (wp > 0 && wp < 1) alpha(Math.sin(wp * Math.PI) * .8, () => { ctx.fillStyle = C.sand; ctx.fillRect(lx - 20 + (lw + 40) * wp - 2, ly - 30, 3, lh + 60); });
   }
   const rl = E.inOutCubic(prog(t, S.end + .9, S.end + 1.8));
   ctx.fillStyle = C.ink; ctx.globalAlpha = .18; ctx.fillRect(W / 2 - 420 * rl, 600, 840 * rl, 2); ctx.globalAlpha = 1;

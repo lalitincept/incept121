@@ -9,16 +9,16 @@ A 30-second, 1920×1080, 60 fps brand film for [inceptds.com](https://www.incept
 |---|---|
 | 0–3.4s | "Every decision runs on data." / "But can you trust it?" over a slowly drawn line |
 | 3.4–6.6s | The line opens into a frame: **We Build Trust in Data**, data governance consulting & implementation |
-| 6.6–11.3s | "Make data governance work, not just exist." Seven governance areas light up around a hub |
+| 6.6–11.3s | "Make data governance work, not just exist." Seven numbered governance cards arrive one by one |
 | 11.3–14.7s | Trusted data you can Find · Understand · Access · Use |
 | 14.7–17.6s | Featured partner card: Informatica Platinum Delivery Partner, trusted by Fortune 500 enterprises |
 | 17.6–20.7s | Partner logos drift by: Informatica, Collibra, Alation, BigID, dbt, Databricks; AWS, Microsoft Azure, Google Cloud |
 | 20.7–23.4s | The nine Incept AI agents orbit a hub |
 | 23.4–26.6s | 195 Informatica certifications · 70+ specialists · 10+ years |
-| 26.6–30s | End card: the `incept` wordmark, tagline, URL, "Book a consultation" |
+| 26.6–30s | End card: the Incept logo wipes in, then tagline, URL, "Book a consultation" |
 
 Palette, copy and agent names come from inceptds.com. Font: Inter.
-Partner logos in `assets/partners/` are taken from the inceptds.com Partners page; the Databricks mark is from
+The Incept logo (`assets/incept-logo.png`) and the partner logos in `assets/partners/` are taken from inceptds.com; the Databricks mark is from
 [Simple Icons](https://simpleicons.org) (CC0). All third-party marks belong to their owners.
 
 ## Rebuilding
