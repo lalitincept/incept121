@@ -2,10 +2,10 @@
   "name": "dominion-cdgc-video",
   "version": "1.0.0",
   "private": true,
-  "description": "CDGC Module 14 – Creating System & Data Set Assets (Intro + Conclusion) – Remotion project",
+  "description": "CDGC Module 14 \u2013 Creating System & Data Set Assets (Intro + Conclusion) \u2013 Remotion project",
   "scripts": {
     "studio": "remotion studio",
-    "render": "remotion render CDGCSystemDataSet out/CDGC_System_DataSet_Intro_Conclusion_4K.mp4",
+    "render": "remotion render CDGCSystemDataSet out/CDGC_System_DataSet_Intro_Conclusion_4K.mp4 --codec=h264 --crf=16 --x264-preset=slow --pixel-format=yuv420p --audio-bitrate=320k",
     "still": "remotion still CDGCSystemDataSet out/still.png"
   },
   "dependencies": {
