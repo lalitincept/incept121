@@ -1,0 +1,22 @@
+{
+  "name": "dominion-cdgc-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CDGC Module 14 – Creating System & Data Set Assets (Intro + Conclusion) – Remotion project",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render CDGCSystemDataSet out/CDGC_System_DataSet_Intro_Conclusion_4K.mp4",
+    "still": "remotion still CDGCSystemDataSet out/still.png"
+  },
+  "dependencies": {
+    "@fontsource-variable/plus-jakarta-sans": "5.2.8",
+    "@remotion/cli": "4.0.528",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "remotion": "4.0.528"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.12",
+    "typescript": "5.9.2"
+  }
+}
