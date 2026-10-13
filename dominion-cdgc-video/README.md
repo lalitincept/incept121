@@ -6,7 +6,7 @@ It covers only the **Intro** and **Conclusion** of the script
 
 | | |
 |---|---|
-| Output | `out/CDGC_System_DataSet_Intro_Conclusion_4K.mp4` |
+| Output | `npm run render` → `out/CDGC_System_DataSet_Intro_Conclusion_4K.mp4` (CRF 16 master, ~137 MB). The committed copy in `deliverables/` is a two-pass ~11 Mbps re-encode (92 MB) to fit GitHub's 100 MB limit, and is visually identical. |
 | Resolution | 3840 × 2160 (4K UHD), 30 fps, H.264 (CRF 16) + AAC 320k |
 | Duration | about 65.5 s |
 | Background | `#221F20`, with subtle `#0072CE` gradients in the top-left and bottom-right corners |
