@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Incept Motion Reel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; height: 100%; background: #15150f; }
+  body { display: grid; place-items: center; overflow: hidden; }
+  canvas { width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; display: block; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+/* Incept 15-second motion reel.
+   Everything is a pure function of time: render(t) draws the frame at t seconds.
+   Open the page to watch it loop; scripts/render.mjs calls render(t) frame by frame. */
+
+const W = 1920, H = 1080, DURATION = 15;
+const cvs = document.getElementById('c');
+const ctx = cvs.getContext('2d');
+const FONT = "'Inter', 'Inter Display', system-ui, sans-serif";
+const MONO = "'JetBrains Mono', 'DejaVu Sans Mono', monospace";
+
+// Palette taken from inceptds.com
+const C = {
+  ink: '#15150f', ink2: '#201f19', line: '#3b3b33',
+  cream: '#f1efe6', sand: '#d7bca2', blue: '#98b7e1', coral: '#e1a598',
+};
+
+// ---------- math & easing ----------
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const E = {
+  outCubic: p => 1 - Math.pow(1 - p, 3),
+  inOutCubic: p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2,
+  outExpo: p => p === 1 ? 1 : 1 - Math.pow(2, -10 * p),
+  inExpo: p => p === 0 ? 0 : Math.pow(2, 10 * p - 10),
+  inOutExpo: p => p === 0 ? 0 : p === 1 ? 1 : p < .5 ? Math.pow(2, 20 * p - 10) / 2 : (2 - Math.pow(2, -20 * p + 10)) / 2,
+  inOutQuart: p => p < .5 ? 8 * p ** 4 : 1 - Math.pow(-2 * p + 2, 4) / 2,
+  outBack: p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); },
+  inBack: p => { const c1 = 1.70158, c3 = c1 + 1; return c3 * p * p * p - c1 * p * p; },
+  outBounce: p => {
+    const n1 = 7.5625, d1 = 2.75;
+    if (p < 1 / d1) return n1 * p * p;
+    if (p < 2 / d1) return n1 * (p -= 1.5 / d1) * p + .75;
+    if (p < 2.5 / d1) return n1 * (p -= 2.25 / d1) * p + .9375;
+    return n1 * (p -= 2.625 / d1) * p + .984375;
+  },
+  spring: p => 1 - Math.exp(-6 * p) * Math.cos(p * 14),
+};
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// ---------- precomputed assets ----------
+const rand = rng(121);
+const PARTICLES = Array.from({ length: 280 }, () => ({
+  a: rand() * Math.PI * 2,
+  r: 120 + Math.pow(rand(), .7) * 1150,
+  s: .6 + rand() * 2.4,
+  k: 2 + rand() * 4,
+  spin: (rand() - .5) * .25,
+  col: [C.sand, C.cream, C.blue, C.coral][Math.floor(rand() * 4)],
+  ph: rand() * 10,
+}));
+const GRAIN = Array.from({ length: 6 }, (_, n) => {
+  const g = document.createElement('canvas'); g.width = g.height = 256;
+  const gx = g.getContext('2d'), id = gx.createImageData(256, 256), r = rng(900 + n);
+  for (let i = 0; i < id.data.length; i += 4) { const v = r() * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
+  gx.putImageData(id, 0, 0); return g;
+});
+
+// ---------- drawing helpers ----------
+function font(size, weight = 600, fam = FONT) { ctx.font = `${weight} ${size}px ${fam}`; }
+
+// Per-letter masked reveal. Letter positions come from prefix widths so kerning survives.
+function kinetic(str, x, y, size, o) {
+  const { weight = 700, color = C.cream, t, t0, stagger = .03, dur = .7, tOut = 99, outStagger = .02, outDur = .45,
+    align = 'center', tracking = 0, ease = E.outExpo, rot = 0, mask = true, stroke = 0 } = o;
+  font(size, weight, o.fam || FONT);
+  ctx.textBaseline = 'alphabetic';
+  const chars = [...str];
+  const xs = chars.map((_, i) => ctx.measureText(chars.slice(0, i).join('')).width + i * tracking);
+  const total = ctx.measureText(str).width + (chars.length - 1) * tracking;
+  const sx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+  ctx.save();
+  if (mask) { ctx.beginPath(); ctx.rect(sx - size, y - size * 1.02, total + size * 2, size * 1.3); ctx.clip(); }
+  chars.forEach((ch, i) => {
+    const pin = ease(prog(t, t0 + i * stagger, t0 + i * stagger + dur));
+    const pout = E.inExpo(prog(t, tOut + i * outStagger, tOut + i * outStagger + outDur));
+    if (pin <= 0 || pout >= 1) return;
+    const dy = (1 - pin) * size * 1.05 - pout * size * 1.15;
+    ctx.save();
+    ctx.translate(sx + xs[i], y + dy);
+    if (rot) ctx.rotate((1 - pin) * rot);
+    if (stroke) { ctx.lineWidth = stroke; ctx.strokeStyle = color; ctx.strokeText(ch, 0, 0); }
+    else { ctx.fillStyle = typeof color === 'function' ? color(i, ch) : color; ctx.fillText(ch, 0, 0); }
+    ctx.restore();
+  });
+  ctx.restore();
+  return { sx, total, xs };
+}
+
+function wordsReveal(words, x, y, size, o) {
+  // words: [[text, color], ...]; centred line, word-level mask stagger
+  font(size, o.weight || 600);
+  const space = ctx.measureText(' ').width;
+  const widths = words.map(w => ctx.measureText(w[0]).width);
+  const total = widths.reduce((a, b) => a + b, 0) + space * (words.length - 1);
+  let cx = x - total / 2;
+  words.forEach((w, i) => {
+    kinetic(w[0], cx, y, size, { ...o, color: w[1], align: 'left', t0: o.t0 + i * (o.wordStagger || .05), stagger: .012,
+      tOut: o.tOut + i * .025, outStagger: .004 });
+    cx += widths[i] + space;
+  });
+}
+
+function circle(x, y, r, fill) { ctx.beginPath(); ctx.arc(x, y, Math.max(0, r), 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); }
+function ring(x, y, r, col, lw, a0 = 0, a1 = Math.PI * 2) { ctx.beginPath(); ctx.arc(x, y, Math.max(0, r), a0, a1); ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke(); }
+function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+function alpha(a, fn) { ctx.save(); ctx.globalAlpha *= clamp(a); fn(); ctx.restore(); }
+
+// ---------- scene timings ----------
+const T = {
+  burst: 1.0,     // line snaps, particles explode
+  typeIn: 1.75,   // WE BUILD TRUST IN DATA
+  wipe: 4.4,      // diagonal band transition
+  stats: 4.75,    // numbers
+  merge: 7.55,    // rings fly to centre
+  agents: 8.05,   // agent network
+  suck: 10.95,    // network collapses into hub
+  iris: 11.45,    // hub floods screen
+  end: 12.0,      // end card
+};
+
+// ---------- background layers ----------
+function drawParticles(t) {
+  if (t < T.burst || t > T.iris + .6) return;
+  const cx = W / 2, cy = H / 2;
+  const suck = E.inExpo(prog(t, T.suck, T.iris + .2));
+  const hubY = 600;
+  for (const p of PARTICLES) {
+    const dt = t - T.burst;
+    const R = p.r * (1 - Math.exp(-p.k * dt));
+    const a = p.a + p.spin * dt + .04 * dt;
+    let x = cx + Math.cos(a) * R + Math.sin(t * .7 + p.ph) * 14;
+    let y = cy + Math.sin(a) * R * .72 + Math.cos(t * .6 + p.ph) * 14;
+    x = lerp(x, cx, suck); y = lerp(y, hubY, suck);
+    const fadeIn = prog(dt, 0, .05);
+    const twinkle = .45 + .55 * Math.abs(Math.sin(t * 1.6 + p.ph));
+    const amb = t > 2.2 ? .35 : lerp(1, .35, prog(t, 1.6, 2.2));
+    alpha(fadeIn * twinkle * amb * (1 - suck * .3), () => {
+      // streak while fast
+      const sp = p.r * p.k * Math.exp(-p.k * dt);
+      if (sp > 60 && suck === 0) {
+        const len = Math.min(140, sp * .06);
+        ctx.strokeStyle = p.col; ctx.lineWidth = p.s; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - Math.cos(a) * len, y - Math.sin(a) * len * .72); ctx.stroke();
+      }
+      circle(x, y, p.s, p.col);
+    });
+  }
+}
+
+function drawGrid(t) {
+  if (t < T.burst || t > T.iris + .6) return;
+  const step = 120;
+  const fade = (t < 2.4 ? lerp(.55, .22, prog(t, 1.6, 2.4)) : .22) * (1 - prog(t, T.iris, T.iris + .4));
+  ctx.save(); ctx.globalAlpha = fade; ctx.strokeStyle = C.line; ctx.lineWidth = 1;
+  for (let i = 1; i < W / step; i++) {
+    const p = E.outExpo(prog(t, T.burst + .1 + Math.abs(i - 8) * .025, T.burst + .9 + Math.abs(i - 8) * .025));
+    const x = i * step; const h = H * p;
+    ctx.beginPath(); ctx.moveTo(x, H / 2 - h / 2); ctx.lineTo(x, H / 2 + h / 2); ctx.stroke();
+  }
+  for (let j = 1; j < H / step; j++) {
+    const p = E.outExpo(prog(t, T.burst + Math.abs(j - 4.5) * .04, T.burst + .8 + Math.abs(j - 4.5) * .04));
+    const y = j * step; const w = W * p;
+    ctx.beginPath(); ctx.moveTo(W / 2 - w / 2, y); ctx.lineTo(W / 2 + w / 2, y); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ---------- scene 1: dot → line → burst ----------
+function sceneOpen(t) {
+  if (t > T.typeIn + .6) return;
+  const cx = W / 2, cy = H / 2;
+  // dot pops in, breathes, then stretches into a line
+  const pop = E.outBack(prog(t, .1, .5));
+  const stretch = E.inOutExpo(prog(t, .55, T.burst));
+  const collapse = E.inOutExpo(prog(t, T.burst + .05, T.burst + .7));
+  const r = 16 * pop * (1 + .12 * Math.sin(t * 14) * (1 - prog(t, .3, .55)));
+  const w = lerp(r * 2, 1500, stretch) * (1 - collapse);
+  const h = lerp(r * 2, 3, stretch);
+  if (w > .5) { roundRect(cx - w / 2, cy - h / 2, w, h, h / 2); ctx.fillStyle = C.sand; ctx.fill(); }
+  // shockwaves
+  [0, .12, .24].forEach((d, i) => {
+    const p = E.outExpo(prog(t, T.burst + d, T.burst + d + 1.1));
+    if (p > 0 && p < 1) alpha(1 - p, () => ring(cx, cy, p * (900 - i * 180), i === 1 ? C.blue : C.sand, 3 - i * .7));
+  });
+  // flash
+  const f = 1 - prog(t, T.burst, T.burst + .25);
+  if (t >= T.burst && f > 0) alpha(f * .35, () => { ctx.fillStyle = C.cream; ctx.fillRect(0, 0, W, H); });
+}
+
+// ---------- scene 2: kinetic type ----------
+function sceneType(t) {
+  if (t < T.typeIn || t > T.stats) return;
+  const out = T.wipe - .35;
+  kinetic('WE BUILD', W / 2, 330, 110, { t, t0: T.typeIn, weight: 600, tracking: 18, color: C.cream, tOut: out });
+  // TRUST: outline ghosts punch outward when the word lands
+  const land = T.typeIn + .35;
+  [0, .12].forEach(d => {
+    const g = E.outCubic(prog(t, land + .5 + d, land + 1.3 + d));
+    if (g <= 0 || g >= 1) return;
+    ctx.save(); ctx.translate(W / 2, 560); ctx.scale(1 + g * .22, 1 + g * .22); ctx.translate(-W / 2, -560);
+    alpha((1 - g) * .7, () => kinetic('TRUST', W / 2, 640, 330, { t: 99, t0: 0, weight: 800, tracking: 6, color: C.sand, stroke: 2.5, mask: false }));
+    ctx.restore();
+  });
+  kinetic('TRUST', W / 2, 640, 330, { t, t0: land, weight: 800, tracking: 6, color: C.sand, stagger: .05, dur: .8, rot: .25, ease: E.outBack, tOut: out, outStagger: .03 });
+  kinetic('IN DATA', W / 2, 820, 110, { t, t0: T.typeIn + .75, weight: 600, tracking: 18, color: C.cream, tOut: out + .06 });
+  // underline sweep + tiny caption
+  const ul = E.inOutExpo(prog(t, T.typeIn + 1.1, T.typeIn + 1.8));
+  const ulOut = E.inOutExpo(prog(t, out, out + .4));
+  if (ul > ulOut) { ctx.fillStyle = C.sand; ctx.fillRect(W / 2 - 520 + 1040 * ulOut, 880, 1040 * (ul - ulOut), 4); }
+  kinetic('DATA GOVERNANCE · INFORMATICA IDMC · AI AGENTS', W / 2, 935, 22, { t, t0: T.typeIn + 1.3, fam: MONO, weight: 500, tracking: 4, color: C.cream, stagger: .008, dur: .5, tOut: out + .1, outStagger: .003 });
+}
+
+// ---------- transition: diagonal bands ----------
+function wipeBands(t) {
+  const bands = [[C.sand, 0, 2700], [C.cream, .07, 2380], [C.ink2, .13, 2100]];
+  bands.forEach(([col, d, bw]) => {
+    const p = E.inOutQuart(prog(t, T.wipe + d, T.wipe + d + .75));
+    if (p <= 0 || p >= 1) return;
+    const xc = lerp(-bw, W + bw, p), sk = 260;
+    ctx.beginPath();
+    ctx.moveTo(xc - bw / 2 + sk, 0); ctx.lineTo(xc + bw / 2 + sk, 0);
+    ctx.lineTo(xc + bw / 2 - sk, H); ctx.lineTo(xc - bw / 2 - sk, H); ctx.closePath();
+    ctx.fillStyle = col; ctx.fill();
+  });
+}
+
+// ---------- scene 3: stats ----------
+const STATS = [
+  { v: 195, suf: '', l: ['Informatica', 'certifications'], col: C.sand },
+  { v: 70, suf: '+', l: ['Data governance', 'specialists'], col: C.blue },
+  { v: 1, suf: 'st', l: ['to deploy CDGC & CDMP', 'in North America'], col: C.coral },
+];
+const RING_POS = [[440, 500], [960, 500], [1480, 500]];
+function sceneStats(t) {
+  if (t < T.stats || t > T.agents + .2) return;
+  const t0 = T.stats + .25;
+  kinetic('BY THE NUMBERS', W / 2, 150, 24, { t, t0: t0 - .1, fam: MONO, weight: 500, tracking: 10, color: C.sand, stagger: .015, dur: .5, tOut: T.merge - .2, outStagger: .005 });
+  const kl = E.inOutExpo(prog(t, t0, t0 + .8)) - E.inOutExpo(prog(t, T.merge - .2, T.merge + .2));
+  if (kl > 0) { ctx.fillStyle = C.line; ctx.fillRect(W / 2 - 360 * kl - 250, 141, 360 * kl, 2); ctx.fillRect(W / 2 + 250, 141, 360 * kl, 2); }
+
+  STATS.forEach((s, i) => {
+    const st = t0 + i * .18;
+    const [bx, by] = RING_POS[i];
+    const R = 165;
+    // merge: shrink & fly to hub
+    const m = E.inBack(prog(t, T.merge + i * .06, T.merge + .45 + i * .06));
+    const x = lerp(bx, W / 2, m), y = lerp(by, 600, m);
+    const sc = 1 - m * .9;
+    const pop = E.outBack(prog(t, st, st + .6));
+    if (pop <= 0 || m >= 1) return;
+    ctx.save(); ctx.translate(x, y); ctx.scale(sc * pop, sc * pop);
+    // track + ticks
+    ring(0, 0, R, C.line, 2);
+    const fill = E.inOutCubic(prog(t, st + .15, st + 1.5));
+    const target = i === 2 ? 1 : i === 0 ? .92 : .78;
+    const prg = fill * target;
+    for (let k = 0; k < 72; k++) {
+      const a = -Math.PI / 2 + k / 72 * Math.PI * 2;
+      const on = k / 72 < prg;
+      ctx.strokeStyle = on ? s.col : C.line; ctx.lineWidth = on ? 3 : 1.5;
+      const r1 = R - 26, r2 = R - (k % 6 === 0 ? 44 : 36);
+      ctx.beginPath(); ctx.moveTo(Math.cos(a) * r1, Math.sin(a) * r1); ctx.lineTo(Math.cos(a) * r2, Math.sin(a) * r2); ctx.stroke();
+    }
+    ctx.lineCap = 'round';
+    ring(0, 0, R, s.col, 7, -Math.PI / 2, -Math.PI / 2 + prg * Math.PI * 2);
+    const ha = -Math.PI / 2 + prg * Math.PI * 2;
+    if (fill > 0) { circle(Math.cos(ha) * R, Math.sin(ha) * R, 11, s.col); alpha(.25, () => circle(Math.cos(ha) * R, Math.sin(ha) * R, 22, s.col)); }
+    // rotating dashed orbit
+    ctx.save(); ctx.rotate(t * (i % 2 ? -.5 : .5)); ctx.setLineDash([3, 16]);
+    alpha(.6, () => ring(0, 0, R + 26, s.col, 2)); ctx.restore();
+    // number
+    const n = Math.max(i === 2 ? 1 : 0, Math.round(s.v * E.outExpo(prog(t, st + .15, st + 1.6))));
+    font(118, 800); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const sufW = s.suf ? (font(54, 700), ctx.measureText(s.suf).width) : 0;
+    font(118, 800); const nw = ctx.measureText(String(n)).width;
+    ctx.fillStyle = C.cream; ctx.fillText(String(n), -sufW / 2, 6);
+    if (s.suf) { font(54, 700); ctx.fillStyle = s.col; ctx.textAlign = 'left'; ctx.fillText(s.suf, nw / 2 - sufW / 2 + 4, s.suf === '+' ? -14 : -20); }
+    ctx.restore();
+    // labels (not scaled)
+    ctx.textAlign = 'left';
+    s.l.forEach((ln, j) => kinetic(ln, bx, by + R + 85 + j * 42, 32, { t, t0: st + .45 + j * .08, weight: j ? 500 : 600, color: j ? 'rgba(241,239,230,.62)' : C.cream, stagger: .01, dur: .55, tOut: T.merge - .25, outStagger: .004 }));
+  });
+}
+
+// ---------- scene 4: agent network ----------
+const AGENTS = ['GovernIQ™', 'Onboard360™', 'DataIQ™', 'PulseDQ™', 'DescribeAI™', 'TermForge™', 'LineageIQ™', 'MigrateIQ™', 'ClassifyIQ™'];
+const AG_COL = [C.sand, C.blue, C.coral];
+function sceneAgents(t) {
+  if (t < T.merge + .3 || t > T.end + .2) return;
+  const hx = W / 2, hy = 600;
+  const suck = E.inExpo(prog(t, T.suck, T.iris + .05));
+  // hub
+  const hubPop = E.spring(prog(t, T.merge + .4, T.merge + 1.4));
+  const hubR = 74 * hubPop;
+  // radiating pulses
+  for (let k = 0; k < 3; k++) {
+    const ph = ((t - T.agents) / 1.1 + k / 3) % 1;
+    if (t > T.agents && suck < .5) alpha((1 - ph) * .5, () => ring(hx, hy, hubR + ph * 240, C.sand, 2));
+  }
+  // orbit ellipses
+  const orb = E.inOutExpo(prog(t, T.agents, T.agents + 1.0)) * (1 - suck);
+  if (orb > 0) {
+    ctx.save(); ctx.setLineDash([2, 10]); ctx.globalAlpha = .55;
+    ctx.beginPath(); ctx.ellipse(hx, hy, 660 * orb, 300 * orb, 0, 0, Math.PI * 2); ctx.strokeStyle = C.line; ctx.lineWidth = 2; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(hx, hy, 400 * orb, 180 * orb, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+  // nodes
+  const nodes = AGENTS.map((name, i) => {
+    let a = -Math.PI / 2 + i * Math.PI * 2 / 9 + .16 * (t - T.agents);
+    a += suck * 2.4;
+    const k = 1 - suck;
+    const x = hx + Math.cos(a) * 660 * k, y = hy + Math.sin(a) * 300 * k;
+    const depth = (Math.sin(a) + 1) / 2;
+    const ta = T.agents + .25 + i * .11;
+    return { name, i, x, y, depth, ta, col: AG_COL[i % 3] };
+  });
+  // connectors
+  nodes.forEach(n => {
+    const p = E.outExpo(prog(t, n.ta - .15, n.ta + .45));
+    if (p <= 0) return;
+    const mx = (hx + n.x) / 2 + (n.y - hy) * .25, my = (hy + n.y) / 2 - (n.x - hx) * .12;
+    const bez = (u) => [(1 - u) ** 2 * hx + 2 * (1 - u) * u * mx + u * u * n.x, (1 - u) ** 2 * hy + 2 * (1 - u) * u * my + u * u * n.y];
+    ctx.save(); ctx.strokeStyle = n.col; ctx.globalAlpha = .45 + .35 * n.depth; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(hx, hy);
+    for (let u = .02; u <= p + 1e-6; u += .02) { const [bx, by] = bez(u); ctx.lineTo(bx, by); }
+    ctx.stroke(); ctx.restore();
+    // data packets travelling to the hub
+    if (p >= 1 && suck < .2) for (let q = 0; q < 2; q++) {
+      const u = 1 - (((t - n.ta) * .9 + q * .5 + n.i * .13) % 1);
+      const [px, py] = bez(u);
+      alpha(Math.sin(u * Math.PI), () => { circle(px, py, 4.5, n.col); alpha(.3, () => circle(px, py, 10, n.col)); });
+    }
+  });
+  // hub on top of connectors
+  if (hubR > 0) {
+    alpha(.18, () => circle(hx, hy, hubR * 1.45, C.sand));
+    circle(hx, hy, hubR, C.sand);
+    alpha(prog(t, T.merge + .7, T.merge + 1.0) * (1 - prog(t, T.suck, T.suck + .3)), () => {
+      font(20, 800); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = C.ink;
+      ctx.letterSpacing = '3px'; ctx.fillText('AGENTS', hx + 1.5, hy + 1); ctx.letterSpacing = '0px';
+    });
+  }
+  // pills, back to front
+  [...nodes].sort((a, b) => a.depth - b.depth).forEach(n => {
+    const p = E.outBack(prog(t, n.ta + .15, n.ta + .6));
+    if (p <= 0) return;
+    const sc = (.82 + .3 * n.depth) * p * (1 - suck * .85);
+    font(26, 600); const tw = ctx.measureText(n.name).width;
+    const pw = tw + 74, ph = 58;
+    ctx.save(); ctx.translate(n.x, n.y); ctx.scale(sc, sc); ctx.globalAlpha = .55 + .45 * n.depth;
+    roundRect(-pw / 2, -ph / 2, pw, ph, ph / 2); ctx.fillStyle = C.ink2; ctx.fill();
+    ctx.strokeStyle = n.col; ctx.lineWidth = 2; ctx.stroke();
+    circle(-pw / 2 + 28, 0, 7, n.col);
+    alpha(.35 + .35 * Math.sin(t * 6 + n.i), () => ring(-pw / 2 + 28, 0, 12, n.col, 1.5));
+    ctx.fillStyle = C.cream; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(n.name, -pw / 2 + 46, 2);
+    ctx.restore();
+  });
+  // headline
+  ctx.textAlign = 'left';
+  kinetic('INCEPT AI AGENTS', W / 2, 105, 22, { t, t0: T.agents - .05, fam: MONO, weight: 500, tracking: 10, color: C.sand, stagger: .015, dur: .5, tOut: T.suck - .1, outStagger: .004 });
+  wordsReveal([['Agents', C.cream], ['that', C.cream], ['take', C.cream], ['the', C.cream], ['data', C.sand], ['work', C.sand], ['off', C.cream], ['your', C.cream], ['team.', C.cream]],
+    W / 2, 185, 56, { t, t0: T.agents + .1, weight: 700, wordStagger: .06, dur: .6, tOut: T.suck - .15 });
+  // iris: hub floods the screen sand, then cream
+  const i1 = E.inOutExpo(prog(t, T.iris, T.iris + .55));
+  const i2 = E.inOutExpo(prog(t, T.iris + .1, T.iris + .65));
+  if (i1 > 0) circle(hx, hy, lerp(hubR, 2300, i1), C.sand);
+  if (i2 > 0) circle(hx, hy, lerp(0, 2300, i2), C.cream);
+}
+
+// ---------- scene 5: end card ----------
+function sceneEnd(t) {
+  if (t < T.end) return;
+  ctx.fillStyle = C.cream; ctx.fillRect(0, 0, W, H);
+  const zoom = 1 + .03 * E.outCubic(prog(t, T.end, DURATION));
+  ctx.save(); ctx.translate(W / 2, H / 2); ctx.scale(zoom, zoom); ctx.translate(-W / 2, -H / 2);
+  // frame corners
+  const fp = E.inOutExpo(prog(t, T.end + .1, T.end + .9));
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.globalAlpha = .25;
+  [[80, 80, 1, 1], [W - 80, 80, -1, 1], [80, H - 80, 1, -1], [W - 80, H - 80, -1, -1]].forEach(([x, y, sx, sy]) => {
+    ctx.beginPath(); ctx.moveTo(x + sx * 60 * fp, y); ctx.lineTo(x, y); ctx.lineTo(x, y + sy * 60 * fp); ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+  // wordmark with a dotless i; the dot is dropped in separately
+  const y = 560, size = 250;
+  const wm = kinetic('ıncept', W / 2, y, size, { t, t0: T.end + .1, weight: 800, tracking: -6, color: C.ink, stagger: .05, dur: .8 });
+  font(size, 800); const iw = ctx.measureText('ı').width;
+  const dx = wm.sx + iw / 2 + size * .032, dyFinal = y - size * .74, dr = size * .085;
+  const drop = prog(t, T.end + .55, T.end + 1.25);
+  if (drop > 0) {
+    const dy = lerp(-80, dyFinal, E.outBounce(drop));
+    circle(dx, dy, dr, C.sand);
+    const rp = E.outExpo(prog(t, T.end + .95, T.end + 1.9));
+    if (rp > 0 && rp < 1) alpha(1 - rp, () => ring(dx, dyFinal, dr + rp * 120, C.sand, 3));
+  }
+  // tagline, rule, url
+  const rl = E.inOutExpo(prog(t, T.end + .7, T.end + 1.4));
+  ctx.fillStyle = C.ink; ctx.globalAlpha = .18; ctx.fillRect(W / 2 - 420 * rl, 640, 840 * rl, 2); ctx.globalAlpha = 1;
+  kinetic('We Build Trust in Data', W / 2, 720, 50, { t, t0: T.end + .85, weight: 600, color: (i) => i >= 9 && i <= 13 ? '#a8835f' : C.ink, stagger: .018, dur: .6 });
+  const up = E.outExpo(prog(t, T.end + 1.35, T.end + 2.0));
+  if (up > 0) {
+    font(32, 600); const uw = ctx.measureText('www.inceptds.com').width + 120;
+    const ux = W / 2 - uw / 2, uy = 790;
+    roundRect(ux + uw / 2 * (1 - up), uy, uw * up, 70, 35); ctx.fillStyle = C.ink; ctx.fill();
+    ctx.save(); ctx.beginPath(); ctx.rect(ux, uy, uw, 70); ctx.clip();
+    kinetic('www.inceptds.com', W / 2 - 18, uy + 46, 32, { t, t0: T.end + 1.5, weight: 600, color: C.cream, stagger: .012, dur: .5, mask: false });
+    // arrow nudges
+    const ar = E.outBack(prog(t, T.end + 1.9, T.end + 2.3));
+    const ax = ux + uw - 52 + Math.sin(Math.max(0, t - T.end - 2.3) * 5) * 4 * (ar >= 1 ? 1 : 0);
+    alpha(ar, () => { ctx.strokeStyle = C.sand; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(ax - 14, uy + 35); ctx.lineTo(ax + 10, uy + 35); ctx.moveTo(ax + 1, uy + 26); ctx.lineTo(ax + 10, uy + 35); ctx.lineTo(ax + 1, uy + 44); ctx.stroke(); });
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// ---------- HUD: the little details ----------
+function hud(t) {
+  const dark = t < T.end;
+  const col = dark ? C.cream : C.ink;
+  const a = prog(t, .6, 1.2) * (dark ? .45 : .45 * prog(t, T.end + .5, T.end + 1));
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = col; font(16, 500, MONO); ctx.textBaseline = 'alphabetic';
+  ctx.letterSpacing = '3px';
+  ctx.textAlign = 'left'; ctx.fillText('INCEPT DATA SOLUTIONS', 80, 62);
+  ctx.textAlign = 'right';
+  const scene = t < T.wipe + .35 ? 1 : t < T.merge + .4 ? 2 : t < T.end ? 3 : 4;
+  ctx.fillText(`0${scene} / 04`, W - 80, 62);
+  const tc = t.toFixed(2).padStart(5, '0');
+  ctx.fillText(`00:${tc.replace('.', ':')}`, W - 80, H - 46);
+  ctx.textAlign = 'left'; ctx.fillText('INCEPTDS.COM', 80, H - 46);
+  // progress bar
+  ctx.globalAlpha = a * .5; ctx.fillRect(80, H - 34, (W - 160) * (t / DURATION), 2);
+  ctx.letterSpacing = '0px';
+  ctx.restore();
+}
+
+function shake(t) {
+  let x = 0, y = 0;
+  for (const [ti, amp] of [[T.burst, 14], [T.typeIn + .55, 9], [T.stats, 6], [T.iris + .5, 5]]) {
+    if (t < ti) continue;
+    const d = t - ti, e = amp * Math.exp(-d * 9);
+    x += e * Math.sin(d * 71); y += e * Math.cos(d * 53);
+  }
+  return [x, y];
+}
+
+// ---------- frame ----------
+function render(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1; ctx.textAlign = 'left';
+  ctx.fillStyle = C.ink; ctx.fillRect(0, 0, W, H);
+  const [sx, sy] = shake(t);
+  ctx.save(); ctx.translate(sx, sy);
+  // gentle push-in on the dark section
+  if (t < T.end) { const z = 1 + .04 * (t / T.end); ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-W / 2, -H / 2); }
+  drawGrid(t);
+  drawParticles(t);
+  sceneOpen(t);
+  if (t < T.wipe + .38) sceneType(t); else sceneStats(t);
+  sceneAgents(t);
+  ctx.restore();
+  wipeBands(t);
+  sceneEnd(t);
+  hud(t);
+  // vignette + grain
+  const v = ctx.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * 1.05);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, t < T.end ? 'rgba(0,0,0,.55)' : 'rgba(60,45,20,.12)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.globalAlpha = .045; ctx.globalCompositeOperation = 'overlay';
+  ctx.fillStyle = ctx.createPattern(GRAIN[Math.floor(t * 24) % GRAIN.length], 'repeat'); ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+  // fade out from black at the very start
+  const fi = 1 - prog(t, 0, .15);
+  if (fi > 0) { ctx.fillStyle = `rgba(0,0,0,${fi})`; ctx.fillRect(0, 0, W, H); }
+}
+window.render = render;
+window.DURATION = DURATION;
+
+// live playback unless driven by the renderer
+if (!location.search.includes('render')) {
+  document.fonts.ready.then(() => {
+    const start = performance.now();
+    const loop = now => { render(((now - start) / 1000) % (DURATION + 1.5) > DURATION ? DURATION : ((now - start) / 1000) % (DURATION + 1.5)); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  });
+}
+</script>
+</body>
+</html>
