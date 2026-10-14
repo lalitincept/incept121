@@ -65,9 +65,6 @@ drone = pad([38, 45, 50], 10.4, a=.4, r=.6, bright=4)
 place(drone * (1 + .25 * np.sin(2 * np.pi * 2 * np.arange(len(drone)) / SR)), 0, .5)
 for k in range(int(10 / .25)):
     place(tick(), k * .25, .25 if k % 4 else .45, .4 if k % 2 else -.4)
-for at in (1.66, 3.35):
-    place(glitch(.55 if at > 3 else .25), at, .35)
-place(whoosh(.5), 3.45, .6)
 for at in (4.48, 5.84, 7.9):
     place(impact(1.0), at - .02, .5); place(whoosh(.35), at - .35, .35, .3)
 # stall: a falling tone when "stalling" lands

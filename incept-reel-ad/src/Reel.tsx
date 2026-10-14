@@ -202,7 +202,6 @@ const Authority: React.FC<{t: number}> = ({t}) => {
   const wipe = ease(prog(t, V.incept - .05, V.incept + .7));
   // 3c: Informatica Platinum Partner
   const c = win(t, 13.1, 16.15);
-  const shine = prog(t, V.platinum, V.platinum + .9);
   // 3d: Fortune 500
   const d = win(t, 16.1, 17.85);
   // 3e: complex data challenges, untangling
@@ -225,18 +224,7 @@ const Authority: React.FC<{t: number}> = ({t}) => {
       </Center>}
       {c > 0 && <Center style={{opacity: c}}>
         <Pop t={t} at={V.trusted}><Kicker style={{textAlign: 'center', marginBottom: 40}}>A trusted</Kicker></Pop>
-        <Pop t={t} at={V.informatica2 - .1}>
-          <div style={{width: 880, background: C.tile, borderRadius: 44, padding: '70px 60px 64px', boxSizing: 'border-box', textAlign: 'center',
-            boxShadow: '0 40px 120px rgba(0,0,0,.6)', position: 'relative', overflow: 'hidden'}}>
-            <Img src={staticFile('informatica.png')} style={{width: 520}} />
-            <div style={{height: 3, width: 160, background: C.sand, margin: '44px auto 40px', transform: `scaleX(${ease(prog(t, V.platinum - .2, V.platinum + .3))})`}} />
-            <div style={{fontFamily: INTER, fontWeight: 900, fontSize: 92, letterSpacing: -2, lineHeight: 1,
-              backgroundImage: `linear-gradient(100deg, #6d6a60 0%, #b9b6ad ${shine * 140 - 30}%, #ffffff ${shine * 140 - 15}%, #b9b6ad ${shine * 140}%, #4a4840 100%)`,
-              WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
-              opacity: clamp((t - V.platinum + .1) * 5), transform: `scale(${.8 + .2 * pop(t, V.platinum - .1)})`}}>PLATINUM</div>
-            <div style={{fontFamily: INTER, fontWeight: 700, fontSize: 52, color: '#2d2c27', marginTop: 10, opacity: clamp((t - V.platinum - .2) * 5)}}>Partner</div>
-          </div>
-        </Pop>
+        <PlatinumBadge t={t} />
       </Center>}
       {d > 0 && <Center style={{opacity: d}}>
         <Pop t={t} at={V.fortune - .05}><Kicker style={{textAlign: 'center'}}>Helping</Kicker></Pop>
@@ -246,6 +234,7 @@ const Authority: React.FC<{t: number}> = ({t}) => {
       </Center>}
       {e > 0 && <Center style={{opacity: e}}>
         <Untangle p={untangle} t={t} />
+        <Clients t={t} at={V.solve - .05} />
         <div style={{position: 'absolute', top: 1260, width: '100%', textAlign: 'center'}}>
           <Pop t={t} at={V.solve}><div style={{...head, fontSize: 110}}>solve <span style={{color: C.sand}}>complex</span></div></Pop>
           <Pop t={t} at={V.complex + .5}><div style={{...head, fontSize: 110, marginTop: 10}}>data challenges</div></Pop>
@@ -254,16 +243,55 @@ const Authority: React.FC<{t: number}> = ({t}) => {
     </AbsoluteFill>
   );
 };
+// Official Informatica Platinum Partner badge: spins in, then a glint and a glow when "Platinum" is spoken
+const PlatinumBadge: React.FC<{t: number}> = ({t}) => {
+  const at = V.informatica2 - .15;
+  if (t < at) return null;
+  const p = pop(t, at, {damping: 14, stiffness: 120, mass: 1});
+  const glint = prog(t, V.platinum - .05, V.platinum + .75);
+  const glow = Math.sin(prog(t, V.platinum - .1, V.platinum + 1.2) * Math.PI);
+  const size = 780;
+  return (
+    <div style={{width: size, height: size, position: 'relative', transform: `scale(${.4 + .6 * p}) rotate(${(1 - p) * -40}deg)`, opacity: clamp(p * 2)}}>
+      <div style={{position: 'absolute', inset: -40, borderRadius: '50%', boxShadow: `0 0 ${60 + 80 * glow}px ${10 + 30 * glow}px rgba(215,188,162,${.18 + .3 * glow})`}} />
+      <Img src={staticFile('informatica-platinum-badge.png')} style={{width: size, height: size, position: 'absolute', inset: 0}} />
+      {glint > 0 && glint < 1 && (
+        <div style={{position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden', mixBlendMode: 'screen'}}>
+          <div style={{position: 'absolute', top: -200, bottom: -200, width: 160, left: -300 + glint * (size + 600),
+            transform: 'rotate(20deg)', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent)'}} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Client logos, shown as one-colour marks under a "Trusted by" label
+const CLIENTS = ['surescripts', 'dominion-energy', 'teradyne', 'beone'];
+const Clients: React.FC<{t: number; at: number}> = ({t, at}) => (
+  <div style={{position: 'absolute', top: 300, left: 80, right: 80}}>
+    <Pop t={t} at={at}><Kicker style={{textAlign: 'center'}}>Trusted by</Kicker></Pop>
+    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px 40px', marginTop: 44}}>
+      {CLIENTS.map((c, i) => (
+        <Pop key={c} t={t} at={at + .12 + i * .12} from={30}>
+          <div style={{height: 130, borderRadius: 28, border: `2px solid ${C.line}`, background: 'rgba(28,27,22,.85)', display: 'grid', placeItems: 'center'}}>
+            <Img src={staticFile(`clients/${c}.png`)} style={{maxWidth: 300, maxHeight: c === 'dominion-energy' ? 84 : 64, objectFit: 'contain', opacity: .92}} />
+          </div>
+        </Pop>
+      ))}
+    </div>
+  </div>
+);
+
 // tangled strands that relax into straight, ordered lanes
 const Untangle: React.FC<{p: number; t: number}> = ({p, t}) => {
   const lanes = 7, cols = [C.sand, C.blue, C.cream, C.warn, C.sand, C.blue, C.cream];
   return (
     <svg width={1080} height={1920} style={{position: 'absolute', inset: 0}}>
       {Array.from({length: lanes}, (_, i) => {
-        const yEnd = 520 + i * 70;
+        const yEnd = 790 + i * 55;
         const pts = Array.from({length: 7}, (_, k) => {
           const x = 90 + k * 150;
-          const messy = 520 + (random(`u${i}-${k}`) * 420) + Math.sin(t * 2 + i + k) * 30;
+          const messy = 760 + (random(`u${i}-${k}`) * 380) + Math.sin(t * 2 + i + k) * 30;
           return [x, messy * (1 - p) + yEnd * p];
         });
         const d = pts.reduce((acc, [x, y], k) => {
@@ -275,7 +303,7 @@ const Untangle: React.FC<{p: number; t: number}> = ({p, t}) => {
         return <path key={i} d={d} fill="none" stroke={col} strokeWidth={5} strokeLinecap="round" opacity={.55 + .45 * p}
           strokeDasharray={2000} strokeDashoffset={2000 * (1 - ease(prog(t, V.solve - .2 + i * .04, V.solve + .5 + i * .04)))} />;
       })}
-      {p > .9 && <circle cx={990} cy={730} r={14 * pop(t, 19.75)} fill={C.sand} />}
+      {p > .9 && <circle cx={990} cy={955} r={14 * pop(t, 19.75)} fill={C.sand} />}
     </svg>
   );
 };
