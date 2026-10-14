@@ -84,21 +84,17 @@ def section(start, stop, pluck_gain, kick_from, octave=0, pad_gain=.3):
         at += BEAT * 8; b += 1
 section(3.45, 19.1, .13, 6.2)
 place(impact(2.0), 6.2, .55)  # authority section lands
-for at in (7.38, 8.6, 10.9, 12.26): place(whoosh(.4), at - .4, .25)
 for i, at in enumerate((15.18, 16.06, 17.14, 18.0)):
     place(pluck(74 + [0, 4, 7, 12][i], 1.2), at, .35, -.3 + .2 * i)
 
 # --- 19-26.6 s: the offer ---
-n = int(1.2 * SR); x = np.linspace(0, 1, n)
-place(fft_filter(rng.standard_normal(n), 300, 9000) * x ** 3, V_FREE - 1.2, .45)
+
 place(impact(2.4), V_FREE - .02, .9)
 section(V_FREE, 26.6, .14, V_FREE, octave=12)
-for at in (21.44, 22.84, 24.38): place(whoosh(.4), at - .35, .3)
 
 # --- 26.6-32 s: reassurance and call to action ---
 for at in (26.88, 27.76): place(pluck(86, 1.0), at, .3); place(pluck(93, 1.0), at + .02, .15)
 place(pad([38, 50, 62, 66, 69, 74], 3.6, a=.4, r=1.5), 28.4, .4)
-place(whoosh(.6), 28.0, .35)
 place(pluck(98, 2.0), 29.6, .3); place(pluck(102, 2.0), 29.62, .16)
 
 # --- duck under the voice ---
