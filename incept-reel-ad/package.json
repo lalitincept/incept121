@@ -1,0 +1,19 @@
+{
+  "name": "incept-reel-ad",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio",
+    "music": "python3 scripts/music.py",
+    "render": "remotion render InceptReel out/raw.mp4 --concurrency=3 --timeout=120000 && ffmpeg -y -i out/raw.mp4 -c:v copy -af loudnorm=I=-14:TP=-1:LRA=11 -c:a aac -b:a 192k -ar 48000 -movflags +faststart incept-reel-ad.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.355",
+    "@remotion/fonts": "^4.0.355",
+    "@types/react": "^19.1.12",
+    "lucide-react": "^0.540.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "remotion": "^4.0.355",
+    "typescript": "^5.9.2"
+  }
+}
