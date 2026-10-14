@@ -1,9 +1,9 @@
 import React from 'react';
-import {AbsoluteFill, Audio, Img, interpolate, spring, staticFile, useCurrentFrame, Easing, random} from 'remotion';
+import {AbsoluteFill, Audio, Img, spring, staticFile, useCurrentFrame, Easing, random} from 'remotion';
 import {loadFont} from '@remotion/fonts';
 import {
-  Users, BarChart3, Loader, BadgeCheck, Database, BookOpen, ShieldCheck, ScanSearch,
-  CircleCheck, MousePointerClick, ChevronDown, CalendarDays, TriangleAlert,
+  BadgeCheck, Database, BookOpen, UserCheck, ScanSearch, ListChecks, Route, CirclePause,
+  CircleCheck, MousePointerClick, ChevronDown, CalendarDays, ArrowRight,
 } from 'lucide-react';
 
 // Fonts are bundled in public/fonts (Inter is a variable font, so one file covers every weight)
@@ -13,24 +13,24 @@ const INTER = 'Inter, sans-serif';
 const MONO = "'JetBrains Mono', monospace";
 
 export const FPS = 30;
-export const DURATION_S = 39;
+export const DURATION_S = 32;
 
-// Palette from inceptds.com, plus a warning red for the problem beats
+// Palette from inceptds.com, plus a warning red for the problem beat
 const C = {
   ink: '#0f0f0b', ink2: '#1c1b16', line: '#34332b', cream: '#f1efe6', sand: '#d7bca2',
   sandHi: '#f0dcc4', blue: '#98b7e1', warn: '#ff6a4d', tile: '#faf8f2',
 };
 
-// Voiceover word timings (seconds), from a transcription of the narration file
+// Voiceover word timings (seconds), from a transcription of public/vo.mp3
 const V = {
-  paying: 0, informatica: .54, but: 1.58, still: 1.66, cant: 2.12, trust: 2.6, data: 2.98,
-  duplicate: 4.48, conflicting: 5.84, governance: 7.9, stalling: 8.7,
-  forOver: 10.32, twelve: 10.76, incept: 11.82, trusted: 13.3, informatica2: 13.76, platinum: 14.6,
-  fortune: 16.24, companies: 17.14, solve: 17.84, complex: 18.3,
-  from: 20.4, quality: 20.62, master: 21.72, cataloging: 23.02, governance2: 24.02,
-  now: 25.28, free: 26.58, five: 26.92, discovery: 27.48, assess: 28.8, environment: 29.32,
-  deliver: 30.24, prioritized: 31.0, roadmap: 31.82,
-  noCost: 33.0, noCommit: 34.2, tap: 35.84, book: 36.54,
+  is: 0, governance: .64, stuck: 1.04, between: 1.44, strategy: 1.8, execution: 2.46,
+  in: 3.5, five: 3.64, days: 3.94, get: 4.32, clear: 4.8, forward: 5.28,
+  forOver: 6.22, twelve: 6.32, incept: 7.38, trusted: 8.42, informatica2: 8.8, platinum: 9.48,
+  fortune: 10.9, fiveHundred: 11.28, companies: 11.7, solve: 12.26, complex: 12.68, powered: 13.56, dataGov: 13.72,
+  from: 14.96, quality: 15.18, master: 16.06, cataloging: 17.14, ownership: 18.0,
+  withOur: 19.22, free: 19.56, fiveDay: 19.94, discovery: 20.42,
+  review: 21.44, uncover: 22.84, deliver: 24.38, roadmap: 25.24,
+  noCost: 26.88, noCommit: 27.76, tap: 28.7, book: 29.6,
 };
 
 // ---------- timing helpers ----------
@@ -102,119 +102,105 @@ const Grain: React.FC<{t: number}> = ({t}) => (
     backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' seed='${Math.floor(t * 12) % 8}'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")`}} />
 );
 
+const big = {fontFamily: INTER, fontWeight: 900, lineHeight: 1, letterSpacing: -3, color: C.cream, textAlign: 'center' as const};
+
 // ---------- scene 1: hook ----------
 const Hook: React.FC<{t: number}> = ({t}) => {
-  const vis = win(t, -1, 3.95, .12);
+  const vis = win(t, -1, 3.35, .15);
   if (vis <= 0) return null;
-  const out = prog(t, 3.35, 3.95);
-  const g = out > 0 ? out : (t > V.still && t < V.still + .25 ? .6 : 0);
-  const shake = t > V.still && t < V.still + .4 ? Math.sin(t * 90) * 10 * (1 - prog(t, V.still, V.still + .4)) : 0;
-  const big = {fontFamily: INTER, fontWeight: 900, lineHeight: 1, letterSpacing: -3, color: C.cream, textAlign: 'center' as const};
+  const shake = t > V.stuck && t < V.stuck + .45 ? Math.sin(t * 80) * 12 * (1 - prog(t, V.stuck, V.stuck + .45)) : 0;
+  // the bridge from strategy to execution draws, then jams halfway
+  const bridge = ease(prog(t, V.strategy + .1, V.execution)) * .5;
+  const jammed = t > V.execution;
+  const blink = jammed && Math.floor(t * 5) % 2 === 0;
   return (
-    <Center style={{opacity: vis * (1 - out * .8), transform: `translateX(${shake}px) scale(${1 + out * .15})`}}>
-      <Glitch amount={g} seed={'h' + Math.floor(t * 20)}>
-        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22}}>
-          <Pop t={t} at={V.paying}><div style={{...big, fontSize: 96, fontWeight: 700}}>Paying for</div></Pop>
-          <Pop t={t} at={V.informatica}><div style={{...big, fontSize: 136, color: C.sand}}>Informatica</div></Pop>
-          <div style={{height: 40}} />
-          <Pop t={t} at={V.but}><div style={{...big, fontSize: 104}}>but <span style={{color: C.warn}}>STILL</span></div></Pop>
-          <Pop t={t} at={V.cant}><div style={{...big, fontSize: 104}}>can't trust</div></Pop>
-          <Pop t={t} at={V.trust + .3}>
-            <div style={{...big, fontSize: 150, position: 'relative'}}>
-              your data<span style={{color: C.warn}}>?</span>
-              <div style={{position: 'absolute', left: 0, right: 0, bottom: -18, height: 10, background: C.warn,
-                transform: `scaleX(${ease(prog(t, V.data + .1, V.data + .5))})`, transformOrigin: 'left'}} />
-            </div>
-          </Pop>
+    <AbsoluteFill style={{opacity: vis}}>
+      <div style={{position: 'absolute', top: 380, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18}}>
+        <Pop t={t} at={V.is}><div style={{...big, fontSize: 92, fontWeight: 700}}>Is your data</div></Pop>
+        <Pop t={t} at={V.governance}><div style={{...big, fontSize: 140, color: C.sand}}>governance</div></Pop>
+        <div style={{transform: `translateX(${shake}px)`}}>
+          <Pop t={t} at={V.stuck}><div style={{...big, fontSize: 250, color: C.warn, letterSpacing: 2, marginTop: 10}}>STUCK</div></Pop>
         </div>
-      </Glitch>
-    </Center>
+        <Pop t={t} at={V.between}><div style={{...big, fontSize: 80, fontWeight: 700, marginTop: 10}}>between</div></Pop>
+      </div>
+      <div style={{position: 'absolute', top: 1180, left: 70, right: 70, height: 260}}>
+        <svg width={940} height={260} style={{position: 'absolute', inset: 0}}>
+          <line x1={140} y1={70} x2={800} y2={70} stroke={C.line} strokeWidth={8} strokeDasharray="4 18" strokeLinecap="round" />
+          <line x1={140} y1={70} x2={140 + 660 * bridge} y2={70} stroke={jammed ? C.warn : C.sand} strokeWidth={8} strokeLinecap="round" />
+        </svg>
+        {[{at: V.strategy, label: 'STRATEGY', x: 140}, {at: V.execution, label: 'EXECUTION', x: 800}].map(n => (
+          <div key={n.label} style={{position: 'absolute', left: n.x - 160, width: 320, top: 0, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+            <Pop t={t} at={n.at} from={30}>
+              <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22}}>
+                <div style={{width: 140, height: 140, borderRadius: 70, background: C.ink2, border: `4px solid ${C.sand}`, display: 'grid', placeItems: 'center'}}>
+                  <div style={{width: 40, height: 40, borderRadius: 20, background: C.sand}} />
+                </div>
+                <div style={{fontFamily: MONO, fontSize: 36, letterSpacing: 6, color: C.cream}}>{n.label}</div>
+              </div>
+            </Pop>
+          </div>
+        ))}
+        {jammed && <div style={{position: 'absolute', left: 140 + 330 - 50, top: 20, opacity: blink ? 1 : .55, transform: `scale(${.8 + .2 * pop(t, V.execution)})`}}>
+          <CirclePause size={100} color={C.warn} strokeWidth={2.4} fill={C.ink} />
+        </div>}
+      </div>
+    </AbsoluteFill>
   );
 };
 
-// ---------- scene 2: pain points ----------
-const PainCard: React.FC<{t: number; at: number; i: number; icon: React.ReactNode; title: string; children: React.ReactNode}> = ({t, at, i, icon, title, children}) => {
-  if (t < at) return null;
-  const p = pop(t, at, {damping: 15, stiffness: 160, mass: 1});
-  const out = ease(prog(t, 9.5 + i * .06, 9.95 + i * .06));
+// ---------- scene 2: the promise ----------
+const Promise5: React.FC<{t: number}> = ({t}) => {
+  const vis = win(t, 3.35, 6.12, .15);
+  if (vis <= 0) return null;
+  const days = Array.from({length: 5}, (_, i) => clamp((t - V.days - i * .12) * 6));
+  const arrow = ease(prog(t, V.clear - .1, V.forward + .3));
   return (
-    <div style={{position: 'absolute', left: 80, right: 80, top: 430 + i * 385, height: 340,
-      transform: `translateX(${(1 - p) * 900 - out * 1200}px) rotate(${(1 - p) * 4}deg)`, opacity: clamp(p * 2) * (1 - out),
-      background: C.ink2, border: `2px solid ${C.line}`, borderRadius: 36, padding: '40px 48px', boxSizing: 'border-box',
-      boxShadow: '0 30px 80px rgba(0,0,0,.5)'}}>
-      <div style={{display: 'flex', alignItems: 'center', gap: 26}}>
-        <div style={{width: 96, height: 96, borderRadius: 26, background: 'rgba(255,106,77,.14)', display: 'grid', placeItems: 'center', color: C.warn}}>{icon}</div>
-        <div style={{fontFamily: INTER, fontWeight: 800, fontSize: 58, color: C.cream, letterSpacing: -1.5, lineHeight: 1.05}}>{title}</div>
-      </div>
-      <div style={{marginTop: 34}}>{children}</div>
-    </div>
-  );
-};
-const Pain: React.FC<{t: number}> = ({t}) => {
-  if (t < 3.9 || t > 10.3) return null;
-  const mono = {fontFamily: MONO, fontSize: 30, color: '#b9b5a6'};
-  const dupNames = ['John Smith', 'Jon Smith', 'J. Smith'];
-  const spin = t < V.stalling + .2 ? t * 360 : (V.stalling + .2) * 360; // spinner freezes when "stalling" lands
-  const bar = Math.min(.62, ease(prog(t, V.governance, V.stalling)) * .62);
-  const blink = t > V.stalling && Math.floor(t * 4) % 2 === 0;
-  return (
-    <AbsoluteFill>
-      <div style={{position: 'absolute', top: 290, width: '100%', textAlign: 'center', opacity: win(t, 4.1, 9.7)}}>
-        <Kicker color={C.warn}>Sound familiar?</Kicker>
-      </div>
-      <PainCard t={t} at={V.duplicate} i={0} icon={<Users size={56} strokeWidth={2.2} />} title="Duplicate customers">
-        <div style={{display: 'flex', gap: 14}}>
-          {dupNames.map((n, k) => (
-            <div key={n} style={{...mono, padding: '12px 18px', borderRadius: 14, border: `2px solid ${k === 0 ? C.line : C.warn}`,
-              opacity: clamp((t - V.duplicate - .15 - k * .18) * 5), transform: `translateY(${(1 - clamp((t - V.duplicate - .15 - k * .18) * 4)) * 20}px)`}}>{n}</div>
+    <AbsoluteFill style={{opacity: vis}}>
+      <div style={{position: 'absolute', top: 330, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+        <Pop t={t} at={V.in}><Kicker>In just</Kicker></Pop>
+        <Pop t={t} at={V.five}><div style={{...big, fontSize: 480, color: C.sand, letterSpacing: -10, marginTop: 10}}>5</div></Pop>
+        <Pop t={t} at={V.days}><div style={{...big, fontSize: 130, letterSpacing: 8, marginTop: -20}}>DAYS</div></Pop>
+        <div style={{display: 'flex', gap: 20, marginTop: 50}}>
+          {days.map((d, i) => (
+            <div key={i} style={{width: 150, height: 120, borderRadius: 24, border: `3px solid ${d > 0 ? C.sand : C.line}`, background: d >= 1 ? 'rgba(215,188,162,.16)' : 'transparent',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transform: `scale(${.8 + .2 * d})`, opacity: .3 + .7 * d}}>
+              <CalendarDays size={40} color={C.sand} strokeWidth={2} />
+              <div style={{fontFamily: MONO, fontSize: 26, color: C.cream, marginTop: 6}}>DAY {i + 1}</div>
+            </div>
           ))}
         </div>
-      </PainCard>
-      <PainCard t={t} at={V.conflicting} i={1} icon={<BarChart3 size={56} strokeWidth={2.2} />} title="Conflicting reports">
-        <div style={{display: 'flex', alignItems: 'center', gap: 30, fontFamily: INTER, fontWeight: 800, fontSize: 64, color: C.cream}}>
-          <span>$4.2M</span>
-          <span style={{color: C.warn, fontSize: 80, transform: `scale(${1 + .2 * Math.sin(t * 12)})`}}>≠</span>
-          <span>$3.7M</span>
-          <span style={{...mono, fontSize: 26}}>same quarter</span>
+      </div>
+      <div style={{position: 'absolute', top: 1270, width: '100%', textAlign: 'center'}}>
+        <Pop t={t} at={V.get}><div style={{...big, fontSize: 92, fontWeight: 800}}>a <span style={{color: C.sand}}>clear</span> way forward</div></Pop>
+        <div style={{position: 'relative', margin: '50px auto 0', width: 800, height: 80}}>
+          <div style={{position: 'absolute', left: 0, top: 36, height: 8, borderRadius: 4, width: 700 * arrow, background: C.sand}} />
+          {arrow > 0 && <div style={{position: 'absolute', left: 700 * arrow - 30, top: 0}}><ArrowRight size={80} color={C.sand} strokeWidth={3} /></div>}
         </div>
-      </PainCard>
-      <PainCard t={t} at={V.governance} i={2} icon={<Loader size={56} strokeWidth={2.2} style={{transform: `rotate(${spin}deg)`}} />} title="Governance that keeps stalling">
-        <div style={{display: 'flex', alignItems: 'center', gap: 24}}>
-          <div style={{flex: 1, height: 22, borderRadius: 11, background: C.line, overflow: 'hidden'}}>
-            <div style={{width: `${bar * 100}%`, height: '100%', background: blink ? C.warn : C.sand}} />
-          </div>
-          <span style={{...mono, color: blink ? C.warn : '#b9b5a6'}}>{Math.round(bar * 100)}%</span>
-        </div>
-      </PainCard>
+      </div>
     </AbsoluteFill>
   );
 };
 
 // ---------- scene 3: authority ----------
 const Authority: React.FC<{t: number}> = ({t}) => {
-  if (t < 10 || t > 20.4) return null;
+  if (t < 6 || t > 15.1) return null;
   const head = {fontFamily: INTER, fontWeight: 900, color: C.cream, letterSpacing: -4, lineHeight: .95, textAlign: 'center' as const};
-  // 3a: 12+ years
-  const a = win(t, 10.1, 11.75);
-  const n = Math.round(12 * ease(prog(t, V.twelve - .3, V.twelve + .5)));
-  // 3b: Incept logo wipe
-  const b = win(t, 11.7, 13.15);
-  const wipe = ease(prog(t, V.incept - .05, V.incept + .7));
-  // 3c: Informatica Platinum Partner
-  const c = win(t, 13.1, 16.15);
-  // 3d: Fortune 500
-  const d = win(t, 16.1, 17.85);
-  // 3e: complex data challenges, untangling
-  const e = win(t, 17.8, 20.35);
-  const untangle = ease(prog(t, V.complex + .5, 19.9));
+  const a = win(t, 6.1, 7.35);
+  const n = Math.round(12 * ease(prog(t, V.twelve - .1, V.twelve + .5)));
+  const b = win(t, 7.3, 8.35);
+  const wipe = ease(prog(t, V.incept - .05, V.incept + .6));
+  const c = win(t, 8.3, 10.88);
+  const d = win(t, 10.85, 12.25);
+  const e = win(t, 12.2, 14.95);
+  const untangle = ease(prog(t, V.complex, 14.2));
   return (
     <AbsoluteFill>
       {a > 0 && <Center style={{opacity: a}}>
-        <Pop t={t} at={V.forOver}><Kicker style={{textAlign: 'center'}}>For over</Kicker></Pop>
-        <Pop t={t} at={V.twelve - .3}>
-          <div style={{...head, fontSize: 420, color: C.sand, marginTop: 20}}>{n}<span style={{fontSize: 260}}>+</span></div>
+        <Pop t={t} at={V.forOver}><Kicker style={{textAlign: 'center'}}>For</Kicker></Pop>
+        <Pop t={t} at={V.twelve - .1}>
+          <div style={{...head, fontSize: 420, color: C.sand, marginTop: 20}}>{n}</div>
         </Pop>
-        <Pop t={t} at={V.twelve + .2}><div style={{...head, fontSize: 130, letterSpacing: 6}}>YEARS</div></Pop>
+        <Pop t={t} at={V.twelve + .3}><div style={{...head, fontSize: 130, letterSpacing: 6}}>YEARS</div></Pop>
       </Center>}
       {b > 0 && <Center style={{opacity: b}}>
         <div style={{width: 900, position: 'relative', clipPath: `inset(0 ${100 - wipe * 100}% 0 0)`}}>
@@ -223,26 +209,214 @@ const Authority: React.FC<{t: number}> = ({t}) => {
         <div style={{width: 6, height: 320, background: C.sand, position: 'absolute', left: 90 + 900 * wipe, opacity: Math.sin(wipe * Math.PI)}} />
       </Center>}
       {c > 0 && <Center style={{opacity: c}}>
-        <Pop t={t} at={V.trusted}><Kicker style={{textAlign: 'center', marginBottom: 40}}>A trusted</Kicker></Pop>
+        <Pop t={t} at={V.trusted}><Kicker style={{textAlign: 'center', marginBottom: 60}}>A trusted</Kicker></Pop>
         <PlatinumBadge t={t} />
       </Center>}
       {d > 0 && <Center style={{opacity: d}}>
         <Pop t={t} at={V.fortune - .05}><Kicker style={{textAlign: 'center'}}>Helping</Kicker></Pop>
         <Pop t={t} at={V.fortune}><div style={{...head, fontSize: 190, marginTop: 30}}>FORTUNE</div></Pop>
-        <Pop t={t} at={V.fortune + .45}><div style={{...head, fontSize: 380, color: C.sand}}>500</div></Pop>
+        <Pop t={t} at={V.fiveHundred}><div style={{...head, fontSize: 380, color: C.sand}}>500</div></Pop>
         <Pop t={t} at={V.companies}><div style={{...head, fontSize: 96, letterSpacing: 0, fontWeight: 700}}>companies</div></Pop>
       </Center>}
       {e > 0 && <Center style={{opacity: e}}>
         <Untangle p={untangle} t={t} />
         <Clients t={t} at={V.solve - .05} />
-        <div style={{position: 'absolute', top: 1260, width: '100%', textAlign: 'center'}}>
-          <Pop t={t} at={V.solve}><div style={{...head, fontSize: 110}}>solve <span style={{color: C.sand}}>complex</span></div></Pop>
-          <Pop t={t} at={V.complex + .5}><div style={{...head, fontSize: 110, marginTop: 10}}>data challenges</div></Pop>
+        <div style={{position: 'absolute', top: 1230, width: '100%', textAlign: 'center'}}>
+          <Pop t={t} at={V.solve}><div style={{...head, fontSize: 96, letterSpacing: -2}}>advance</div></Pop>
+          <Pop t={t} at={V.complex}><div style={{...head, fontSize: 88, letterSpacing: -2, color: C.sand, marginTop: 8}}>Informatica-powered</div></Pop>
+          <Pop t={t} at={V.dataGov}><div style={{...head, fontSize: 96, letterSpacing: -2, marginTop: 8}}>data governance</div></Pop>
         </div>
       </Center>}
     </AbsoluteFill>
   );
 };
+
+// ---------- scene 4: services ----------
+const SERVICES = [
+  {at: V.quality, label: 'Data Quality', Icon: BadgeCheck},
+  {at: V.master, label: 'Master Data', Icon: Database},
+  {at: V.cataloging, label: 'Data Catalog', Icon: BookOpen},
+  {at: V.ownership, label: 'Clear Ownership', Icon: UserCheck},
+];
+const Services: React.FC<{t: number}> = ({t}) => {
+  const vis = win(t, 14.9, 19.15, .2);
+  if (vis <= 0) return null;
+  const active = SERVICES.reduce((a, s, i) => (t >= s.at ? i : a), -1);
+  return (
+    <AbsoluteFill style={{opacity: vis}}>
+      <div style={{position: 'absolute', top: 360, width: '100%', textAlign: 'center'}}>
+        <Pop t={t} at={V.from}><Kicker>End-to-end expertise</Kicker></Pop>
+      </div>
+      <div style={{position: 'absolute', top: 470, left: 80, right: 80, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40}}>
+        {SERVICES.map(({at, label, Icon}, i) => {
+          const p = pop(t, at - .05, {damping: 12, stiffness: 170, mass: .9});
+          const on = i === active;
+          return (
+            <div key={label} style={{height: 440, borderRadius: 40, background: on ? C.sand : C.ink2, border: `2px solid ${on ? C.sand : C.line}`,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 36,
+              transform: `scale(${t < at - .05 ? .6 : .6 + .4 * p})`, opacity: t < at - .05 ? .18 : 1,
+              boxShadow: on ? '0 0 90px rgba(215,188,162,.45)' : 'none'}}>
+              <Icon size={150} strokeWidth={1.6} color={on ? C.ink : C.sand} />
+              <div style={{fontFamily: INTER, fontWeight: 800, fontSize: 50, color: on ? C.ink : C.cream, letterSpacing: -1}}>{label}</div>
+            </div>
+          );
+        })}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// ---------- scene 5: the offer ----------
+const Offer: React.FC<{t: number}> = ({t}) => {
+  const vis = win(t, 19.1, 21.2, .15);
+  if (vis <= 0) return null;
+  const slam = pop(t, V.free, {damping: 9, stiffness: 220, mass: .8});
+  const days = Array.from({length: 5}, (_, i) => clamp((t - V.fiveDay - .1 - i * .12) * 6));
+  return (
+    <Center style={{opacity: vis}}>
+      <Pop t={t} at={V.withOur}><div style={{...big, fontSize: 80, fontWeight: 700}}>With our</div></Pop>
+      {t >= V.free && <div style={{...big, fontSize: 330, color: C.ink, background: C.sand, padding: '10px 60px 30px', borderRadius: 40, marginTop: 40,
+        transform: `scale(${3 - 2 * slam}) rotate(${-6 * slam}deg)`, opacity: clamp(slam * 2), boxShadow: '0 30px 100px rgba(215,188,162,.35)'}}>FREE</div>}
+      <Pop t={t} at={V.fiveDay}><div style={{...big, fontSize: 100, marginTop: 70}}>5-day discovery</div></Pop>
+      <div style={{display: 'flex', gap: 22, marginTop: 50}}>
+        {days.map((d, i) => (
+          <div key={i} style={{width: 140, height: 120, borderRadius: 24, border: `3px solid ${d > 0 ? C.sand : C.line}`, background: d >= 1 ? 'rgba(215,188,162,.16)' : 'transparent',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transform: `scale(${.8 + .2 * d})`, opacity: .3 + .7 * d}}>
+            <CalendarDays size={40} color={C.sand} strokeWidth={2} />
+            <div style={{fontFamily: MONO, fontSize: 26, color: C.cream, marginTop: 6}}>DAY {i + 1}</div>
+          </div>
+        ))}
+      </div>
+    </Center>
+  );
+};
+
+// three steps of the discovery, each landing on its phrase
+const STEPS = [
+  {at: V.review, l1: 'Review your', l2: 'priorities', Icon: ListChecks},
+  {at: V.uncover, l1: 'Uncover', l2: 'critical gaps', Icon: ScanSearch},
+  {at: V.deliver, l1: 'Deliver a focused', l2: 'roadmap', Icon: Route},
+];
+const Steps: React.FC<{t: number}> = ({t}) => {
+  const vis = win(t, 21.15, 26.7, .15);
+  if (vis <= 0) return null;
+  const active = STEPS.reduce((a, s, i) => (t >= s.at ? i : a), -1);
+  const rail = ease(prog(t, V.review, V.deliver + .6));
+  return (
+    <AbsoluteFill style={{opacity: vis}}>
+      <div style={{position: 'absolute', top: 330, width: '100%', textAlign: 'center'}}>
+        <Pop t={t} at={21.2}><Kicker>In five days, we'll</Kicker></Pop>
+      </div>
+      <div style={{position: 'absolute', left: 150, top: 560, width: 8, height: 760 * rail, background: C.sand, borderRadius: 4}} />
+      {STEPS.map(({at, l1, l2, Icon}, i) => {
+        if (t < at - .05) return null;
+        const p = pop(t, at - .05, {damping: 14, stiffness: 170, mass: .9});
+        const on = i === active;
+        const scan = i === 1 && on ? .5 + .5 * Math.sin((t - at) * 8) : 0;
+        return (
+          <div key={l2} style={{position: 'absolute', left: 80, right: 80, top: 470 + i * 380, height: 300, display: 'flex', alignItems: 'center', gap: 44,
+            transform: `translateX(${(1 - p) * 300}px)`, opacity: clamp(p * 2)}}>
+            <div style={{width: 148, height: 148, flex: 'none', borderRadius: 74, background: on ? C.sand : C.ink2, border: `4px solid ${C.sand}`,
+              display: 'grid', placeItems: 'center', boxShadow: on ? `0 0 ${50 + 40 * scan}px rgba(215,188,162,.5)` : 'none'}}>
+              <Icon size={74} color={on ? C.ink : C.sand} strokeWidth={2} />
+            </div>
+            <div>
+              <div style={{fontFamily: MONO, fontSize: 30, color: C.sand, letterSpacing: 6}}>STEP {i + 1}</div>
+              <div style={{fontFamily: INTER, fontWeight: 700, fontSize: 64, color: C.cream, letterSpacing: -1.5, lineHeight: 1.1, marginTop: 10}}>{l1}</div>
+              <div style={{fontFamily: INTER, fontWeight: 900, fontSize: 84, color: on ? C.sand : C.cream, letterSpacing: -2.5, lineHeight: 1}}>{l2}</div>
+            </div>
+          </div>
+        );
+      })}
+    </AbsoluteFill>
+  );
+};
+
+// ---------- scene 6: reassurance ----------
+const Reassure: React.FC<{t: number}> = ({t}) => {
+  const vis = win(t, 26.65, 28.6, .15);
+  if (vis <= 0) return null;
+  const row = (at: number, text: string) => (
+    <Pop t={t} at={at} from={80}>
+      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24}}>
+        <CircleCheck size={130} color={C.sand} strokeWidth={2.2} />
+        <div style={{fontFamily: INTER, fontWeight: 900, fontSize: 104, color: C.cream, letterSpacing: -3, whiteSpace: 'nowrap'}}>{text}</div>
+      </div>
+    </Pop>
+  );
+  return (
+    <Center style={{opacity: vis, gap: 70}}>
+      {row(V.noCost - .05, 'No cost.')}
+      {row(V.noCommit - .05, 'No commitment.')}
+    </Center>
+  );
+};
+
+// ---------- scene 7: call to action ----------
+const CTA: React.FC<{t: number}> = ({t}) => {
+  const t0 = 28.55;
+  if (t < t0) return null;
+  const vis = clamp((t - t0) / .2);
+  const press = t > V.book && t < V.book + .35 ? .94 : 1;
+  const pulse = 1 + .03 * Math.sin((t - t0) * 6);
+  const hand = ease(prog(t, t0 + .4, V.book));
+  return (
+    <AbsoluteFill style={{opacity: vis}}>
+      <div style={{position: 'absolute', top: 300, width: '100%', display: 'flex', justifyContent: 'center'}}>
+        <Pop t={t} at={t0 + .02}><Img src={staticFile('incept-logo-white.png')} style={{width: 620}} /></Pop>
+      </div>
+      <div style={{position: 'absolute', top: 640, width: '100%', textAlign: 'center'}}>
+        <Pop t={t} at={t0 + .1}><div style={{...big, fontSize: 104}}>Book your</div></Pop>
+        <Pop t={t} at={t0 + .25}><div style={{...big, fontSize: 104, color: C.sand, lineHeight: 1.05}}>FREE 5-day</div></Pop>
+        <Pop t={t} at={t0 + .4}><div style={{...big, fontSize: 104}}>discovery</div></Pop>
+      </div>
+      <div style={{position: 'absolute', top: 1130, width: '100%', display: 'flex', justifyContent: 'center'}}>
+        <Pop t={t} at={V.tap}>
+          <div style={{background: C.sand, color: C.ink, fontFamily: INTER, fontWeight: 800, fontSize: 62, padding: '36px 80px', borderRadius: 100,
+            transform: `scale(${pulse * press})`, boxShadow: '0 0 0 14px rgba(215,188,162,.18), 0 30px 90px rgba(215,188,162,.35)'}}>Book now →</div>
+        </Pop>
+      </div>
+      <div style={{position: 'absolute', left: 640, top: 1240 + (1 - hand) * 260, opacity: hand, color: C.cream, transform: `scale(${press})`}}>
+        <MousePointerClick size={110} strokeWidth={2} fill={C.ink} />
+      </div>
+      <div style={{position: 'absolute', top: 1420, width: '100%', textAlign: 'center', opacity: clamp((t - t0 - .7) * 4)}}>
+        <div style={{fontFamily: MONO, fontSize: 34, color: C.cream, letterSpacing: 6}}>INCEPTDS.COM</div>
+        <div style={{marginTop: 20, display: 'flex', justifyContent: 'center', transform: `translateY(${Math.abs(Math.sin((t - t0) * 5)) * 18}px)`}}>
+          <ChevronDown size={80} color={C.sand} strokeWidth={2.5} />
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// ---------- composition ----------
+export const Reel: React.FC = () => {
+  const frame = useCurrentFrame();
+  const t = frame / FPS;
+  const wallOpacity = .5 * (1 - prog(t, 2.9, 3.5));
+  // cold and stuck for the hook, warm from the promise onward
+  const warm = prog(t, 3.2, 4.2);
+  return (
+    <AbsoluteFill style={{background: C.ink, overflow: 'hidden'}}>
+      <AbsoluteFill style={{background: `radial-gradient(1200px 1400px at 50% 40%, rgba(255,106,77,${.10 * (1 - warm)}), transparent 70%)`}} />
+      <AbsoluteFill style={{background: `radial-gradient(1200px 1400px at 50% 45%, rgba(215,188,162,${.13 * warm}), transparent 70%)`}} />
+      <DataWall t={t} opacity={wallOpacity} corrupt={prog(t, .8, 2.6)} />
+      <Hook t={t} />
+      <Promise5 t={t} />
+      <Authority t={t} />
+      <Services t={t} />
+      <Offer t={t} />
+      <Steps t={t} />
+      <Reassure t={t} />
+      <CTA t={t} />
+      <AbsoluteFill style={{background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.55) 100%)'}} />
+      <Grain t={t} />
+      <Audio src={staticFile('vo.mp3')} />
+      <Audio src={staticFile('music.wav')} volume={.9} />
+    </AbsoluteFill>
+  );
+};
+
 // Official Informatica Platinum Partner badge: spins in, then a glint and a glow when "Platinum" is spoken
 const PlatinumBadge: React.FC<{t: number}> = ({t}) => {
   const at = V.informatica2 - .15;
@@ -303,212 +477,7 @@ const Untangle: React.FC<{p: number; t: number}> = ({p, t}) => {
         return <path key={i} d={d} fill="none" stroke={col} strokeWidth={5} strokeLinecap="round" opacity={.55 + .45 * p}
           strokeDasharray={2000} strokeDashoffset={2000 * (1 - ease(prog(t, V.solve - .2 + i * .04, V.solve + .5 + i * .04)))} />;
       })}
-      {p > .9 && <circle cx={990} cy={955} r={14 * pop(t, 19.75)} fill={C.sand} />}
+      {p > .9 && <circle cx={990} cy={955} r={14 * pop(t, 14.25)} fill={C.sand} />}
     </svg>
-  );
-};
-
-// ---------- scene 4: services ----------
-const SERVICES = [
-  {at: V.quality, label: 'Data Quality', Icon: BadgeCheck},
-  {at: V.master, label: 'Master Data', Icon: Database},
-  {at: V.cataloging, label: 'Data Catalog', Icon: BookOpen},
-  {at: V.governance2, label: 'Governance', Icon: ShieldCheck},
-];
-const Services: React.FC<{t: number}> = ({t}) => {
-  const vis = win(t, 20.2, 25.1, .2);
-  if (vis <= 0) return null;
-  const active = SERVICES.reduce((a, s, i) => (t >= s.at ? i : a), -1);
-  return (
-    <AbsoluteFill style={{opacity: vis}}>
-      <div style={{position: 'absolute', top: 360, width: '100%', textAlign: 'center'}}>
-        <Pop t={t} at={V.from}><Kicker>End-to-end expertise</Kicker></Pop>
-      </div>
-      <div style={{position: 'absolute', top: 470, left: 80, right: 80, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40}}>
-        {SERVICES.map(({at, label, Icon}, i) => {
-          const p = pop(t, at - .05, {damping: 12, stiffness: 170, mass: .9});
-          const on = i === active;
-          return (
-            <div key={label} style={{height: 440, borderRadius: 40, background: on ? C.sand : C.ink2, border: `2px solid ${on ? C.sand : C.line}`,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 36,
-              transform: `scale(${t < at - .05 ? .6 : .6 + .4 * p})`, opacity: t < at - .05 ? .18 : 1,
-              boxShadow: on ? '0 0 90px rgba(215,188,162,.45)' : 'none'}}>
-              <Icon size={150} strokeWidth={1.6} color={on ? C.ink : C.sand} />
-              <div style={{fontFamily: INTER, fontWeight: 800, fontSize: 52, color: on ? C.ink : C.cream, letterSpacing: -1}}>{label}</div>
-            </div>
-          );
-        })}
-      </div>
-    </AbsoluteFill>
-  );
-};
-
-// ---------- scene 5: offer ----------
-const Offer: React.FC<{t: number}> = ({t}) => {
-  if (t < 25 || t > 33) return null;
-  const head = {fontFamily: INTER, fontWeight: 900, color: C.cream, letterSpacing: -3, lineHeight: 1, textAlign: 'center' as const};
-  const a = win(t, 25.05, 28.65, .15);
-  const b = win(t, 28.6, 30.15, .15);
-  const c = win(t, 30.1, 32.85, .15);
-  const slam = pop(t, V.free, {damping: 9, stiffness: 220, mass: .8});
-  const days = Array.from({length: 5}, (_, i) => clamp((t - V.five - .15 - i * .14) * 6));
-  return (
-    <AbsoluteFill>
-      {a > 0 && <Center style={{opacity: a}}>
-        <Pop t={t} at={V.now}><div style={{...head, fontSize: 110, color: C.sand}}>Now,</div></Pop>
-        <Pop t={t} at={V.now + .55}><div style={{...head, fontSize: 70, fontWeight: 700, marginTop: 20}}>start with a</div></Pop>
-        {t >= V.free && <div style={{...head, fontSize: 330, color: C.ink, background: C.sand, padding: '10px 60px 30px', borderRadius: 40, marginTop: 40,
-          transform: `scale(${3 - 2 * slam}) rotate(${-6 * slam}deg)`, opacity: clamp(slam * 2), boxShadow: '0 30px 100px rgba(215,188,162,.35)'}}>FREE</div>}
-        <Pop t={t} at={V.five}><div style={{...head, fontSize: 100, marginTop: 70}}>5-day discovery</div></Pop>
-        <div style={{display: 'flex', gap: 22, marginTop: 50}}>
-          {days.map((d, i) => (
-            <div key={i} style={{width: 140, height: 120, borderRadius: 24, border: `3px solid ${d > 0 ? C.sand : C.line}`, background: d >= 1 ? 'rgba(215,188,162,.16)' : 'transparent',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transform: `scale(${.8 + .2 * d})`, opacity: .3 + .7 * d}}>
-              <CalendarDays size={40} color={C.sand} strokeWidth={2} />
-              <div style={{fontFamily: MONO, fontSize: 26, color: C.cream, marginTop: 6}}>DAY {i + 1}</div>
-            </div>
-          ))}
-        </div>
-      </Center>}
-      {b > 0 && <Center style={{opacity: b}}>
-        <Radar t={t} />
-        <div style={{position: 'absolute', top: 1300, width: '100%'}}>
-          <Pop t={t} at={V.assess - .2}><div style={{...head, fontSize: 96}}>We assess</div></Pop>
-          <Pop t={t} at={V.environment - .1}><div style={{...head, fontSize: 96, color: C.sand}}>your environment</div></Pop>
-        </div>
-      </Center>}
-      {c > 0 && <Center style={{opacity: c}}>
-        <Roadmap t={t} />
-        <div style={{position: 'absolute', top: 330, width: '100%'}}>
-          <Pop t={t} at={V.deliver}><Kicker style={{textAlign: 'center'}}>And deliver a</Kicker></Pop>
-          <Pop t={t} at={V.prioritized}><div style={{...head, fontSize: 110, marginTop: 24}}>prioritized</div></Pop>
-          <Pop t={t} at={V.roadmap}><div style={{...head, fontSize: 150, color: C.sand}}>roadmap</div></Pop>
-        </div>
-      </Center>}
-    </AbsoluteFill>
-  );
-};
-const Radar: React.FC<{t: number}> = ({t}) => {
-  const a = (t - V.assess) * 260;
-  const nodes = [[-230, -120], [180, -210], [260, 120], [-120, 210], [40, 30], [-300, 80], [120, -40]];
-  const appear = ease(prog(t, V.assess - .4, V.assess + .2));
-  return (
-    <div style={{position: 'absolute', left: 540 - 380, top: 820 - 380, width: 760, height: 760, transform: `scale(${.7 + .3 * appear})`, opacity: appear}}>
-      {[1, .7, .4].map(r => <div key={r} style={{position: 'absolute', inset: `${(1 - r) * 50}%`, borderRadius: '50%', border: `2px solid ${C.line}`}} />)}
-      <div style={{position: 'absolute', inset: 0, borderRadius: '50%',
-        background: `conic-gradient(from ${a}deg, rgba(215,188,162,.55), rgba(215,188,162,0) 70deg, transparent 360deg)`}} />
-      {nodes.map(([x, y], i) => {
-        const ang = (Math.atan2(y, x) * 180 / Math.PI + 450) % 360;
-        const swept = ((a % 360) + 360) % 360;
-        const lit = t > V.assess && ((swept - ang + 360) % 360) < 120;
-        return <div key={i} style={{position: 'absolute', left: 380 + x - 16, top: 380 + y - 16, width: 32, height: 32, borderRadius: 10,
-          background: lit ? C.sand : C.ink2, border: `2px solid ${C.sand}`, transition: 'none'}} />;
-      })}
-      <div style={{position: 'absolute', left: 380 - 60, top: 380 - 60, width: 120, height: 120, borderRadius: 60, background: C.sand, display: 'grid', placeItems: 'center'}}>
-        <ScanSearch size={64} color={C.ink} strokeWidth={2.2} />
-      </div>
-    </div>
-  );
-};
-const Roadmap: React.FC<{t: number}> = ({t}) => {
-  const d = ease(prog(t, V.prioritized - .3, V.roadmap + .4));
-  const stops = [{y: 900, x: 300, n: 1}, {y: 1170, x: 760, n: 2}, {y: 1440, x: 340, n: 3}];
-  return (
-    <svg width={1080} height={1920} style={{position: 'absolute', inset: 0}}>
-      <path d="M140,780 C140,900 300,840 300,900 S760,1020 760,1170 S340,1300 340,1440 S600,1600 900,1600" fill="none" stroke={C.line} strokeWidth={10} strokeLinecap="round" />
-      <path d="M140,780 C140,900 300,840 300,900 S760,1020 760,1170 S340,1300 340,1440 S600,1600 900,1600" fill="none" stroke={C.sand} strokeWidth={10} strokeLinecap="round"
-        strokeDasharray={1800} strokeDashoffset={1800 * (1 - d)} />
-      {stops.map((s, i) => {
-        const p = pop(t, V.prioritized - .1 + i * .35);
-        return <g key={i} transform={`translate(${s.x},${s.y}) scale(${p})`}>
-          <circle r={62} fill={C.sand} />
-          <text textAnchor="middle" dy={22} fontFamily={INTER} fontWeight={900} fontSize={64} fill={C.ink}>{s.n}</text>
-          <text x={i === 1 ? -100 : 100} textAnchor={i === 1 ? 'end' : 'start'} dy={14} fontFamily={MONO} fontSize={34} fill={C.cream} letterSpacing={4}>PRIORITY {s.n}</text>
-        </g>;
-      })}
-    </svg>
-  );
-};
-
-// ---------- scene 6: reassurance ----------
-const Reassure: React.FC<{t: number}> = ({t}) => {
-  const vis = win(t, 32.85, 35.75, .15);
-  if (vis <= 0) return null;
-  const row = (at: number, text: string) => (
-    <Pop t={t} at={at} from={80}>
-      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24}}>
-        <CircleCheck size={130} color={C.sand} strokeWidth={2.2} />
-        <div style={{fontFamily: INTER, fontWeight: 900, fontSize: 104, color: C.cream, letterSpacing: -3, whiteSpace: 'nowrap'}}>{text}</div>
-      </div>
-    </Pop>
-  );
-  return (
-    <Center style={{opacity: vis, gap: 70}}>
-      {row(V.noCost - .05, 'No cost.')}
-      {row(V.noCommit - .05, 'No commitment.')}
-    </Center>
-  );
-};
-
-// ---------- scene 7: call to action ----------
-const CTA: React.FC<{t: number}> = ({t}) => {
-  if (t < 35.6) return null;
-  const vis = clamp((t - 35.6) / .2);
-  const press = t > V.book && t < V.book + .35 ? .94 : 1;
-  const pulse = 1 + .03 * Math.sin((t - 35.6) * 6);
-  const hand = ease(prog(t, 36.0, V.book));
-  return (
-    <AbsoluteFill style={{opacity: vis}}>
-      <div style={{position: 'absolute', top: 300, width: '100%', display: 'flex', justifyContent: 'center'}}>
-        <Pop t={t} at={35.62}><Img src={staticFile('incept-logo-white.png')} style={{width: 620}} /></Pop>
-      </div>
-      <div style={{position: 'absolute', top: 640, width: '100%', textAlign: 'center'}}>
-        <Pop t={t} at={35.7}><div style={{fontFamily: INTER, fontWeight: 900, fontSize: 104, color: C.cream, letterSpacing: -3, lineHeight: 1}}>Book your</div></Pop>
-        <Pop t={t} at={35.85}><div style={{fontFamily: INTER, fontWeight: 900, fontSize: 104, color: C.sand, letterSpacing: -3, lineHeight: 1.05}}>FREE 5-day</div></Pop>
-        <Pop t={t} at={36.0}><div style={{fontFamily: INTER, fontWeight: 900, fontSize: 104, color: C.cream, letterSpacing: -3, lineHeight: 1}}>discovery</div></Pop>
-      </div>
-      <div style={{position: 'absolute', top: 1130, width: '100%', display: 'flex', justifyContent: 'center'}}>
-        <Pop t={t} at={V.tap}>
-          <div style={{background: C.sand, color: C.ink, fontFamily: INTER, fontWeight: 800, fontSize: 62, padding: '36px 80px', borderRadius: 100,
-            transform: `scale(${pulse * press})`, boxShadow: '0 0 0 14px rgba(215,188,162,.18), 0 30px 90px rgba(215,188,162,.35)'}}>Book now →</div>
-        </Pop>
-      </div>
-      <div style={{position: 'absolute', left: 640, top: 1240 + (1 - hand) * 260, opacity: hand, color: C.cream, transform: `scale(${press})`}}>
-        <MousePointerClick size={110} strokeWidth={2} fill={C.ink} />
-      </div>
-      <div style={{position: 'absolute', top: 1420, width: '100%', textAlign: 'center', opacity: clamp((t - 36.3) * 4)}}>
-        <div style={{fontFamily: MONO, fontSize: 34, color: C.cream, letterSpacing: 6}}>INCEPTDS.COM</div>
-        <div style={{marginTop: 20, display: 'flex', justifyContent: 'center', transform: `translateY(${Math.abs(Math.sin((t - 36) * 5)) * 18}px)`}}>
-          <ChevronDown size={80} color={C.sand} strokeWidth={2.5} />
-        </div>
-      </div>
-    </AbsoluteFill>
-  );
-};
-
-// ---------- composition ----------
-export const Reel: React.FC = () => {
-  const frame = useCurrentFrame();
-  const t = frame / FPS;
-  const wallOpacity = t < 10 ? .55 * (1 - prog(t, 9.4, 10)) : 0;
-  // the scene swaps from a cold, broken mood to warm once Incept enters
-  const warm = prog(t, 10, 11);
-  return (
-    <AbsoluteFill style={{background: C.ink, overflow: 'hidden'}}>
-      <AbsoluteFill style={{background: `radial-gradient(1200px 1400px at 50% 40%, rgba(255,106,77,${.10 * (1 - warm)}), transparent 70%)`}} />
-      <AbsoluteFill style={{background: `radial-gradient(1200px 1400px at 50% 45%, rgba(215,188,162,${.13 * warm}), transparent 70%)`}} />
-      <DataWall t={t} opacity={wallOpacity} corrupt={t < 3.9 ? prog(t, 1.5, 3.3) : 1} />
-      <Hook t={t} />
-      <Pain t={t} />
-      <Authority t={t} />
-      <Services t={t} />
-      <Offer t={t} />
-      <Reassure t={t} />
-      <CTA t={t} />
-      <AbsoluteFill style={{background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.55) 100%)'}} />
-      <Grain t={t} />
-      <Audio src={staticFile('vo.mp3')} />
-      <Audio src={staticFile('music.wav')} volume={.9} />
-    </AbsoluteFill>
   );
 };

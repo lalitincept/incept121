@@ -1,9 +1,10 @@
 """Builds public/music.wav: a music bed and sound effects cued to the voiceover, ducked under the voice.
-Tense and glitchy over the problem (0-10 s), warm and building once Incept enters, a hit on FREE, resolve on the CTA."""
+A quiet, tense hook, warm and building from the promise onward, a hit on FREE, resolve on the CTA."""
 import os, subprocess, wave
 import numpy as np
 
-SR, DUR = 48000, 39.0
+SR, DUR = 48000, 32.0
+V_FREE = 19.56  # "free" in the voiceover
 N = int(SR * DUR); t = np.arange(N) / SR
 here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 L = np.zeros(N); R = np.zeros(N)
@@ -60,53 +61,45 @@ def glitch(dur=.5):
 def tick():
     n = int(.03 * SR); return fft_filter(rng.standard_normal(n), 3000, 12000) * env(n, .0005, .006)
 
-# --- 0-10 s: tension ---
-drone = pad([38, 45, 50], 10.4, a=.4, r=.6, bright=4)
+# Cues follow the version 2 voiceover (word times as in src/Reel.tsx).
+# --- 0-3.4 s: hook. Just a low drone and a ticking clock: no hits or glitches here ---
+drone = pad([38, 45, 50], 3.9, a=.3, r=.6, bright=4)
 place(drone * (1 + .25 * np.sin(2 * np.pi * 2 * np.arange(len(drone)) / SR)), 0, .5)
-for k in range(int(10 / .25)):
-    place(tick(), k * .25, .25 if k % 4 else .45, .4 if k % 2 else -.4)
-for at in (4.48, 5.84, 7.9):
-    place(impact(1.0), at - .02, .5); place(whoosh(.35), at - .35, .35, .3)
-# stall: a falling tone when "stalling" lands
-n = int(.8 * SR); x = np.arange(n) / SR
-place(np.sin(2 * np.pi * np.cumsum(420 * np.exp(-x * 2.5)) / SR) * env(n, .01, .4), 8.7, .18)
+for k in range(int(3.4 / .25)):
+    place(tick(), k * .25, .22 if k % 4 else .4, .4 if k % 2 else -.4)
 
-# --- 10-25 s: warm, building ---
-place(impact(2.2), 10.0, .8); place(whoosh(.8), 9.25, .6)
+# --- 3.4-19 s: warm and building from the promise onward ---
 BEAT = 60 / 110
 prog = [(50, [62, 66, 69]), (45, [61, 64, 69]), (47, [62, 66, 71]), (43, [62, 67, 71])]  # D A Bm G
-at = 10.0; b = 0
-while at < 25.2:
-    bass, ch = prog[b % 4]
-    place(pad([bass - 12] + ch, BEAT * 8 + .6, a=.3, r=.6), at, .32)
-    for k in range(16):
-        m = [ch[0], ch[1], ch[2], ch[1] + 12][k % 4] + (12 if k >= 8 else 0)
-        place(pluck(m), at + k * BEAT / 2, .16 if at > 13 else .1, -.3 + .2 * (k % 4))
-    for k in range(4):
-        if at > 11.5: place(kick(), at + k * BEAT * 2, .35)
-    at += BEAT * 8; b += 1
-for at in (V for V in (11.82, 13.6, 16.24, 17.84)): place(whoosh(.4), at - .4, .3)
-for i, at in enumerate((20.62, 21.72, 23.02, 24.02)):
+def section(start, stop, pluck_gain, kick_from, octave=0, pad_gain=.3):
+    at = start; b = 0
+    while at < stop:
+        bass, ch = prog[b % 4]
+        place(pad([bass - 12] + [c + octave for c in ch], BEAT * 8 + .6, a=.3, r=.6), at, pad_gain)
+        for k in range(16):
+            m = [ch[0], ch[1], ch[2], ch[1] + 12][k % 4] + (12 if k >= 8 else 0) + octave
+            place(pluck(m), at + k * BEAT / 2, pluck_gain, -.3 + .2 * (k % 4))
+        for k in range(4):
+            if at + k * BEAT * 2 > kick_from: place(kick(), at + k * BEAT * 2, .3)
+        at += BEAT * 8; b += 1
+section(3.45, 19.1, .13, 6.2)
+place(impact(2.0), 6.2, .55)  # authority section lands
+for at in (7.38, 8.6, 10.9, 12.26): place(whoosh(.4), at - .4, .25)
+for i, at in enumerate((15.18, 16.06, 17.14, 18.0)):
     place(pluck(74 + [0, 4, 7, 12][i], 1.2), at, .35, -.3 + .2 * i)
 
-# --- 25-33 s: offer ---
-n = int(1.3 * SR); x = np.linspace(0, 1, n)
-place(fft_filter(rng.standard_normal(n), 300, 9000) * x ** 3, 26.58 - 1.3, .5)
-place(impact(2.4), 26.56, 1.0)
-at = 26.6; b = 0
-while at < 32.9:
-    bass, ch = prog[b % 4]
-    place(pad([bass - 12] + [c + 12 for c in ch], BEAT * 8 + .5, a=.15, r=.5, bright=7), at, .3)
-    for k in range(16): place(pluck([ch[0], ch[2], ch[1] + 12, ch[2] + 12][k % 4] + 12, .5), at + k * BEAT / 2, .14, -.4 + .25 * (k % 4))
-    for k in range(4): place(kick(), at + k * BEAT * 2, .3)
-    at += BEAT * 8; b += 1
-for at in (28.6, 30.1): place(whoosh(.5), at - .45, .35)
+# --- 19-26.6 s: the offer ---
+n = int(1.2 * SR); x = np.linspace(0, 1, n)
+place(fft_filter(rng.standard_normal(n), 300, 9000) * x ** 3, V_FREE - 1.2, .45)
+place(impact(2.4), V_FREE - .02, .9)
+section(V_FREE, 26.6, .14, V_FREE, octave=12)
+for at in (21.44, 22.84, 24.38): place(whoosh(.4), at - .35, .3)
 
-# --- 33-39 s: reassurance and CTA ---
-for at in (33.0, 34.2): place(pluck(86, 1.0), at, .3); place(pluck(93, 1.0), at + .02, .15)
-place(pad([38, 50, 62, 66, 69, 74], 4.0, a=.4, r=1.5), 35.0, .4)
-place(whoosh(.6), 35.0, .4)
-place(pluck(98, 2.0), 36.54, .3); place(pluck(102, 2.0), 36.56, .16)
+# --- 26.6-32 s: reassurance and call to action ---
+for at in (26.88, 27.76): place(pluck(86, 1.0), at, .3); place(pluck(93, 1.0), at + .02, .15)
+place(pad([38, 50, 62, 66, 69, 74], 3.6, a=.4, r=1.5), 28.4, .4)
+place(whoosh(.6), 28.0, .35)
+place(pluck(98, 2.0), 29.6, .3); place(pluck(102, 2.0), 29.62, .16)
 
 # --- duck under the voice ---
 vo = np.frombuffer(subprocess.run(['ffmpeg', '-loglevel', 'error', '-i', os.path.join(here, 'public/vo.mp3'), '-ac', '1', '-ar', str(SR), '-f', 'f32le', '-'],

@@ -1,20 +1,22 @@
 # Incept Instagram Reel ad
 
-A 39-second, 1080×1920 (9:16), 30 fps Reel ad built with [Remotion](https://www.remotion.dev), cut to the
-ElevenLabs voiceover in `public/vo.mp3`. Every animation is timed to the narration's words (the `V` table in
-`src/Reel.tsx`, taken from a transcription of the voiceover).
+A 32-second, 1080×1920 (9:16), 30 fps Reel ad built with [Remotion](https://www.remotion.dev), cut to the
+ElevenLabs voiceover in `public/vo.mp3` (version 2 of the script). Every animation is timed to the narration's words
+(the `V` table in `src/Reel.tsx`, taken from a transcription of the voiceover). The first, 39-second cut for the
+version 1 script is in git history.
 
 **Watch:** `incept-reel-ad.mp4`
 
 | Time | Voiceover | On screen |
 |---|---|---|
-| 0–3.9s | Paying for Informatica, but still can't trust your data? | Kinetic hook over a wall of corrupted records; glitch out |
-| 3.9–10s | Duplicate customers. Conflicting reports. Governance that keeps stalling. | Three problem cards slam in: duplicate names, $4.2M ≠ $3.7M, a stalled progress bar |
-| 10–20s | 12 years · Incept · Informatica Platinum Partner · Fortune 500 · complex data challenges | 12+ counter, Incept logo wipe, official Informatica Platinum Partner badge, FORTUNE 500, "Trusted by" client logos over tangled lines that straighten out |
-| 20–25s | Data quality, master data, cataloging, governance | Four service tiles light up on each word |
-| 25–33s | Free five-day discovery · assess · prioritized roadmap | FREE stamp, five day tiles, radar scan, roadmap with priorities |
-| 33–35.6s | No cost. No commitment. | Two check marks |
-| 35.6–39s | Tap below to book yours. | Logo, "Book your FREE 5-day discovery", Book now button, pointer tap, arrow down |
+| 0–3.4s | Is your data governance stuck between strategy and execution? | "STUCK" over corrupted records; a line from Strategy to Execution jams halfway |
+| 3.4–6.1s | In five days, get a clear way forward. | A giant 5, five day tiles, an arrow drawing forward |
+| 6.1–15s | 12 years · Incept Data · Informatica Platinum Partner · Fortune 500 · Informatica-powered data governance | 12 counter, Incept logo wipe, Platinum Partner badge, FORTUNE 500, "Trusted by" client logos over lines that straighten |
+| 15–19.1s | Data quality, master data, cataloging, clear ownership | Four service tiles light up on each word |
+| 19.1–21.2s | With our free five-day discovery | FREE stamp and five day tiles |
+| 21.2–26.6s | Review your priorities, uncover critical gaps, deliver a focused roadmap | Three numbered steps arrive along a rail |
+| 26.6–28.6s | No cost. No commitment. | Two check marks |
+| 28.6–32s | Tap below to book your discovery. | Logo, "Book your FREE 5-day discovery", Book now button, pointer tap, arrow down |
 
 Text stays clear of the top ~250 px and bottom ~350 px, where Instagram draws its own UI.
 
