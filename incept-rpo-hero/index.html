@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Incept Data Solutions · RPO hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:wght@400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Preview page only: recreates the RPO hero so the visual can be judged in place. -->
+<style>
+  :root{
+    --page:#333333; --ink:#f8f8f3; --muted:rgba(248,248,243,.86); --brand:#c9966a;
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .09 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--page)}
+  body{
+    min-height:100vh;color:var(--ink);background:var(--grain),var(--page);
+    font-family:"Funnel Sans",Arial,sans-serif;-webkit-font-smoothing:antialiased;
+  }
+  .hero{position:relative;min-height:100vh;min-height:100svh;display:flex;align-items:center;overflow:hidden}
+  .hero::before,.hero::after{
+    content:"";position:absolute;width:210px;height:96px;pointer-events:none;
+    background:repeating-linear-gradient(90deg,rgba(201,150,106,.45) 0 1px,transparent 1px 4px);
+  }
+  .hero::before{top:0;left:0;-webkit-mask-image:linear-gradient(90deg,#000,transparent);mask-image:linear-gradient(90deg,#000,transparent)}
+  .hero::after{right:0;bottom:0;-webkit-mask-image:linear-gradient(270deg,#000,transparent);mask-image:linear-gradient(270deg,#000,transparent)}
+  .hero-inner{
+    position:relative;width:100%;max-width:1400px;margin:0 auto;padding:96px 40px;
+    display:grid;grid-template-columns:minmax(0,553px) minmax(0,690px);justify-content:center;align-items:center;gap:72px;
+  }
+  .hero-copy h1{font-weight:400;font-size:clamp(36px,3.2vw,62px);line-height:1.1;letter-spacing:-.005em}
+  .hero-copy p{margin-top:42px;max-width:640px;font-size:clamp(17px,1.2vw,22px);line-height:1.38;color:var(--muted)}
+  .ctas{margin-top:36px;display:flex;flex-wrap:wrap;gap:13px}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;height:60px;padding:0 48px;border-radius:4px;
+    background:var(--brand);color:#fff;text-decoration:none;text-transform:uppercase;
+    font:400 13px/1 "Geist Mono",ui-monospace,monospace;letter-spacing:.02em;transition:filter .2s;
+  }
+  .btn:hover{filter:brightness(1.07)}
+  .btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  @media (max-width:1000px){
+    .hero-inner{grid-template-columns:minmax(0,560px);padding:48px 20px 64px;gap:44px}
+    .hero-copy p{margin-top:24px}
+  }
+  @media (max-width:480px){ .btn{height:54px;padding:0 26px} }
+</style>
+
+<!-- ================= RPO visual · styles (copy) ================= -->
+<style id="rpo-visual-css">
+  .rpo-visual{
+    /* Picks up the site's Webflow variables when they exist. */
+    --rpo-bg:var(--_colors---brand--brand-2,#2a2a2a);
+    --rpo-ink:var(--_colors---ui--light-1,#f8f8f3);
+    --rpo-amber:var(--_colors---brand--brand-1,#c9966a);
+    --rpo-t0:var(--rpo-amber);   /* cleared */
+    --rpo-t1:#efe1cd;            /* clearable */
+    --rpo-t2:#8ea3b6;            /* non-cleared */
+    --rpo-muted:rgba(248,248,243,.64);
+    --rpo-dim:rgba(248,248,243,.42);
+    --rpo-line:rgba(248,248,243,.09);
+    --rpo-sans:var(--_typography---typefaces--body,"Funnel Sans",Arial,sans-serif);
+    --rpo-mono:var(--_typography---typefaces--badges,"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace);
+    position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;isolation:isolate;container-type:inline-size;
+    border-radius:6px;border:1px solid var(--rpo-line);
+    background:radial-gradient(70% 62% at 50% 47%,rgba(201,150,106,.075),transparent 72%),var(--rpo-bg);
+    color:var(--rpo-ink);font-family:var(--rpo-sans);text-align:left;
+    -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  }
+  .rpo-visual::before{
+    content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.7;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .09 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .rpo-visual *{box-sizing:border-box;margin:0}
+  .rpo-visual [data-tier="0"]{--c:var(--rpo-t0)}
+  .rpo-visual [data-tier="1"]{--c:var(--rpo-t1)}
+  .rpo-visual [data-tier="2"]{--c:var(--rpo-t2)}
+  .rpo-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+
+  .rpo-head{
+    position:absolute;z-index:2;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;
+    padding:14px 16px;border-bottom:1px solid var(--rpo-line);pointer-events:none;
+  }
+  .rpo-pulse{flex:none;width:7px;height:7px;border-radius:50%;background:var(--rpo-amber);box-shadow:0 0 0 0 rgba(201,150,106,.55);animation:rpoPulse 2s infinite}
+  .rpo-msg{flex:1;min-width:0;display:flex;align-items:center;gap:9px;transition:opacity .2s,transform .2s}
+  .rpo-msg.is-out{opacity:0;transform:translateY(-3px)}
+  .rpo-state-label{flex:none;font:500 10px/1 var(--rpo-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--rpo-dim);transition:color .3s}
+  .rpo-head.is-hire .rpo-state-label{color:var(--rpo-amber)}
+  .rpo-msg-role{min-width:0;font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rpo-badge{
+    flex:none;padding:4px 6px;border-radius:3px;border:1px solid rgba(248,248,243,.2);
+    border-color:color-mix(in srgb,var(--c) 45%,transparent);color:var(--c);
+    font:500 9px/1 var(--rpo-mono);letter-spacing:.08em;text-transform:uppercase;
+  }
+  .rpo-stripes{
+    flex:none;width:52px;height:14px;
+    background:repeating-linear-gradient(90deg,rgba(201,150,106,.6) 0 1px,transparent 1px 4px);
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000);mask-image:linear-gradient(90deg,transparent,#000);
+  }
+
+  .rpo-tier{
+    position:absolute;z-index:2;display:flex;flex-direction:column;gap:5px;padding:6px 8px;
+    border:0;border-radius:4px;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;
+    transition:opacity .2s,background-color .2s;
+  }
+  .rpo-tier:hover,.rpo-tier[aria-pressed="true"]{background:rgba(248,248,243,.05)}
+  .rpo-tier:focus-visible{outline:1px solid var(--rpo-amber);outline-offset:2px}
+  .rpo-tier-name{display:flex;align-items:center;gap:7px;font:500 10px/1 var(--rpo-mono);letter-spacing:.12em;text-transform:uppercase}
+  .rpo-tier-name i{flex:none;width:7px;height:7px;border-radius:50%;background:var(--c);transition:box-shadow .2s}
+  .rpo-tier[aria-pressed="true"] .rpo-tier-name i{box-shadow:0 0 0 3px rgba(248,248,243,.12);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 32%,transparent)}
+  .rpo-tier-note{font-size:11.5px;line-height:1.25;color:var(--rpo-muted)}
+  .rpo-tier[data-tier="2"]{top:calc(var(--rpo-head,46px) + 8px);left:8px}
+  .rpo-tier[data-tier="0"]{top:calc(var(--rpo-head,46px) + 8px);right:8px;align-items:flex-end;text-align:right}
+  .rpo-tier[data-tier="0"] .rpo-tier-name{flex-direction:row-reverse}
+  .rpo-tier[data-tier="1"]{bottom:calc(var(--rpo-foot,64px) + 6px);left:50%;transform:translateX(-50%);align-items:center;text-align:center}
+  .rpo-visual[data-hl="0"] .rpo-tier:not([data-tier="0"]),
+  .rpo-visual[data-hl="1"] .rpo-tier:not([data-tier="1"]),
+  .rpo-visual[data-hl="2"] .rpo-tier:not([data-tier="2"]){opacity:.38}
+
+  .rpo-hub{
+    position:absolute;z-index:1;left:var(--rpo-cx,50%);top:var(--rpo-cy,50%);width:var(--rpo-hub,80px);height:var(--rpo-hub,80px);
+    transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    pointer-events:none;text-align:center;
+  }
+  .rpo-hub strong{display:block;font-weight:500;font-size:22px;font-size:calc(var(--rpo-hub,80px) * .3);line-height:1;font-variant-numeric:tabular-nums}
+  .rpo-hub strong.is-bump{animation:rpoBump .7s ease-out}
+  .rpo-hub span{font:500 8px/1 var(--rpo-mono);font-size:max(6.5px,calc(var(--rpo-hub,80px) * .105));letter-spacing:.14em;text-transform:uppercase;color:var(--rpo-amber)}
+
+  .rpo-tip{
+    position:absolute;z-index:3;left:0;top:0;width:max-content;max-width:220px;padding:10px 12px 11px;border-radius:6px;
+    background:rgba(28,28,27,.93);border:1px solid rgba(248,248,243,.14);box-shadow:0 14px 34px -12px rgba(0,0,0,.7);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    opacity:0;visibility:hidden;transition:opacity .15s,visibility .15s;pointer-events:none;
+  }
+  .rpo-tip.is-on{opacity:1;visibility:visible}
+  .rpo-tip-level{display:flex;align-items:center;gap:6px;font:500 9.5px/1 var(--rpo-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
+  .rpo-tip-level i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--c)}
+  .rpo-tip-role{margin-top:8px;font-size:14px;font-weight:500;line-height:1.2}
+  .rpo-tip-meta{margin-top:3px;font-size:12px;line-height:1.3;color:var(--rpo-muted)}
+  .rpo-tip-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-top:10px}
+  .rpo-tip-steps b{height:3px;border-radius:2px;background:rgba(248,248,243,.14)}
+  .rpo-tip-steps b.is-done{background:var(--c)}
+  .rpo-tip-hint{margin-top:8px;font:500 9px/1 var(--rpo-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--rpo-dim)}
+
+  .rpo-foot{
+    position:absolute;z-index:2;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 1fr 1.2fr;
+    border-top:1px solid var(--rpo-line);background:rgba(0,0,0,.14);pointer-events:none;
+  }
+  .rpo-cell{min-width:0;display:flex;flex-direction:column;gap:6px;padding:12px 16px}
+  .rpo-cell + .rpo-cell{border-left:1px solid var(--rpo-line)}
+  .rpo-cell > span{font:500 9px/1.2 var(--rpo-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--rpo-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rpo-cell > span b{font-weight:inherit;color:var(--rpo-ink);font-variant-numeric:tabular-nums}
+  .rpo-cell > span i{font-style:normal}
+  .rpo-cell strong{font-weight:500;font-size:15px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rpo-fee strong{display:inline-block;color:var(--rpo-amber)}
+  .rpo-fee.is-flash strong{animation:rpoFlash 1.3s ease-out}
+
+  @supports (font-size:1cqw){
+    .rpo-head{padding:2.6cqw 3cqw;gap:1.8cqw}
+    .rpo-state-label{font-size:max(8px,1.8cqw)}
+    .rpo-msg-role{font-size:max(11px,2.4cqw)}
+    .rpo-badge{font-size:max(7.5px,1.6cqw)}
+    .rpo-stripes{width:9.5cqw;height:2.5cqw}
+    .rpo-tier{gap:max(4px,.9cqw)}
+    .rpo-tier[data-tier="2"]{left:max(6px,calc(3cqw - 8px))}
+    .rpo-tier[data-tier="0"]{right:max(6px,calc(3cqw - 8px))}
+    .rpo-tier-name{font-size:max(8px,1.8cqw)}
+    .rpo-tier-note{font-size:max(10px,2.1cqw)}
+    .rpo-cell{padding:2.3cqw 3cqw;gap:1.1cqw}
+    .rpo-cell > span{font-size:max(7.5px,1.6cqw)}
+    .rpo-cell strong{font-size:max(12px,2.75cqw)}
+  }
+  @container (max-width:420px){
+    .rpo-foot{grid-template-columns:1fr 1.25fr}
+    .rpo-foot .rpo-cell:first-child,.rpo-stripes,.rpo-tier-note,.rpo-hub span{display:none}
+    .rpo-foot .rpo-cell:nth-child(2){border-left:0}
+  }
+  @keyframes rpoPulse{70%{box-shadow:0 0 0 7px rgba(201,150,106,0)}100%{box-shadow:0 0 0 0 rgba(201,150,106,0)}}
+  @keyframes rpoBump{0%{transform:scale(1.28);color:var(--rpo-amber)}100%{transform:scale(1)}}
+  @keyframes rpoFlash{0%{transform:scale(1.18);text-shadow:0 0 14px rgba(201,150,106,.75)}100%{transform:scale(1);text-shadow:none}}
+  @media (prefers-reduced-motion:reduce){
+    .rpo-pulse,.rpo-hub strong.is-bump,.rpo-fee.is-flash strong{animation:none}
+    .rpo-msg{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-inner">
+
+    <!-- ================= RPO visual · markup (copy) ================= -->
+    <div class="rpo-visual">
+      <canvas class="rpo-canvas" role="img" aria-label="Illustration of a recruiting radar. Candidates for cleared, clearable and non-cleared IT roles move inward from sourced to screened, interview, offer and hired."></canvas>
+      <div class="rpo-head">
+        <span class="rpo-pulse" aria-hidden="true"></span>
+        <span class="rpo-msg"><span class="rpo-state-label">Sourcing</span><span class="rpo-msg-role">Cloud Security Engineer</span><span class="rpo-badge" data-tier="0">TS/SCI</span></span>
+        <span class="rpo-stripes" aria-hidden="true"></span>
+      </div>
+      <button class="rpo-tier" type="button" data-tier="2" aria-pressed="false"><span class="rpo-tier-name"><i></i>Non-cleared</span><span class="rpo-tier-note">Commercial IT talent</span></button>
+      <button class="rpo-tier" type="button" data-tier="0" aria-pressed="false"><span class="rpo-tier-name"><i></i>Cleared</span><span class="rpo-tier-note">Secret · TS · TS/SCI</span></button>
+      <button class="rpo-tier" type="button" data-tier="1" aria-pressed="false"><span class="rpo-tier-name"><i></i>Clearable</span><span class="rpo-tier-note">U.S. citizens, ready for sponsorship</span></button>
+      <div class="rpo-hub" aria-hidden="true"><strong data-rpo-hires>0</strong><span>Hired</span></div>
+      <div class="rpo-tip" aria-hidden="true">
+        <div class="rpo-tip-level"><i></i><span></span></div>
+        <div class="rpo-tip-role"></div>
+        <div class="rpo-tip-meta"></div>
+        <div class="rpo-tip-steps"><b></b><b></b><b></b><b></b><b></b></div>
+        <div class="rpo-tip-hint"></div>
+      </div>
+      <div class="rpo-foot">
+        <div class="rpo-cell"><span>Recruiters</span><strong>Dedicated to you</strong></div>
+        <div class="rpo-cell"><span>Pricing</span><strong>One monthly fee</strong></div>
+        <div class="rpo-cell rpo-fee"><span>Placement fees · <b data-rpo-hires>0</b> <i data-rpo-noun>hires</i></span><strong>$0</strong></div>
+      </div>
+    </div>
+    <!-- ================= /RPO visual · markup ================= -->
+
+    <div class="hero-copy">
+      <h1>Recruitment Process Outsourcing for Government Contractors</h1>
+      <p>Dedicated recruiters for your cleared, clearable, and non-cleared IT roles. One monthly fee. No placement fees.</p>
+      <div class="ctas">
+        <a class="btn" href="https://inceptds.com/contact-us" target="_top">Book a call</a>
+        <a class="btn" href="#how-it-works">See how it works</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= RPO visual · script (copy) ================= -->
+<script id="rpo-visual-js">
+/* ------------------------------------------------------------------
+   RPO hero visual: the recruiting pipeline drawn as a radar.
+   Sectors are the three role types, rings are hiring stages from the
+   outside in, and the centre is a hire. The sweep "sources" new
+   candidates as it passes. Candidates are illustrative, not real data.
+   Hover a dot for its card, click it to move it forward, click a
+   sector or its label to focus that role type.
+------------------------------------------------------------------- */
+(() => {
+  const TAU = Math.PI * 2, D = Math.PI / 180;
+  const TIERS = ['Cleared', 'Clearable', 'Non-cleared'];
+  const SECTORS = [[-90, 30], [30, 150], [150, 270]].map(s => s.map(a => a * D));   // canvas angles, clockwise from 3 o'clock
+  const STAGES = ['Sourced', 'Screened', 'Interview', 'Offer', 'Hired'];
+  const RINGS = [1, 0.77, 0.57, 0.39];                    // stage boundaries, as a share of the radar radius
+  const BANDS = [[0.81, 0.96], [0.61, 0.73], [0.43, 0.53], [0.26, 0.35]];
+  const HUB = 0.2;
+  const DWELL = [[34, 70], [22, 48], [18, 42], [6, 14]];  // seconds at a stage before moving on or dropping out
+  const ADVANCE = [0.5, 0.5, 0.5, 1];                     // chance of moving on; the rest drop out
+  const SOURCED = 84;                                     // candidates kept in the outer ring
+  const OMEGA = TAU / 9;                                  // sweep: one turn every 9 seconds
+  const ROLES = ['Cloud Security Engineer', 'DevSecOps Engineer', 'Systems Administrator', 'Network Engineer',
+    'Cyber Threat Analyst', 'Java Software Engineer', 'Data Engineer', 'ISSO', 'Solutions Architect',
+    'Penetration Tester', 'Database Administrator', 'Full-Stack Developer', 'Site Reliability Engineer',
+    'Machine Learning Engineer', 'Splunk Engineer', 'ServiceNow Developer', 'Linux Administrator',
+    'AWS Cloud Engineer', 'Identity & Access Engineer', 'Help Desk Technician II', 'SOC Analyst',
+    'Python Developer', 'Kubernetes Engineer', 'Cloud Data Architect'];
+  const PLACES = ['Reston, VA', 'Herndon, VA', 'Chantilly, VA', 'McLean, VA', 'Arlington, VA', 'Fort Meade, MD',
+    'Columbia, MD', 'Annapolis Junction, MD', 'Colorado Springs, CO', 'Huntsville, AL', 'San Antonio, TX',
+    'Tampa, FL', 'San Diego, CA', 'Remote'];
+  const LEVELS = ['Secret', 'Top Secret', 'TS/SCI', 'TS/SCI + CI poly', 'TS/SCI + FS poly'];
+
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const ease = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+  const norm = a => { a = (a + Math.PI / 2) % TAU; return (a < 0 ? a + TAU : a) - Math.PI / 2; };   // into [-90°, 270°)
+  const tierAt = a => a < SECTORS[1][0] ? 0 : a < SECTORS[2][0] ? 1 : 2;
+  const badge = d => d.tier === 0 ? d.level : TIERS[d.tier];
+
+  document.querySelectorAll('.rpo-visual').forEach(init);
+
+  function init(root){
+    const canvas = root.querySelector('.rpo-canvas'), ctx = canvas && canvas.getContext('2d');
+    if (!ctx) return;
+    const $ = s => root.querySelector(s);
+    const head = $('.rpo-head'), foot = $('.rpo-foot'), msg = $('.rpo-msg'), tip = $('.rpo-tip');
+    const stateEl = $('.rpo-state-label'), roleEl = $('.rpo-msg-role'), badgeEl = $('.rpo-badge');
+    const hubNum = $('.rpo-hub strong'), fee = $('.rpo-fee'), bottomTier = $('.rpo-tier[data-tier="1"]');
+    const tipLevel = $('.rpo-tip-level span'), tipRole = $('.rpo-tip-role'), tipMeta = $('.rpo-tip-meta'), tipHint = $('.rpo-tip-hint');
+    const tipSteps = [...root.querySelectorAll('.rpo-tip-steps b')], tierBtns = [...root.querySelectorAll('.rpo-tier')];
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let W = 0, H = 0, cx = 0, cy = 0, R = 0, u = 1, dpr = 1, ink = [248, 248, 243], amber = [201, 150, 106], tierCol = [], mono = 'monospace';
+    let dots = [], now = 0, last = performance.now(), visible = true, dirty = true;
+    let pointer = null, hover = null, hoverTier = -1, focusTier = -1, tipStage = -1, tipW = 0, tipH = 0;
+    let hires = 0, hubPulse = -9, lastSpawn = -9, latest = null, msgUntil = 0, nextMsg = 3.5, sayTimer = 0;
+    let topGap = [8, 12, 17, 23].map(a => a * D);    // angle kept clear at 12 o'clock for each stage label; measured in layout()
+
+    function rgb(c){
+      ctx.fillStyle = '#000'; ctx.fillStyle = (c || '').trim() || '#000';
+      const v = ctx.fillStyle;
+      if (v[0] === '#') return [1, 3, 5].map(i => parseInt(v.slice(i, i + 2), 16));
+      const m = v.match(/[\d.]+/g); return m ? m.slice(0, 3).map(Number) : [0, 0, 0];
+    }
+    const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+    const circle = (x, y, r) => { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); };
+    const ring = (x, y, r) => { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke(); };
+    const at = (r, a) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+    const labelFont = () => `500 ${Math.max(7.5, 8.6 * u).toFixed(1)}px ${mono}`;
+    function range(tier, stage){
+      const [a0, a1] = SECTORS[tier], top = topGap[Math.min(stage, 3)], side = 5 * D;
+      return [a0 + (tier === 0 ? top : side), a1 - (tier === 2 ? top : side)];
+    }
+
+    // ---------------- candidates ----------------
+    function makeDot(tier, angle, stage, r){
+      return { tier, angle, stage, r, r0: r, r1: r, a0: angle, a1: angle, t0: 0, dur: 1, mode: 'idle', fade: 1, born: now,
+        nextAt: now + rand(...DWELL[stage]), drift: rand(-1, 1) * 0.008, link: -9, x: 0, y: 0,
+        role: pick(ROLES), place: pick(PLACES), level: tier === 0 ? pick(LEVELS) : '' };
+    }
+
+    function seed(){
+      [SOURCED, 28, 12, 4].forEach((n, stage) => {
+        const per = Math.ceil(n / 3);
+        for (let i = 0; i < n; i++){
+          const tier = i % 3, k = Math.floor(i / 3), [lo, hi] = range(tier, stage);
+          const d = makeDot(tier, lo + (hi - lo) * (k + Math.random()) / per, stage, rand(...BANDS[stage]));
+          d.nextAt = rand(2, DWELL[stage][1]);
+          dots.push(d);
+        }
+      });
+      dots.filter(d => d.stage === 3).forEach((d, i) => { d.nextAt = 1.6 + i * 3.4; });   // first hire shortly after load
+    }
+
+    // new candidates appear right behind the sweep line, as if the scan found them
+    function spawn(theta){
+      const a = norm(theta - rand(0.02, 0.1)), tier = tierAt(a), [lo, hi] = range(tier, 0);
+      if (a < lo || a > hi) return false;
+      const d = makeDot(tier, a, 0, rand(...BANDS[0]));
+      d.mode = 'in'; d.fade = 0;
+      dots.push(d); latest = d;
+      return true;
+    }
+
+    function advance(d){
+      if (d.mode === 'move' || d.mode === 'hire' || d.mode === 'drop') return false;
+      d.r0 = d.r; d.a0 = d.angle; d.t0 = now; d.link = now; d.fade = 1;
+      if (d.stage === 3){ d.mode = 'hire'; d.stage = 4; d.r1 = 0; d.a1 = d.angle; d.dur = reduce ? 0.001 : 1.1; }
+      else {
+        d.stage++;
+        const [lo, hi] = range(d.tier, d.stage);
+        d.mode = 'move'; d.r1 = rand(...BANDS[d.stage]); d.a1 = Math.min(hi, Math.max(lo, d.angle)); d.dur = reduce ? 0.001 : 1.2;
+      }
+      dirty = true;
+      return true;
+    }
+
+    function hired(d){
+      hires++;
+      root.querySelectorAll('[data-rpo-hires]').forEach(el => { el.textContent = hires.toLocaleString('en-US'); });
+      root.querySelectorAll('[data-rpo-noun]').forEach(el => { el.textContent = hires === 1 ? 'hire' : 'hires'; });
+      hubPulse = now;
+      restart(hubNum, 'is-bump'); restart(fee, 'is-flash');
+      say('Hired', d, true);
+      msgUntil = nextMsg = now + 3.2;
+    }
+    function restart(el, cls){ if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+    function say(label, d, isHire){
+      clearTimeout(sayTimer);
+      msg.classList.add('is-out');
+      sayTimer = setTimeout(() => {
+        stateEl.textContent = label; roleEl.textContent = d.role;
+        badgeEl.textContent = badge(d); badgeEl.dataset.tier = d.tier;
+        head.classList.toggle('is-hire', isHire);
+        msg.classList.remove('is-out');
+      }, reduce ? 0 : 200);
+    }
+
+    // ---------------- simulation ----------------
+    function step(dt, auto){
+      now += dt;
+      const theta = -Math.PI / 2 + now * OMEGA;
+      if (auto && now - lastSpawn > 0.18){
+        let n = 0;
+        for (const d of dots) if (d.stage === 0 && d.mode !== 'drop') n++;
+        if (n < SOURCED && spawn(theta)) lastSpawn = now;
+      }
+      let dead = false;
+      for (const d of dots){
+        if (d.mode === 'in'){ d.fade = Math.min(1, (now - d.born) / 0.7); if (d.fade === 1) d.mode = 'idle'; }
+        if (d.mode === 'move' || d.mode === 'hire'){
+          const p = Math.min(1, (now - d.t0) / d.dur), e = ease(p);
+          d.r = d.r0 + (d.r1 - d.r0) * e; d.angle = d.a0 + (d.a1 - d.a0) * e;
+          if (p === 1){
+            if (d.mode === 'hire'){ d.dead = dead = true; hired(d); }
+            else { d.mode = 'idle'; d.nextAt = now + rand(...DWELL[d.stage]); }
+          }
+        } else if (d.mode === 'drop'){
+          const p = (now - d.t0) / 1.4;
+          d.fade = Math.max(0, 1 - p); d.r = d.r0 + 0.04 * p;
+          if (p >= 1) d.dead = dead = true;
+        } else if (auto){
+          if (d.mode === 'idle' && now >= d.nextAt){
+            if (Math.random() < ADVANCE[d.stage]) advance(d);
+            else { d.mode = 'drop'; d.t0 = now; d.r0 = d.r; }
+          } else {
+            const [lo, hi] = range(d.tier, d.stage);
+            d.angle += d.drift * dt;
+            if (d.angle < lo || d.angle > hi){ d.drift = -d.drift; d.angle = Math.min(hi, Math.max(lo, d.angle)); }
+          }
+        }
+      }
+      if (dead) dots = dots.filter(d => !d.dead);
+      if (hover && hover.dead) setHover(null);
+      if (auto && now > msgUntil && now > nextMsg){
+        const d = latest && !latest.dead && latest.mode !== 'drop' ? latest : pick(dots);
+        if (d) say('Sourcing', d, false);
+        nextMsg = now + 3.4;
+      }
+    }
+
+    // ---------------- drawing ----------------
+    function sweep(theta, hubR){
+      const span = 75 * D;
+      if (ctx.createConicGradient){
+        const g = ctx.createConicGradient(theta - span, cx, cy), f = span / TAU;
+        g.addColorStop(0, rgba(amber, 0)); g.addColorStop(f * 0.6, rgba(amber, 0.035));
+        g.addColorStop(f, rgba(amber, 0.15)); g.addColorStop(f + 0.001, rgba(amber, 0)); g.addColorStop(1, rgba(amber, 0));
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.moveTo(cx + hubR, cy); ctx.arc(cx, cy, hubR, 0, TAU, true); ctx.fill();
+      } else {
+        for (let i = 0; i < 30; i++){
+          const a1 = theta - span * i / 30, a0 = theta - span * (i + 1) / 30;
+          ctx.fillStyle = rgba(amber, 0.15 * Math.pow(1 - i / 30, 2));
+          ctx.beginPath(); ctx.arc(cx, cy, R, a0, a1); ctx.arc(cx, cy, hubR, a1, a0, true); ctx.closePath(); ctx.fill();
+        }
+      }
+      ctx.strokeStyle = rgba(amber, 0.55); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(...at(hubR, theta)); ctx.lineTo(...at(R, theta)); ctx.stroke();
+    }
+
+    function draw(){
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      const theta = -Math.PI / 2 + now * OMEGA, hubR = HUB * R, hl = focusTier >= 0 ? focusTier : hoverTier;
+
+      if (hl >= 0){                                                 // focused or hovered sector
+        const [a0, a1] = SECTORS[hl];
+        ctx.fillStyle = rgba(tierCol[hl], focusTier >= 0 ? 0.07 : 0.045);
+        ctx.beginPath(); ctx.arc(cx, cy, R, a0, a1); ctx.arc(cx, cy, hubR, a1, a0, true); ctx.closePath(); ctx.fill();
+      }
+      sweep(theta, hubR);
+
+      ctx.lineWidth = 1;                                            // stage rings
+      RINGS.forEach((f, i) => { ctx.strokeStyle = rgba(ink, i ? 0.1 : 0.2); ring(cx, cy, f * R); });
+      ctx.setLineDash([2 * u, 5 * u]); ctx.strokeStyle = rgba(ink, 0.13); ctx.beginPath();   // sector dividers; 12 o'clock holds the labels
+      for (const a of [SECTORS[1][0], SECTORS[2][0]]){ ctx.moveTo(...at(hubR, a)); ctx.lineTo(...at(R, a)); }
+      ctx.stroke(); ctx.setLineDash([]);
+      SECTORS.forEach(([a0, a1], t) => {                            // rim in tier colours
+        ctx.strokeStyle = rgba(tierCol[t], hl === t ? 0.95 : hl >= 0 ? 0.18 : 0.5); ctx.lineWidth = 2 * u;
+        ctx.beginPath(); ctx.arc(cx, cy, R + 4 * u, a0 + 1.2 * D, a1 - 1.2 * D); ctx.stroke();
+      });
+      ctx.lineWidth = 1; ctx.strokeStyle = rgba(ink, 0.16); ctx.beginPath();   // scale ticks
+      for (let k = 0; k < 120; k++){ const a = k * 3 * D; ctx.moveTo(...at(R + 9 * u, a)); ctx.lineTo(...at(R + (k % 10 ? 12 : 15) * u, a)); }
+      ctx.stroke();
+
+      ctx.font = labelFont();                                       // stage labels up the 12 o'clock line
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = rgba(ink, 0.42);
+      if ('letterSpacing' in ctx) ctx.letterSpacing = `${(0.9 * u).toFixed(2)}px`;
+      BANDS.forEach(([a, b], s) => ctx.fillText(STAGES[s].toUpperCase(), cx, cy - (a + b) / 2 * R));
+      if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+
+      for (const d of dots){ [d.x, d.y] = at(d.r * R, d.angle); }
+
+      for (const d of dots){                                        // recruiter touchpoint: hub -> candidate who just moved on
+        const k = 1 - (now - d.link) / 0.9;
+        if (k <= 0 || d.mode === 'hire') continue;
+        ctx.strokeStyle = rgba(tierCol[d.tier], 0.45 * k); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(...at(hubR, d.angle)); ctx.lineTo(d.x, d.y); ctx.stroke();
+      }
+      if (hover && hover.mode !== 'hire'){                          // path to hire for the hovered candidate
+        ctx.setLineDash([2 * u, 4 * u]); ctx.strokeStyle = rgba(tierCol[hover.tier], 0.5); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(...at(hubR, hover.angle)); ctx.lineTo(hover.x, hover.y); ctx.stroke(); ctx.setLineDash([]);
+      }
+
+      const lens = pointer && !pointer.touch ? 64 * u : 0;    // magnify near the cursor (not on touch)
+      for (const d of dots){
+        const col = tierCol[d.tier], st = Math.min(d.stage, 3);
+        const dim = focusTier >= 0 ? (d.tier === focusTier ? 1 : 0.15) : hoverTier >= 0 ? (d.tier === hoverTier ? 1 : 0.5) : 1;
+        let s = (2.1 + 0.4 * st) * u, a = [0.55, 0.78, 0.92, 1][st];
+        const glow = reduce ? 0 : Math.exp(-(((theta - d.angle) % TAU + TAU) % TAU) / OMEGA / 0.7);
+        if (lens){
+          const k = 1 - Math.hypot(d.x - pointer.x, d.y - pointer.y) / lens;
+          if (k > 0){ s *= 1 + 0.9 * k * k; a = Math.min(1, a + 0.3 * k); }
+        }
+        if (d === hover) s = Math.max(s, 4.4 * u);
+        if (d.mode === 'move' || d.mode === 'hire'){                // comet tail while moving inward
+          const back = Math.max(0, Math.min(1, (now - d.t0) / d.dur) - 0.35), e = ease(back);
+          ctx.strokeStyle = rgba(col, 0.5 * dim); ctx.lineWidth = Math.max(1, s * 0.8);
+          ctx.beginPath(); ctx.moveTo(...at((d.r0 + (d.r1 - d.r0) * e) * R, d.a0 + (d.a1 - d.a0) * e)); ctx.lineTo(d.x, d.y); ctx.stroke();
+          if (d.mode === 'hire'){ s *= 1.3; a = 1; }
+        }
+        const f = d.fade * dim;
+        if (glow > 0.03){ ctx.fillStyle = rgba(col, 0.22 * glow * f); circle(d.x, d.y, s * 3.2); }
+        ctx.fillStyle = rgba(col, Math.min(1, a + 0.4 * glow) * f); circle(d.x, d.y, s);
+        if (d === hover){ ctx.strokeStyle = rgba(col, 0.9); ctx.lineWidth = 1.2; ring(d.x, d.y, s + 3.5 * u); }
+      }
+
+      const pulse = Math.exp(-(now - hubPulse) / 0.6);              // hub
+      ctx.fillStyle = rgba(amber, 0.06 + 0.16 * pulse); circle(cx, cy, hubR);
+      ctx.strokeStyle = rgba(amber, 0.5 + 0.5 * pulse); ctx.lineWidth = 1.2 * u; ring(cx, cy, hubR);
+      ctx.setLineDash([1.5 * u, 4.5 * u]); ctx.lineDashOffset = reduce ? 0 : -now * 8 * u;
+      ctx.strokeStyle = rgba(amber, 0.35); ctx.lineWidth = 1; ring(cx, cy, hubR - 5 * u);
+      ctx.setLineDash([]); ctx.lineDashOffset = 0;
+      const rp = (now - hubPulse) / 1.4;
+      if (rp >= 0 && rp < 1){ ctx.strokeStyle = rgba(amber, 0.55 * (1 - rp)); ctx.lineWidth = 1.5 * u; ring(cx, cy, hubR + rp * 0.5 * R); }
+    }
+
+    // ---------------- hover card ----------------
+    function setHover(d){
+      if (d === hover) return;
+      hover = d; tipStage = -1;
+      tip.classList.toggle('is-on', !!d);
+      dirty = true;
+    }
+    function renderTip(){
+      if (!hover || hover.stage === tipStage) return;
+      tipStage = hover.stage;
+      tip.dataset.tier = hover.tier;
+      tipLevel.textContent = hover.tier === 0 ? `Cleared · ${hover.level}` : hover.tier === 1 ? 'Clearable · U.S. citizen' : 'Non-cleared role';
+      tipRole.textContent = hover.role;
+      tipMeta.textContent = `${STAGES[hover.stage]} · ${hover.place}`;
+      tipSteps.forEach((b, i) => b.classList.toggle('is-done', i <= hover.stage));
+      tipHint.textContent = hover.stage === 4 ? 'Placed · $0 placement fee' : hover.stage === 3 ? 'Click to hire' : 'Click to move forward';
+      tipW = tip.offsetWidth; tipH = tip.offsetHeight;
+    }
+    function placeTip(){
+      if (!hover) return;
+      let x = hover.x + 14, y = hover.y - tipH - 12;
+      if (x + tipW > W - 8) x = hover.x - tipW - 14;
+      if (y < 8) y = hover.y + 14;
+      tip.style.transform = `translate(${Math.round(Math.max(8, x))}px,${Math.round(y)}px)`;
+    }
+
+    // ---------------- input ----------------
+    function locate(e){
+      const b = root.getBoundingClientRect();
+      pointer = { x: e.clientX - b.left, y: e.clientY - b.top, touch: e.pointerType === 'touch' };
+    }
+    function pickAt(){
+      let best = null, bd = pointer.touch ? 22 : Math.max(13 * u, 12);
+      for (const d of dots){
+        if (d.mode === 'hire' || d.mode === 'drop' || d.fade < 0.3) continue;
+        const dd = Math.hypot(d.x - pointer.x, d.y - pointer.y);
+        if (dd < bd){ bd = dd; best = d; }
+      }
+      setHover(best);
+      const dx = pointer.x - cx, dy = pointer.y - cy, r = Math.hypot(dx, dy);
+      return r > HUB * R && r < R * 1.08 ? tierAt(norm(Math.atan2(dy, dx))) : -1;
+    }
+    function setHoverTier(t){ hoverTier = t; sync(); }
+    function setFocus(t){
+      focusTier = t;
+      tierBtns.forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.tier === t)));
+      sync();
+    }
+    function sync(){ root.dataset.hl = focusTier >= 0 ? focusTier : hoverTier; dirty = true; }
+
+    root.addEventListener('pointermove', e => {
+      locate(e);
+      const btn = e.target.closest && e.target.closest('.rpo-tier'), sector = pickAt();
+      setHoverTier(btn ? +btn.dataset.tier : sector);
+      canvas.style.cursor = hover || sector >= 0 ? 'pointer' : '';
+    });
+    root.addEventListener('pointerleave', () => { pointer = null; setHover(null); setHoverTier(-1); });
+    canvas.addEventListener('click', e => {
+      locate(e);
+      const sector = pickAt();
+      if (hover) advance(hover);
+      else if (sector >= 0) setFocus(focusTier === sector ? -1 : sector);
+    });
+    tierBtns.forEach(b => {
+      const t = +b.dataset.tier;
+      b.addEventListener('click', () => setFocus(focusTier === t ? -1 : t));
+      b.addEventListener('focus', () => setHoverTier(t));
+      b.addEventListener('blur', () => setHoverTier(-1));
+    });
+
+    // ---------------- layout + loop ----------------
+    function layout(){
+      W = root.clientWidth; H = root.clientHeight;
+      if (!W || !H) return;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      root.style.setProperty('--rpo-head', head.offsetHeight + 'px');
+      root.style.setProperty('--rpo-foot', foot.offsetHeight + 'px');
+      const top = head.offsetHeight + 6, bottom = (bottomTier ? bottomTier.offsetTop : H - foot.offsetHeight) - 4;
+      cx = W / 2; cy = (top + bottom) / 2;
+      R = Math.min((bottom - top) / 2, W / 2 - 10) / 1.09;
+      const corners = tierBtns.filter(b => b !== bottomTier).map(b => [b.offsetLeft, b.offsetTop, b.offsetLeft + b.offsetWidth, b.offsetTop + b.offsetHeight]);
+      const gap = ([x0, y0, x1, y1]) => Math.hypot(Math.max(x0 - cx, 0, cx - x1), Math.max(y0 - cy, 0, cy - y1));
+      while (R > 40 && corners.some(c => gap(c) < R * 1.09 + 2)) R *= 0.98;    // keep the ticks clear of the corner labels
+      R = Math.max(40, R); u = R / 190;
+      root.style.setProperty('--rpo-cx', cx + 'px');
+      root.style.setProperty('--rpo-cy', cy + 'px');
+      root.style.setProperty('--rpo-hub', 2 * HUB * R + 'px');
+      const cs = getComputedStyle(root);
+      ink = rgb(cs.getPropertyValue('--rpo-ink')); amber = rgb(cs.getPropertyValue('--rpo-amber'));
+      tierCol = [0, 1, 2].map(i => rgb(cs.getPropertyValue('--rpo-t' + i)));
+      mono = cs.getPropertyValue('--rpo-mono').trim() || 'monospace';
+      ctx.font = labelFont();
+      if ('letterSpacing' in ctx) ctx.letterSpacing = `${(0.9 * u).toFixed(2)}px`;
+      topGap = BANDS.map(([a, b], s) => Math.max(5 * D, (ctx.measureText(STAGES[s].toUpperCase()).width / 2 + 7) / ((a + b) / 2 * R)));
+      if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+      tipStage = -1; dirty = true;
+    }
+
+    function frame(t){
+      requestAnimationFrame(frame);
+      const dt = Math.min(Math.max(t - last, 0) / 1000, 0.1); last = t;
+      if (!visible || !W) return;
+      if (!reduce) step(dt, true);
+      else if (dirty) step(0.05, false);          // reduced motion: no autoplay, redraw only on input
+      else return;
+      draw(); renderTip(); placeTip();
+      dirty = false;
+    }
+
+    layout(); seed();
+    if (window.ResizeObserver) new ResizeObserver(layout).observe(root); else window.addEventListener('resize', layout);
+    if (window.IntersectionObserver) new IntersectionObserver(([e]) => { visible = e.isIntersecting; dirty = true; }).observe(root);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+<!-- ================= /RPO visual · script ================= -->
+
+</body>
+</html>
