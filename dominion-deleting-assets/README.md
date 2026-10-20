@@ -3,7 +3,8 @@
 Remotion project for the enterprise training video *Cloud Data Governance & Catalog: Deleting Assets Correctly*.
 Only the **Intro** and **Conclusion** of the script are produced; Methods 1–4 and the tagline are intentionally left out.
 
-- **Output:** `out/Deleting_Assets_Correctly_4K.mp4`: 3840×2160, 30 fps, H.264 + AAC, ~74 s
+- **Output:** `out/Deleting_Assets_Correctly_4K.mp4`: 3840×2160, 30 fps, H.264 (BT.709, limited range) + AAC 48 kHz,
+  74 s, VO normalised to −16.5 LUFS / −1.5 dBTP
 - **Look:** `#221F20` background with soft `#0072CE` light in the top-left and bottom-right corners, kinetic
   typography synced word-by-word to the voiceover, smooth keyframed camera moves, glass cards and circular icon badges
   matching the Dominion CDGC reference series.
@@ -45,6 +46,17 @@ npm run studio          # live preview in Remotion Studio
 npm run render          # final 4K master -> out/Deleting_Assets_Correctly_4K.mp4
 npx remotion render DeletingAssetsCorrectly out/preview_1080p.mp4 --scale=0.5   # quick 1080p preview
 node scripts/stills.mjs 0.5 out/stills 12 25 40   # review stills at given seconds
+```
+
+The committed master was made by running `npm run render`, then this delivery encode, which converts Remotion's
+full-range BT.601 output to broadcast-safe BT.709 and lifts the VO to the e-learning loudness target:
+
+```bash
+ffmpeg -i out/Deleting_Assets_Correctly_4K.mp4 \
+  -vf "scale=in_range=pc:out_range=tv:in_color_matrix=bt601:out_color_matrix=bt709:flags=accurate_rnd+full_chroma_int,format=yuv420p" \
+  -c:v libx264 -preset slow -crf 16 -profile:v high -tune animation \
+  -color_range tv -colorspace bt709 -color_primaries bt709 -color_trc bt709 \
+  -af "volume=2.35dB" -c:a aac -b:a 256k -ar 48000 -movflags +faststart out/final.mp4
 ```
 
 On machines where Remotion can't download its own browser, point it at a local Chromium:
