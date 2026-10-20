@@ -11,7 +11,7 @@ AUDIO=(-af "volume=2.35dB" -c:a aac -ar 48000)
 TAGS=(-pix_fmt yuv420p -color_range tv -colorspace bt709 -color_primaries bt709 -color_trc bt709 -movflags +faststart)
 
 ffmpeg -v error -y -i "$MASTER" \
-  -c:v libx264 -preset slow -crf 16 -profile:v high -level:v 5.1 \
+  -c:v libx264 -preset slow -crf 17 -profile:v high -level:v 5.1 \
   -x264-params "ref=4:bframes=3:keyint=60:min-keyint=30:vbv-maxrate=40000:vbv-bufsize=80000" \
   "${TAGS[@]}" "${AUDIO[@]}" -b:a 256k out/Deleting_Assets_Correctly_4K.mp4
 
