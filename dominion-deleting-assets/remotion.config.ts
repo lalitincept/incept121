@@ -1,12 +1,13 @@
 import {Config} from '@remotion/cli/config';
 
-// Master quality: high-quality JPEG intermediates, H.264 at a low CRF.
-Config.setVideoImageFormat('jpeg');
-Config.setJpegQuality(96);
+// Near-lossless master: lossless PNG frames, BT.709 colour, very low CRF.
+// Delivery files are encoded from this master by scripts/deliver.sh.
+Config.setVideoImageFormat('png');
+Config.setColorSpace('bt709');
 Config.setCodec('h264');
-Config.setCrf(16);
+Config.setCrf(6);
 Config.setPixelFormat('yuv420p');
-Config.setX264Preset('slow');
+Config.setX264Preset('veryfast');
 Config.setOverwriteOutput(true);
 
 // Allow pointing at a locally installed Chromium (e.g. in CI or sandboxed machines).

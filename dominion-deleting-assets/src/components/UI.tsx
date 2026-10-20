@@ -96,7 +96,7 @@ export const Glass: React.FC<{
   </div>
 );
 
-/** Gradient title pill that wipes on from the left, then catches a light sweep. */
+/** Gradient title pill: pops in as a circle, stretches open into the full capsule, then catches a light sweep. */
 export const Pill: React.FC<{
   text: string;
   t: number;
@@ -105,8 +105,11 @@ export const Pill: React.FC<{
   dur?: number;
   shineAt?: number;
 }> = ({text, t, at, size, dur = 0.8, shineAt}) => {
-  const p = ease.inOut(clamp01((t - at) / dur));
-  const tp = ease.out(clamp01((t - at - dur * 0.35) / dur));
+  const height = size * 1.39; // line box + vertical padding
+  const pop = ease.outBack(clamp01((t - at) / (dur * 0.35)));
+  const open = ease.inOut(clamp01((t - at - dur * 0.2) / (dur * 0.8)));
+  const side = `calc((50% - ${height / 2}px) * ${(1 - open).toFixed(4)})`;
+  const tp = ease.out(clamp01((t - at - dur * 0.45) / dur));
   const sh = shineAt === undefined ? -1 : clamp01((t - shineAt) / 0.9);
   return (
     <div
@@ -117,8 +120,10 @@ export const Pill: React.FC<{
         borderRadius: size,
         overflow: 'hidden',
         background: 'linear-gradient(90deg, #EEF6FD 0%, #BFDDF5 40%, #72B2EA 76%, #348ADB 100%)',
-        clipPath: `inset(0 ${(1 - p) * 100}% 0 0 round ${size}px)`,
+        clipPath: `inset(0 ${side} 0 ${side} round ${size}px)`,
         boxShadow: `0 0 ${size * 0.5}px rgba(0,114,206,0.35)`,
+        opacity: clamp01((t - at) / (dur * 0.15)),
+        transform: `scale(${lerp(0.4, 1, pop)})`,
       }}
     >
       <div
@@ -130,7 +135,7 @@ export const Pill: React.FC<{
           color: '#1A1718',
           whiteSpace: 'nowrap',
           opacity: tp,
-          transform: `translateX(${(1 - tp) * -0.25 * size}px)`,
+          transform: `scale(${lerp(0.94, 1, tp)})`,
         }}
       >
         {text}

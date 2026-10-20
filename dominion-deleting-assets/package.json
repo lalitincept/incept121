@@ -5,9 +5,10 @@
   "description": "CDGC training video: Deleting Assets Correctly (Intro + Conclusion) for Dominion Energy",
   "scripts": {
     "studio": "remotion studio",
-    "render": "remotion render DeletingAssetsCorrectly out/Deleting_Assets_Correctly_4K.mp4",
+    "render": "remotion render DeletingAssetsCorrectly out/master_4K.mp4 && bash scripts/deliver.sh",
     "still": "remotion still DeletingAssetsCorrectly",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "deliver": "bash scripts/deliver.sh"
   },
   "dependencies": {
     "@remotion/cli": "4.0.537",
