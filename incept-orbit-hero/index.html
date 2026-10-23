@@ -6,7 +6,7 @@
 <title>Incept Data Solutions · Live orbit hero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:wght@400;500&family=Geist+Mono:wght@500&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg-1:#fdfbf4; --bg-2:#fbf6ea; --bg-3:#f7ead2;
@@ -69,14 +69,13 @@
     max-width:1240px;width:100%;margin:0 auto;padding:40px 28px 90px;pointer-events:none;
   }
   .copy{max-width:540px;pointer-events:auto}
-  h1{font-size:clamp(38px,5vw,66px);font-weight:700;line-height:1.02;letter-spacing:-.035em}
-  h1 .soft{display:block;color:var(--amber)}
-  .lede{margin-top:26px;font-size:clamp(16px,1.45vw,18px);line-height:1.65;color:var(--muted);max-width:470px}
+  /* Heading, lede and buttons use the same type and button shape as the other site pages. */
+  h1{font-family:'Funnel Sans',Arial,sans-serif;font-size:clamp(40px,4.5vw,64px);font-weight:400;line-height:1.05;letter-spacing:-.02em}
+  h1 .soft{display:block}
+  .lede{margin-top:26px;font-family:'Funnel Sans',Arial,sans-serif;font-size:clamp(17px,1.4vw,20px);line-height:1.4;color:var(--ink);max-width:470px}
   .ctas{margin-top:36px;display:flex;gap:14px;flex-wrap:wrap}
-  .btn{display:inline-flex;align-items:center;gap:10px;padding:15px 26px;border-radius:999px;font:600 15px/1 'Poppins',system-ui,sans-serif;text-decoration:none;cursor:pointer;border:0}
-  .btn.primary{color:#1b1b1b;background:linear-gradient(135deg,var(--amber),var(--amber-deep));box-shadow:0 10px 30px -8px rgba(201,150,106,.45)}
-  .btn.primary:hover{filter:brightness(1.05)}
-  .btn.secondary{color:var(--ink);background:var(--btn2-bg);border:1px solid var(--btn2-bd);backdrop-filter:blur(6px)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;height:60px;padding:0 48px;border-radius:6px;font:500 13px/1.4 'Geist Mono','Trebuchet MS',sans-serif;text-transform:uppercase;text-decoration:none;cursor:pointer;border:0;color:#15150f;background:var(--amber)}
+  .btn:hover{filter:brightness(1.05)}
   .btn:focus-visible,.toggle:focus-visible,.links a:focus-visible{outline:2px solid var(--amber-deep);outline-offset:3px}
 
   .live-line{position:absolute;z-index:1;left:0;top:0;margin:0;white-space:nowrap;display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--muted);transform:translateX(-50%);opacity:0;transition:opacity .4s}
