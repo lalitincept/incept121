@@ -10,6 +10,6 @@ const composition = await selectComposition({ serveUrl, id: 'CatalogSource', bro
 for (const s of times) {
   const frame = Math.round(parseFloat(s) * 30);
   const t0 = Date.now();
-  await renderStill({ serveUrl, composition, frame, output: `/tmp/claude-0/-home-user-incept121/301a6a00-8a1d-543d-8162-c3dc31e27ae8/scratchpad/bench_${gl}_${frame}.jpg`, scale: parseFloat(scaleArg), imageFormat: 'jpeg', jpegQuality: 90, browserExecutable, chromiumOptions });
+  await renderStill({ serveUrl, composition, frame, output: `out/bench_${gl}_${frame}.jpg`, scale: parseFloat(scaleArg), imageFormat: 'jpeg', jpegQuality: 90, browserExecutable, chromiumOptions });
   console.log(gl, s, ((Date.now() - t0) / 1000).toFixed(2) + 's');
 }

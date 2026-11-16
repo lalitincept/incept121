@@ -12,6 +12,16 @@ npx remotion studio       # live preview / scrubbing
 ```
 
 `remotion.config.ts` points at the headless Chromium shipped in this environment; set `REMOTION_BROWSER` to override.
+A full 4K render takes ~25 min on 4 cores with the ANGLE GL backend. Remotion emits full-range video from JPEG frames,
+so convert to standard limited-range BT.709 for delivery:
+
+```bash
+ffmpeg -i out/Creating_a_Catalog_Source_4K.mp4 -vf "scale=in_range=pc:out_range=tv,format=yuv420p" \
+  -color_range tv -colorspace bt709 -color_primaries bt709 -color_trc bt709 \
+  -c:v libx264 -preset medium -crf 15 -c:a copy -movflags +faststart out/final_4K.mp4
+```
+
+Before the first render, rebuild the processed screen recording: `scripts/prepare-assets.sh <original recording.mp4>`.
 
 ## How it is organised
 
