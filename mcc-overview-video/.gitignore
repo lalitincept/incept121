@@ -1,0 +1,4 @@
+node_modules/
+out/
+public/media/mcc-app.mp4
+.DS_Store
