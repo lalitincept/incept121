@@ -18,7 +18,8 @@ export type Highlight = {
   from: number;
   to: number;
   r: Rect;
-  label?: string;
+  /** a single label for the whole highlight, or several timed labels */
+  label?: string | { text: string; from: number; to: number }[];
   side?: 'top' | 'bottom' | 'left' | 'right';
   spot?: number;
   radius?: number;
@@ -162,11 +163,12 @@ export const ScreenCard: React.FC<ScreenCardProps> = ({ remap, cam, card, highli
       })}
 
       {/* callout labels (card space) */}
-      {highlights.map((h, i) => {
-        if (!h.label) return null;
-        const v = win(t, h.from + 0.15, h.to, 0.4, 0.35);
+      {highlights.flatMap((h) =>
+        !h.label ? [] : typeof h.label === 'string' ? [{ ...h, text: h.label, lf: h.from + 0.15, lt: h.to }] : h.label.map((l) => ({ ...h, text: l.text, lf: l.from, lt: l.to })),
+      ).map((h, i) => {
+        const v = win(t, h.lf, h.lt, 0.4, 0.35);
         if (v <= 0.001) return null;
-        const pp = pop(t, h.from + 0.15, 13, 140);
+        const pp = pop(t, h.lf, 13, 140);
         const side = h.side ?? 'bottom';
         const a = map(h.r.x, h.r.y);
         const b = map(h.r.x + h.r.w, h.r.y + h.r.h);
@@ -197,7 +199,7 @@ export const ScreenCard: React.FC<ScreenCardProps> = ({ remap, cam, card, highli
               boxShadow: '0 24px 60px rgba(0,40,90,0.45), 0 0 0 2px rgba(255,255,255,0.12) inset',
             }}
           >
-            {h.label}
+            {h.text}
           </div>
         );
       })}

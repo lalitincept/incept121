@@ -7,7 +7,7 @@ Config.setCodec('h264');
 Config.setCrf(16);
 Config.setPixelFormat('yuv420p');
 Config.setConcurrency(4);
-Config.setChromiumOpenGlRenderer('swangle');
+Config.setChromiumOpenGlRenderer('angle');
 // Pre-installed headless shell in this environment (override with REMOTION_BROWSER if needed).
 const browser =
   process.env.REMOTION_BROWSER ??

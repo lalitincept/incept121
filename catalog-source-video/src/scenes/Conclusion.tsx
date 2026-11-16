@@ -355,9 +355,9 @@ export const Conclusion: React.FC = () => {
             <>
               <At x={X4 - 1150} y={Y + 300}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 50 }}>
-                  <Chip text="Naming" icon="tag" at={142.95} size={76} />
-                  <Chip text="Scope" icon="target" at={143.45} size={76} />
-                  <Chip text="Easy to fix now" icon="check" at={144.15} size={76} variant="blue" />
+                  <Chip text="Naming" icon="tag" at={142.95} size={96} />
+                  <Chip text="Scope" icon="target" at={143.45} size={96} />
+                  <Chip text="Easy to fix now" icon="check" at={144.15} size={96} variant="blue" />
                 </div>
               </At>
               <Network cx={X4 + 820} cy={Y + 300} />
@@ -371,19 +371,19 @@ export const Conclusion: React.FC = () => {
 
       {/* screen-space kinetic text */}
       <At x={1920} y={330}>
-        <KineticText text="Once saved, this catalog source is *ready* / to run its *first scan* whenever you are." at={125.75} out={130.35} size={112} maxWidth={3500} />
+        <KineticText text="Once saved, this catalog source is *ready* / to run its *first scan* whenever you are." at={125.75} out={130.35} size={132} maxWidth={3500} />
       </At>
       <At x={1920} y={330}>
-        <KineticText text="That's the moment raw connection details / turn into *governed metadata.*" at={130.8} out={134.95} size={112} maxWidth={3500} />
+        <KineticText text="That's the moment raw connection details / turn into *governed metadata.*" at={130.8} out={134.95} size={132} maxWidth={3500} />
       </At>
       <At x={1920} y={1080}>
         <KineticText text="Take your time / on this *setup.*" at={135.3} out={136.95} size={190} />
       </At>
       <At x={1920} y={330}>
-        <KineticText text="A little extra care here / pays off in *every scan* that runs afterward." at={137.2} out={140.95} size={112} maxWidth={3500} />
+        <KineticText text="A little extra care here / pays off in *every scan* that runs afterward." at={137.2} out={140.95} size={132} maxWidth={3500} />
       </At>
       <At x={1920} y={330}>
-        <KineticText text="Much easier to fix a *naming* or *scope* decision *now* / than after a dozen technical assets depend on it." at={141.4} out={148.0} size={104} maxWidth={3600} />
+        <KineticText text="Much easier to fix a *naming* or *scope* decision *now* / than after a dozen technical assets depend on it." at={141.4} out={148.0} size={120} maxWidth={3600} />
       </At>
 
       {/* tagline */}
@@ -398,13 +398,13 @@ export const Conclusion: React.FC = () => {
           <At x={1920} y={1080}>
             <div style={{ width: 2400, height: 2400, borderRadius: '50%', background: `radial-gradient(circle, rgba(0,114,206,${0.22 * ramp(t, 151.4, 1.2)}) 0%, rgba(0,114,206,0) 65%)` }} />
           </At>
-          <At x={1340} y={1080}>
-            <Logo width={1120} at={151.55} />
+          <At x={1170} y={1080}>
+            <Logo width={1180} at={151.55} />
           </At>
           <div
             style={{
               position: 'absolute',
-              left: 2010,
+              left: 1890,
               top: 1080 - 190 * dividerP,
               width: 5,
               height: 380 * dividerP,
@@ -412,8 +412,8 @@ export const Conclusion: React.FC = () => {
               borderRadius: 3,
             }}
           />
-          <At x={2120} y={1080} anchor="left">
-            <KineticText text="*Reliable data* powers / everything we do." at={152.9} size={96} weight={500} align="left" lineHeight={1.2} />
+          <At x={2000} y={1080} anchor="left">
+            <KineticText text="*Reliable data* powers / everything we do." at={152.9} size={116} weight={500} align="left" lineHeight={1.2} />
           </At>
         </AbsoluteFill>
       ) : null}

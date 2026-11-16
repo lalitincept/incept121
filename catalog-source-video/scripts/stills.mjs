@@ -14,6 +14,6 @@ const composition = await selectComposition({ serveUrl, id: 'CatalogSource', bro
 for (const s of times) {
   const frame = Math.round(parseFloat(s) * composition.fps);
   const output = path.join(outDir, `f_${String(frame).padStart(5, '0')}.jpg`);
-  await renderStill({ serveUrl, composition, frame, output, scale, imageFormat: 'jpeg', jpegQuality: 85, browserExecutable, chromiumOptions: { gl: 'swangle' } });
+  await renderStill({ serveUrl, composition, frame, output, scale, imageFormat: 'jpeg', jpegQuality: 85, browserExecutable, chromiumOptions: { gl: 'angle' } });
   console.log('wrote', output);
 }

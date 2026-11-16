@@ -220,8 +220,8 @@ export const Intro: React.FC = () => {
           <>
             <LineLayer>
               {/* power line: station → tower → tower → city */}
-              <FlowLine d={`M ${EX - 1000} ${EY + 10} Q ${EX - 640} ${EY - 40} ${EX - 300} ${EY - 165} Q ${EX + 120} ${EY - 60} ${EX + 560} ${EY - 165} Q ${EX + 1000} ${EY - 60} ${EX + 1400} ${EY + 30}`} at={5.9} dur={1.6} width={9} pulses={3} pulseSpeed={0.5} out={17.2} />
-              <FlowLine d={`M ${EX - 1000} ${EY + 50} Q ${EX - 640} ${EY + 0} ${EX - 300} ${EY - 85} Q ${EX + 120} ${EY + 20} ${EX + 560} ${EY - 85} Q ${EX + 1000} ${EY + 20} ${EX + 1400} ${EY + 70}`} at={6.1} dur={1.6} width={6} pulses={2} pulseSpeed={0.42} color="rgba(255,255,255,0.32)" out={17.2} />
+              <FlowLine d={`M ${EX - 1000} ${EY + 10} Q ${EX - 640} ${EY - 40} ${EX - 300} ${EY - 165} Q ${EX + 120} ${EY - 60} ${EX + 560} ${EY - 165} Q ${EX + 1000} ${EY - 60} ${EX + 1400} ${EY + 30}`} at={5.55} dur={1.9} width={9} pulses={3} pulseSpeed={0.5} out={17.2} />
+              <FlowLine d={`M ${EX - 1000} ${EY + 50} Q ${EX - 640} ${EY + 0} ${EX - 300} ${EY - 85} Q ${EX + 120} ${EY + 20} ${EX + 560} ${EY - 85} Q ${EX + 1000} ${EY + 20} ${EX + 1400} ${EY + 70}`} at={5.75} dur={1.9} width={6} pulses={2} pulseSpeed={0.42} color="rgba(255,255,255,0.32)" out={17.2} />
             </LineLayer>
             <At x={EX - 1220} y={EY + 40}>
               <Glow at={9.6} out={17.0} size={1100} />
@@ -230,7 +230,7 @@ export const Intro: React.FC = () => {
               <Icon name="station" size={520} at={9.55} dur={1.1} out={17.0} />
             </At>
             <At x={EX - 1220} y={EY + 420}>
-              <Label text="Generation station" at={10.2} out={13.6} />
+              <Label text="Generation station" at={10.2} out={13.6} size={78} />
             </At>
             <At x={EX - 300} y={EY + 70}>
               <Icon name="tower" size={520} at={11.3} dur={1.0} out={17.0} />
@@ -239,7 +239,7 @@ export const Intro: React.FC = () => {
               <Icon name="tower" size={520} at={11.6} dur={1.0} out={17.0} />
             </At>
             <At x={EX + 130} y={EY + 420}>
-              <Label text="Transmission lines" at={12.2} out={13.6} />
+              <Label text="Transmission lines" at={12.2} out={13.6} size={78} />
             </At>
             <At x={EX + 1640} y={EY + 40}>
               <Glow at={6.6} out={17.0} size={1200} strength={0.55} />
@@ -248,7 +248,7 @@ export const Intro: React.FC = () => {
               <Icon name="city" size={520} at={6.6} dur={1.1} out={17.0} />
             </At>
             <At x={EX + 1640} y={EY + 420}>
-              <Label text="The grid" at={7.3} out={13.6} />
+              <Label text="The grid" at={7.3} out={13.6} size={78} />
             </At>
             <At x={EX + 1640} y={EY - 420}>
               <Icon name="bolt" size={200} at={7.0} dur={0.7} out={8.9} />
@@ -279,7 +279,7 @@ export const Intro: React.FC = () => {
               <Icon name="chart" size={300} at={18.2} out={25.1} />
             </At>
             <At x={EX - 1500} y={DY + 760}>
-              <Label text="Source systems" at={17.85} out={24.7} />
+              <Label text="Source systems" at={17.85} out={24.7} size={78} />
             </At>
             <At x={EX - 1220} y={DY + 330}>
               <Label text="Source system" at={14.4} out={17.0} size={64} color={C.muted} />
@@ -293,7 +293,7 @@ export const Intro: React.FC = () => {
               <Icon name="catalog" size={460} at={14.5} out={25.1} />
             </At>
             <At x={EX + 1640} y={DY + 360}>
-              <Label text="Data catalog" at={14.9} out={24.7} />
+              <Label text="Data catalog" at={14.9} out={24.7} size={78} />
             </At>
 
             {/* the gap: dashed, packets fade before arriving */}
@@ -392,19 +392,19 @@ export const Intro: React.FC = () => {
 
       {/* ---------------- screen-space kinetic text ---------------- */}
       <At x={1920} y={300}>
-        <KineticText text="Every *watt of power* flowing through / Dominion Energy's grid" at={5.9} out={8.55} size={124} maxWidth={3300} />
+        <KineticText text="Every *watt of power* flowing through / Dominion Energy's grid" at={5.9} out={8.55} size={140} maxWidth={3300} />
       </At>
       <At x={1920} y={300}>
-        <KineticText text="begins at a dedicated *generation station* / connected to our *transmission lines*" at={8.8} out={13.5} size={124} maxWidth={3300} />
+        <KineticText text="begins at a dedicated *generation station* / connected to our *transmission lines*" at={8.8} out={13.5} size={140} maxWidth={3300} />
       </At>
       <At x={1920} y={1080}>
-        <KineticText text="In our enterprise data landscape, / the principle is *identical.*" at={13.7} out={16.95} size={128} maxWidth={3300} />
+        <KineticText text="In our enterprise data landscape, / the principle is *identical.*" at={13.7} out={16.95} size={144} maxWidth={3300} />
       </At>
       <At x={1920} y={300}>
-        <KineticText text="Raw source systems don't *magically appear* / in the catalog on their own." at={17.65} out={21.55} size={124} maxWidth={3300} />
+        <KineticText text="Raw source systems don't *magically appear* / in the catalog on their own." at={17.65} out={21.55} size={140} maxWidth={3300} />
       </At>
       <At x={1920} y={300}>
-        <KineticText text="Someone has to establish that / *foundational connection.*" at={21.75} out={24.6} size={124} maxWidth={3300} />
+        <KineticText text="Someone has to establish that / *foundational connection.*" at={21.75} out={24.6} size={140} maxWidth={3300} />
       </At>
       <At x={1920} y={330}>
         <div style={{ opacity: win(t, 24.8, 29.2, 0.4, 0.45) }}>
@@ -415,10 +415,10 @@ export const Intro: React.FC = () => {
         <Acronym at={25.72} collapse={27.15} out={29.0} size={190} />
       </At>
       <At x={1920} y={300}>
-        <KineticText text="A *catalog source* bridges systems / directly into our *data catalog.*" at={29.45} out={35.55} size={124} maxWidth={3500} />
+        <KineticText text="A *catalog source* bridges systems / directly into our *data catalog.*" at={29.45} out={35.55} size={140} maxWidth={3500} />
       </At>
       <At x={1920} y={330}>
-        <KineticText text="Configure it cleanly, and every schema and table / becomes *discoverable, governed metadata.*" at={36.3} out={41.3} size={112} maxWidth={3500} />
+        <KineticText text="Configure it cleanly, and every schema and table / becomes *discoverable, governed metadata.*" at={36.3} out={41.3} size={124} maxWidth={3500} />
       </At>
     </AbsoluteFill>
   );

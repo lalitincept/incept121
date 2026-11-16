@@ -62,7 +62,9 @@ export const REMAP: RemapSeg[] = [
 /** Inner camera: focus point in recording coordinates (1666×826) and zoom. */
 export const CAM: CamKey[] = [
   { t: 41.0, cx: 833, cy: 413, z: 1 },
-  { t: 44.4, cx: 833, cy: 413, z: 1 },
+  { t: 42.5, cx: 833, cy: 413, z: 1 },
+  { t: 43.3, cx: 560, cy: 260, z: 1.55 },
+  { t: 44.4, cx: 520, cy: 240, z: 1.6 },
   { t: 45.1, cx: 330, cy: 170, z: 2.4 },
   { t: 45.75, cx: 330, cy: 170, z: 2.4 },
   { t: 46.35, cx: 833, cy: 413, z: 1.15 },
@@ -142,16 +144,25 @@ export const CARD: CardKey[] = [
 
 export const HIGHLIGHTS: Highlight[] = [
   // Method 1
+  { from: 42.6, to: 44.75, r: { x: 8, y: 12, w: 330, h: 40 }, label: 'Metadata Command Center (MCC)', side: 'right' },
   { from: 44.9, to: 46.0, r: { x: 12, y: 68, w: 68, h: 26 }, label: 'Click New', side: 'right' },
   { from: 46.95, to: 49.3, r: { x: 283, y: 273, w: 130, h: 30 }, label: 'Catalog Source tab', side: 'bottom' },
   { from: 50.3, to: 52.8, r: { x: 436, y: 250, w: 952, h: 390 }, label: 'Choose a source type', side: 'top', spot: 0.3 },
   { from: 53.7, to: 55.6, r: { x: 438, y: 246, w: 196, h: 27 } },
-  { from: 62.0, to: 64.15, r: { x: 1214, y: 196, w: 174, h: 34 }, label: 'Search for your system', side: 'bottom', radius: 16 },
-  { from: 64.3, to: 65.8, r: { x: 436, y: 274, w: 952, h: 46 }, label: 'Pick the matching type', side: 'bottom' },
-  { from: 65.8, to: 73.7, r: { x: 436, y: 274, w: 952, h: 46 } },
+  { from: 62.0, to: 64.5, r: { x: 1214, y: 196, w: 174, h: 34 }, label: 'Search for your system', side: 'bottom', radius: 16 },
+  { from: 64.15, to: 73.7, r: { x: 436, y: 274, w: 952, h: 46 }, label: [{ text: 'Pick the matching type', from: 64.35, to: 73.6 }], side: 'bottom' },
   // Method 2
   { from: 74.6, to: 75.9, r: { x: 199, y: 139, w: 112, h: 36 }, label: 'Registration', side: 'bottom', radius: 18 },
-  { from: 76.2, to: 82.6, r: { x: 455, y: 252, w: 435, h: 34 }, label: 'Clear, recognizable name', side: 'bottom' },
+  {
+    from: 76.2,
+    to: 82.6,
+    r: { x: 455, y: 252, w: 435, h: 34 },
+    label: [
+      { text: 'Clear, recognizable name', from: 76.35, to: 79.15 },
+      { text: 'Seen in job lists for a long time', from: 79.3, to: 82.6 },
+    ],
+    side: 'bottom',
+  },
   { from: 95.6, to: 98.95, r: { x: 228, y: 224, w: 262, h: 348 }, label: 'Easy to tell apart', side: 'right', spot: 0.32 },
   // Method 3
   { from: 99.1, to: 99.8, r: { x: 1128, y: 78, w: 110, h: 34 } },
