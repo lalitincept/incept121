@@ -2,11 +2,11 @@
   "name": "mcc-overview-video",
   "version": "1.0.0",
   "private": true,
-  "description": "Dominion Energy – Metadata Command Center: Overview & Access (Remotion, 4K)",
+  "description": "Dominion Energy \u2013 Metadata Command Center: Overview & Access (Remotion, 4K)",
   "scripts": {
     "studio": "remotion studio",
     "prep": "bash scripts/prep-media.sh",
-    "render": "remotion render MCCOverview out/MCC-Overview-4K.mp4 --codec h264 --crf 16 --x264-preset slow --audio-bitrate 320k",
+    "render": "remotion render MCCOverview out/MCC-Overview-4K.mp4 --codec h264 --crf 16 --x264-preset slow --audio-bitrate 320k && bash scripts/finalize.sh",
     "still": "remotion still MCCOverview"
   },
   "dependencies": {

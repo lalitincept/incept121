@@ -30,7 +30,7 @@ Enterprise training video built with [Remotion](https://www.remotion.dev/), rend
 npm install
 npm run prep     # builds public/media/mcc-app.mp4 from source/mcc-recording.mp4 (ffmpeg required)
 npm run studio   # preview / edit
-npm run render   # final 4K render → out/MCC-Overview-4K.mp4
+npm run render   # final 4K render → out/MCC-Overview-4K.mp4 (+ -16 LUFS loudness pass and 1080p preview)
 ```
 
 ## Design system
