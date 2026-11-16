@@ -1,0 +1,5 @@
+node_modules/
+out/
+.cache/
+# regenerate with scripts/prepare-assets.sh (96 MB)
+public/rec.mp4
