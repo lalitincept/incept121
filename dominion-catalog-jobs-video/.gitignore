@@ -1,0 +1,7 @@
+node_modules/
+out/
+# Client media & derived assets are kept out of version control (public repo)
+source-media/
+public/frames/
+public/audio/
+public/brand/dominion-logo.json
