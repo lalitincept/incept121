@@ -46,7 +46,8 @@ npm install
 #   public/source/vo.mp3      (ElevenLabs voiceover)
 npm run build:media
 npm run studio      # preview
-npm run render      # 4K render to out/
+npm run render      # 4K render to out/ (single pass)
+bash scripts/render_chunks.sh   # memory-safe, resumable 4K render (recommended on <16 GB RAM)
 ```
 
 Requires ffmpeg/ffprobe on PATH. Optional music bed: pass `--props='{"music":"media/music.mp3","musicVolume":0.1}'`.
