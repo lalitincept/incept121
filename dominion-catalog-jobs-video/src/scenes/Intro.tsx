@@ -157,7 +157,7 @@ export const FoundationScene: React.FC = () => {
           tokens={k("Every@9.26 reliable@9.52 *report,@10.06 *dashboard@11.1 &@11.68 *governance@11.94 *decision@12.3")}
           size={124}
           weight={600}
-          exitAt={13.55}
+          exitAt={13.22}
         />
       </div>
       <div style={{ position: "absolute", top: 250, width: "100%" }}>
@@ -241,10 +241,10 @@ export const SolidScene: React.FC = () => {
   return (
     <Scene from={18.62} to={26.1}>
       <div style={{ position: "absolute", top: 250, width: "100%" }}>
-        <KText tokens={k("Once@18.92 your@19.1 catalog@19.3 source@19.68 is@19.96 *configured@20.2")} size={124} weight={600} exitAt={20.95} />
+        <KText tokens={k("Once@18.92 your@19.1 catalog@19.3 source@19.68 is@19.96 *configured@20.2")} size={124} weight={600} exitAt={20.8} exitDur={9} />
       </div>
       <div style={{ position: "absolute", top: 250, width: "100%" }}>
-        <KText tokens={k("*Executing@21.2 &@21.68 *monitoring@21.96 regular@22.4 scan@22.92 jobs@23.26")} size={124} weight={600} exitAt={23.82} />
+        <KText tokens={k("*Executing@21.2 &@21.68 *monitoring@21.96 regular@22.4 scan@22.92 jobs@23.26")} size={124} weight={600} exitAt={23.6} exitDur={9} />
       </div>
       <div style={{ position: "absolute", top: 250, width: "100%" }}>
         <KText tokens={k("Keeps@24.02 that@24.34 *foundation@24.58 *solid@25.06")} size={124} weight={600} />

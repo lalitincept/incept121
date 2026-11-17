@@ -85,11 +85,11 @@ export const HIGHLIGHTS: Highlight[] = [
   { v0: 37.4, v1: 40.0, x: 2, y: 88, w: 210, h: 322, spot: true }, // left navigation panel
   { v0: 40.6, v1: 41.6, x: 6, y: 178, w: 204, h: 40 }, // Explore
   { v0: 42.4, v1: 43.9, x: 404, y: 106, w: 192, h: 42 }, // Catalog Sources
-  { v0: 44.8, v1: 46.0, x: 304, y: 389, w: 854, h: 45, spot: true }, // configured source row
+  { v0: 44.8, v1: 45.78, x: 304, y: 389, w: 854, h: 45, spot: true }, // configured source row
   { v0: 48.0, v1: 50.35, x: 298, y: 794, w: 205, h: 52 }, // Test Connection
   { v0: 51.45, v1: 52.75, x: 802, y: 88, w: 272, h: 56 }, // success toast
   { v0: 53.55, v1: 54.5, x: 1402, y: 98, w: 146, h: 52 }, // Run
-  { v0: 55.6, v1: 56.25, x: 909, y: 749, w: 145, h: 52 }, // dialog Run
+  { v0: 55.6, v1: 56.15, x: 909, y: 749, w: 145, h: 52 }, // dialog Run
   { v0: 68.4, v1: 69.7, x: 6, y: 224, w: 204, h: 40 }, // Monitor nav
   { v0: 70.3, v1: 72.1, x: 1384, y: 405, w: 84, h: 32 }, // STARTING in list
   { v0: 83.6, v1: 87.0, x: 884, y: 186, w: 80, h: 30 }, // STATUS STARTING

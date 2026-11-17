@@ -88,7 +88,7 @@ export const ComfortScene: React.FC = () => {
   return (
     <Scene from={129.22} to={135.33}>
       <div style={{ position: "absolute", top: 300, width: "100%" }}>
-        <KText tokens={k("Get@129.42 comfortable@129.64 reading@130.06 job@130.44 *status@130.78 *now@131.06")} size={150} weight={600} exitAt={131.5} />
+        <KText tokens={k("Get@129.42 comfortable@129.64 reading@130.06 job@130.44 *status@130.78 *now@131.06")} size={150} weight={600} exitAt={131.3} exitDur={10} />
       </div>
       <div style={{ position: "absolute", top: 260, width: "100%" }}>
         <KText
@@ -138,7 +138,7 @@ export const NormalScene: React.FC = () => {
   return (
     <Scene from={135.18} to={141.66}>
       <div style={{ position: "absolute", top: 270, width: "100%" }}>
-        <KText tokens={k("Most@135.82 of@136.1 what@136.3 looks@136.44 *alarming@136.64 the@137.06 first@137.3 time…@137.52")} size={136} weight={600} exitAt={137.85} />
+        <KText tokens={k("Most@135.82 of@136.1 what@136.3 looks@136.44 *alarming…@136.64")} size={136} weight={600} exitAt={137.45} exitDur={10} />
       </div>
       <div style={{ position: "absolute", top: 270, width: "100%" }}>
         <KText tokens={k("…turns@137.94 out@138.28 to@138.48 be@138.6 *perfectly@138.76 *normal@139.28")} size={136} weight={600} />
