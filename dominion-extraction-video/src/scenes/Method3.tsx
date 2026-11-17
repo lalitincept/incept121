@@ -289,7 +289,7 @@ const FiveMinutes: React.FC = () => {
   return (
     <Cam from={115.65} to={120.35} enter="zoom" exit="push" push={0.05}>
       <KLine y={250} text="A *five-minute check* now…" times={[116.24, 116.38, 116.66, 116.86, 117.14]} size={112} weight={600} />
-      <IconBadge icon="stopwatch" t0={115.95} x={1150} y={1060} d={520} label="5 minutes now" labelSize={70} />
+      <IconBadge icon="stopwatch" t0={115.72} x={1150} y={1060} d={520} label="5 minutes now" labelSize={70} />
       {sweep > 0 ? (
         <svg style={{ position: 'absolute', left: 1150 - R - 40, top: 1060 - R - 40, overflow: 'visible' }} width={2 * R + 80} height={2 * R + 80}>
           <path
