@@ -66,8 +66,8 @@ const OVERLAYS: Overlay[] = [
   {kind: 'lens', shot: 'X1', rect: [92, 848, 520, 888], from: f(142.0), to: f(145.4), at: [700, 640], zoom: 2.6},
   {kind: 'box', shot: 'X1', rect: [66, 208, 232, 229], from: f(147.2), to: f(151.7)},
   {kind: 'lens', shot: 'X1', rect: [40, 200, 470, 246], from: f(147.3), to: f(151.7), at: [700, 420], zoom: 2.5},
-  {kind: 'box', shot: 'X1', rect: [1153, 208, 1217, 246], from: f(153.3), to: f(155.3)},
-  {kind: 'lens', shot: 'X1', rect: [960, 200, 1420, 246], from: f(153.4), to: f(155.3), at: [1000, 430], zoom: 2.4},
+  {kind: 'box', shot: 'X1', rect: [1153, 208, 1217, 246], from: f(152.75), to: f(155.3)},
+  {kind: 'lens', shot: 'X1', rect: [960, 200, 1420, 246], from: f(152.85), to: f(155.3), at: [1000, 430], zoom: 2.4},
   // ---- Part 3: re-import
   {kind: 'box', shot: 'W3', rect: [526, 258, 1306, 308], from: f(155.4), to: f(156.5), tag: 'Import Assets', tagPos: 'bottom'},
   {kind: 'ripple', shot: 'W3', x: 1142, y: 705, at: srcFrame('W3', 364.7)},
@@ -222,7 +222,7 @@ const NotePanel: React.FC = () => {
     <>
       <div style={{position: 'absolute', inset: 0, background: `rgba(16,15,16,${0.72 * p})`}} />
       <div style={{position: 'absolute', left: 960, top: 455, transform: `translate(-50%,-50%) scale(${0.92 + 0.08 * s})`, opacity: p}}>
-        <Panel glow style={{width: 1180, padding: '48px 60px', borderRadius: 34, background: 'linear-gradient(160deg, rgba(40,37,38,0.96), rgba(28,26,27,0.96))', border: '1.5px solid rgba(90,169,234,0.35)'}}>
+        <Panel glow style={{width: 1180, padding: '48px 60px', borderRadius: 34, background: 'linear-gradient(160deg, rgb(40,37,38), rgb(28,26,27))', border: '1.5px solid rgba(90,169,234,0.35)'}}>
           <div style={{display: 'flex', alignItems: 'center', gap: 40}}>
             <IconRing name="lock" start={NOTE_A + 6} size={170} />
             <div>

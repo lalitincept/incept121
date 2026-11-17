@@ -103,8 +103,8 @@ SHOTS = [
             ("freeze", 256.5, 141.6, 145.4),        # sheet tabs
             ("play", 262.0, 270.4, 145.4, 148.6),   # scroll to stakeholder role column
             ("play", 296.0, 345.6, 148.6, 151.7),   # enter username (time-lapse)
-            ("play", 351.4, 356.6, 151.7, 153.6),   # scroll to operation column
-            ("freeze", 356.6, 153.6, 155.3),        # Operation = Update
+            ("play", 351.4, 356.6, 151.7, 152.7),   # scroll to operation column
+            ("freeze", 356.6, 152.7, 155.3),        # Operation = Update
         ],
     },
     {
