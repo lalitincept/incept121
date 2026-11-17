@@ -1,0 +1,6 @@
+node_modules/
+out/
+.remotion/
+# Client media is not committed: drop the inputs into public/source and run `npm run build:media`
+public/source/
+public/media/

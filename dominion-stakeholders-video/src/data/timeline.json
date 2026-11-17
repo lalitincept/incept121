@@ -1,0 +1,385 @@
+{
+ "fps": 30,
+ "durationInFrames": 5625,
+ "lead": 3.0,
+ "cuts": [
+  {
+   "at": 51.55,
+   "gap": 0.5
+  },
+  {
+   "at": 85.5,
+   "gap": 0.6
+  },
+  {
+   "at": 117.8,
+   "gap": 0.6
+  },
+  {
+   "at": 156.8,
+   "gap": 1.0
+  }
+ ],
+ "shots": [
+  {
+   "cropX": 5,
+   "id": "W1",
+   "crop": "web",
+   "src": "media/shot_W1.mp4",
+   "from": 1620,
+   "to": 3657,
+   "srcW": 1664,
+   "srcH": 830,
+   "width": 3040,
+   "height": 1516,
+   "pieces": [
+    {
+     "type": "freeze",
+     "srcA": 9.8,
+     "srcB": 9.8,
+     "from": 1620,
+     "to": 1647,
+     "speed": 0
+    },
+    {
+     "type": "play",
+     "srcA": 9.8,
+     "srcB": 14.8,
+     "from": 1647,
+     "to": 1737,
+     "speed": 1.6667
+    },
+    {
+     "type": "play",
+     "srcA": 26.9,
+     "srcB": 28.6,
+     "from": 1737,
+     "to": 1761,
+     "speed": 2.125
+    },
+    {
+     "type": "play",
+     "srcA": 31.0,
+     "srcB": 33.95,
+     "from": 1761,
+     "to": 1803,
+     "speed": 2.1071
+    },
+    {
+     "type": "play",
+     "srcA": 33.95,
+     "srcB": 35.8,
+     "from": 1803,
+     "to": 1833,
+     "speed": 1.85
+    },
+    {
+     "type": "play",
+     "srcA": 35.8,
+     "srcB": 41.5,
+     "from": 1833,
+     "to": 1953,
+     "speed": 1.425
+    },
+    {
+     "type": "play",
+     "srcA": 54.6,
+     "srcB": 59.5,
+     "from": 1953,
+     "to": 2052,
+     "speed": 1.4848
+    },
+    {
+     "type": "play",
+     "srcA": 59.5,
+     "srcB": 64.5,
+     "from": 2052,
+     "to": 2184,
+     "speed": 1.1364
+    },
+    {
+     "type": "play",
+     "srcA": 69.6,
+     "srcB": 74.6,
+     "from": 2184,
+     "to": 2325,
+     "speed": 1.0638
+    },
+    {
+     "type": "play",
+     "srcA": 74.6,
+     "srcB": 86.4,
+     "from": 2325,
+     "to": 2670,
+     "speed": 1.0261
+    },
+    {
+     "type": "play",
+     "srcA": 86.4,
+     "srcB": 88.4,
+     "from": 2670,
+     "to": 2736,
+     "speed": 0.9091
+    },
+    {
+     "type": "play",
+     "srcA": 88.4,
+     "srcB": 89.6,
+     "from": 2736,
+     "to": 2757,
+     "speed": 1.7143
+    },
+    {
+     "type": "play",
+     "srcA": 93.9,
+     "srcB": 95.9,
+     "from": 2757,
+     "to": 2787,
+     "speed": 2.0
+    },
+    {
+     "type": "play",
+     "srcA": 95.9,
+     "srcB": 97.4,
+     "from": 2787,
+     "to": 2826,
+     "speed": 1.1538
+    },
+    {
+     "type": "play",
+     "srcA": 103.9,
+     "srcB": 105.0,
+     "from": 2826,
+     "to": 2847,
+     "speed": 1.5714
+    },
+    {
+     "type": "play",
+     "srcA": 105.0,
+     "srcB": 107.4,
+     "from": 2847,
+     "to": 2919,
+     "speed": 1.0
+    },
+    {
+     "type": "freeze",
+     "srcA": 107.6,
+     "srcB": 107.6,
+     "from": 2919,
+     "to": 2988,
+     "speed": 0
+    },
+    {
+     "type": "play",
+     "srcA": 107.6,
+     "srcB": 112.0,
+     "from": 2988,
+     "to": 3027,
+     "speed": 3.3846
+    },
+    {
+     "type": "play",
+     "srcA": 112.0,
+     "srcB": 118.6,
+     "from": 3027,
+     "to": 3087,
+     "speed": 3.3
+    },
+    {
+     "type": "freeze",
+     "srcA": 118.6,
+     "srcB": 118.6,
+     "from": 3087,
+     "to": 3378,
+     "speed": 0
+    },
+    {
+     "type": "play",
+     "srcA": 122.6,
+     "srcB": 127.0,
+     "from": 3378,
+     "to": 3480,
+     "speed": 1.2941
+    },
+    {
+     "type": "play",
+     "srcA": 127.0,
+     "srcB": 128.8,
+     "from": 3480,
+     "to": 3534,
+     "speed": 1.0
+    },
+    {
+     "type": "freeze",
+     "srcA": 128.8,
+     "srcB": 128.8,
+     "from": 3534,
+     "to": 3657,
+     "speed": 0
+    }
+   ]
+  },
+  {
+   "cropX": 5,
+   "id": "W2",
+   "crop": "web",
+   "src": "media/shot_W2.mp4",
+   "from": 4008,
+   "to": 4170,
+   "srcW": 1664,
+   "srcH": 830,
+   "width": 3040,
+   "height": 1516,
+   "pieces": [
+    {
+     "type": "play",
+     "srcA": 182.9,
+     "srcB": 185.6,
+     "from": 4008,
+     "to": 4050,
+     "speed": 1.9286
+    },
+    {
+     "type": "play",
+     "srcA": 203.9,
+     "srcB": 205.4,
+     "from": 4050,
+     "to": 4071,
+     "speed": 2.1429
+    },
+    {
+     "type": "play",
+     "srcA": 207.9,
+     "srcB": 210.9,
+     "from": 4071,
+     "to": 4107,
+     "speed": 2.5
+    },
+    {
+     "type": "play",
+     "srcA": 210.9,
+     "srcB": 212.6,
+     "from": 4107,
+     "to": 4128,
+     "speed": 2.4286
+    },
+    {
+     "type": "play",
+     "srcA": 246.0,
+     "srcB": 249.6,
+     "from": 4128,
+     "to": 4170,
+     "speed": 2.5714
+    }
+   ]
+  },
+  {
+   "cropX": 0,
+   "id": "X1",
+   "crop": "xl",
+   "src": "media/shot_X1.mp4",
+   "from": 4170,
+   "to": 4659,
+   "srcW": 1674,
+   "srcH": 900,
+   "width": 2880,
+   "height": 1548,
+   "pieces": [
+    {
+     "type": "play",
+     "srcA": 252.4,
+     "srcB": 256.0,
+     "from": 4170,
+     "to": 4248,
+     "speed": 1.3846
+    },
+    {
+     "type": "freeze",
+     "srcA": 256.5,
+     "srcB": 256.5,
+     "from": 4248,
+     "to": 4362,
+     "speed": 0
+    },
+    {
+     "type": "play",
+     "srcA": 262.0,
+     "srcB": 270.4,
+     "from": 4362,
+     "to": 4458,
+     "speed": 2.625
+    },
+    {
+     "type": "play",
+     "srcA": 296.0,
+     "srcB": 345.6,
+     "from": 4458,
+     "to": 4551,
+     "speed": 16.0
+    },
+    {
+     "type": "play",
+     "srcA": 351.4,
+     "srcB": 356.6,
+     "from": 4551,
+     "to": 4608,
+     "speed": 2.7368
+    },
+    {
+     "type": "freeze",
+     "srcA": 356.6,
+     "srcB": 356.6,
+     "from": 4608,
+     "to": 4659,
+     "speed": 0
+    }
+   ]
+  },
+  {
+   "cropX": 5,
+   "id": "W3",
+   "crop": "web",
+   "src": "media/shot_W3.mp4",
+   "from": 4659,
+   "to": 4845,
+   "srcW": 1664,
+   "srcH": 830,
+   "width": 3040,
+   "height": 1516,
+   "pieces": [
+    {
+     "type": "play",
+     "srcA": 361.7,
+     "srcB": 365.6,
+     "from": 4659,
+     "to": 4710,
+     "speed": 2.2941
+    },
+    {
+     "type": "play",
+     "srcA": 367.2,
+     "srcB": 368.6,
+     "from": 4710,
+     "to": 4728,
+     "speed": 2.3333
+    },
+    {
+     "type": "play",
+     "srcA": 378.3,
+     "srcB": 383.2,
+     "from": 4728,
+     "to": 4794,
+     "speed": 2.2273
+    },
+    {
+     "type": "freeze",
+     "srcA": 384.0,
+     "srcB": 384.0,
+     "from": 4794,
+     "to": 4845,
+     "speed": 0
+    }
+   ]
+  }
+ ]
+}

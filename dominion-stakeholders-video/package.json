@@ -1,0 +1,26 @@
+{
+  "name": "dominion-stakeholders-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dominion Energy training video: Stakeholders & Reviewing Ingested Technical Assets (Remotion)",
+  "scripts": {
+    "studio": "remotion studio",
+    "build:media": "python3 scripts/build_media.py",
+    "render": "remotion render StakeholdersVideo out/Dominion_Stakeholders_Reviewing_Ingested_Assets_4K.mp4 --scale=2 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k",
+    "still": "remotion still StakeholdersVideo"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.544",
+    "@remotion/cli": "4.0.544",
+    "@remotion/paths": "4.0.544",
+    "@remotion/renderer": "4.0.544",
+    "@remotion/shapes": "4.0.544",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.544"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  }
+}
